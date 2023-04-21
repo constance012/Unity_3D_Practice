@@ -4,10 +4,11 @@ using CSTGames.CommonEnums;
 public class AnimStateController : MonoBehaviour
 {
 	[SerializeField] private Animator animator;
-	public PlayerMovement playerMovement;
 
 	// Parameter ids.
-	private int velHash;
+	//private int velXHash, velZHash;
+	private int speedHash;
+	private int isJumpingHash;
 
 	private void Awake()
 	{
@@ -16,16 +17,19 @@ public class AnimStateController : MonoBehaviour
 
 	private void Start()
 	{
-		velHash = Animator.StringToHash("Velocity");
+		//velXHash = Animator.StringToHash("Velocity X");
+		//velZHash = Animator.StringToHash("Velocity Z");
+		speedHash = Animator.StringToHash("Speed");
+		isJumpingHash = Animator.StringToHash("IsJumping");
 	}
 
 	private void Update()
 	{
-		if (playerMovement.isRunning)
-			animator.SetFloat(velHash, playerMovement.velocity / PlayerMovement.maxRunningSpeed);
-		else if (playerMovement.isWalking)
-			animator.SetFloat(velHash, .1f);
-		else
-			animator.SetFloat(velHash, 0f);
+		animator.SetFloat(speedHash, PlayerMovement.linearVelocity);
+	}
+
+	public void OnJumping(bool isJumping)
+	{
+		animator.SetBool(isJumpingHash, isJumping);
 	}
 }

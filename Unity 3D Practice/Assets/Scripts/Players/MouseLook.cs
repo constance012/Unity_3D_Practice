@@ -14,7 +14,7 @@ public class MouseLook : MonoBehaviour
 	
 	private void Awake()
 	{
-		player = GameObject.FindWithTag("Player").GetComponent<Transform>();
+		player = GameObject.FindWithTag("Player").transform;
 	}
 
 	// Start is called before the first frame update
@@ -33,6 +33,7 @@ public class MouseLook : MonoBehaviour
 		xRotation = Mathf.Clamp(xRotation, -70f, 90f);  // Limit the angle of rotation.
 
 		transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
 		player.Rotate(Vector3.up * mouseX);
 	}
 }

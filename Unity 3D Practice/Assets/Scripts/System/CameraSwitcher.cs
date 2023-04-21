@@ -4,33 +4,30 @@ using Cinemachine;
 
 public static class CameraSwitcher
 {
-	static List<CinemachineVirtualCamera> cameras = new List<CinemachineVirtualCamera> ();
+	static List<CinemachineVirtualCameraBase> cameras = new List<CinemachineVirtualCameraBase>();
 
-	public static CinemachineVirtualCamera activeCam = null;
+	public static CinemachineVirtualCameraBase activeCam { get; private set; } = null;
 
-	public static bool isActive(CinemachineVirtualCamera cam)
-	{
-		return cam == activeCam;
-	}
+	public static bool IsActive(CinemachineVirtualCameraBase cam) => cam == activeCam;
 
-	public static void SwitchCam(CinemachineVirtualCamera cam)
+	public static void SwitchCam(CinemachineVirtualCameraBase cam)
 	{
 		cam.Priority = 20;
 		activeCam = cam;
 
 		// Iterate through the list of cameras and set the priority of those which are not the active cam to 0.
-		foreach (CinemachineVirtualCamera c in cameras)
+		foreach (CinemachineVirtualCameraBase c in cameras)
 			if (c.Priority != 0 && c != activeCam)
 				c.Priority = 0;
 	}
 
-	public static void Register(CinemachineVirtualCamera cam)
+	public static void Register(CinemachineVirtualCameraBase cam)
 	{
 		cameras.Add(cam);
 		Debug.Log("Registered camera: " + cam);
 	}
 
-	public static void Unregister(CinemachineVirtualCamera cam)
+	public static void Unregister(CinemachineVirtualCameraBase cam)
 	{
 		cameras.Remove(cam);
 		Debug.Log("Unregistered camera: " + cam);

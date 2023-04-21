@@ -39,9 +39,10 @@ public class CameraManager : MonoBehaviour
 
 	private void OnEnable()
 	{
-		// Default cam is third person.
-		thirdPersonCam.Priority = 20;
-		firstPersonCam.Priority = 0;
+		CameraSwitcher.Register(firstPersonCam);
+		CameraSwitcher.Register(thirdPersonCam);
+
+		CameraSwitcher.SwitchCam(thirdPersonCam);
 
 		move3rdScript.enabled = true;
 
@@ -49,42 +50,36 @@ public class CameraManager : MonoBehaviour
 		cam1stLookScript.enabled = false;
 	}
 
+	private void OnDestroy()
+	{
+		CameraSwitcher.Unregister(firstPersonCam);
+		CameraSwitcher.Unregister(thirdPersonCam);
+	}
+
 	// Update is called once per frame
 	private void Update()
 	{
 		// Check for camera switching trigger key.
 		if (InputManager.instance.GetKeyDown(KeybindingActions.SwitchCamera))
-			SwitchCam();
-	}
-
-	private void SwitchCam()
-	{
-		// Switch to first person.
-		if (thirdPersonCam.Priority != 0)
 		{
-			firstPersonCam.Priority = 20;
-			thirdPersonCam.Priority = 0;
+			if (CameraSwitcher.IsActive(thirdPersonCam))
+			{
+				CameraSwitcher.SwitchCam(firstPersonCam);
 
-			move1stScript.enabled = true;
-			cam1stLookScript.enabled = true;
+				move1stScript.enabled = true;
+				cam1stLookScript.enabled = true;
 
-			move3rdScript.enabled = false;
+				move3rdScript.enabled = false;
+			}
+			else
+			{
+				CameraSwitcher.SwitchCam(thirdPersonCam);
 
-			stateController.playerMovement = stateController.gameObject.GetComponent<FirstPersonMovement>();
-		}
+				move3rdScript.enabled = true;
 
-		// Switch to third person.
-		else if (firstPersonCam.Priority != 0)
-		{
-			thirdPersonCam.Priority = 20;
-			firstPersonCam.Priority = 0;
-
-			move3rdScript.enabled = true;
-
-			move1stScript.enabled = false;
-			cam1stLookScript.enabled = false;
-
-			stateController.playerMovement = stateController.gameObject.GetComponent<ThirdPersonMovement>();
+				move1stScript.enabled = false;
+				cam1stLookScript.enabled = false;
+			}
 		}
 	}
 }

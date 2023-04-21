@@ -1,5 +1,6 @@
 using UnityEngine;
 using CSTGames.CommonEnums;
+using UnityEditor.iOS.Extensions.Common;
 
 public class ThirdPersonMovement : PlayerMovement
 {
@@ -25,16 +26,18 @@ public class ThirdPersonMovement : PlayerMovement
 	{
 		base.Update();
 
-		// Control using W, A, S, D or arrow keys.
-		float x = InputManager.instance.GetAxisRaw("Horizontal");
-		float z = InputManager.instance.GetAxisRaw("Vertical");
-
-		// Use "normalized" to always get the vector magnitude (or length) of 1, even moving diagonally.
-		Vector3 direction = new Vector3(x, 0f, z).normalized;
+		Vector3 direction = new Vector3(velocityX, 0f, velocityZ).normalized;
 
 		// Move the player.
-		if (direction.magnitude >= 0.1f)
+		if (direction.magnitude > 0f || linearVelocity > 0f)
 		{
+			// Decelerate and then stopping.
+			if (direction.magnitude == 0f)
+			{
+				controller.Move(transform.forward * linearVelocity * Time.deltaTime);
+				return;
+			}
+
 			float facingAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;  // Calculate the angle using Arctan.
 
 			float smoothedAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, facingAngle, ref turnSmoothVelocity, turnSmoothTime);
@@ -43,7 +46,7 @@ public class ThirdPersonMovement : PlayerMovement
 
 			Vector3 moveDir = Quaternion.Euler(0f, facingAngle, 0f) * Vector3.forward;
 			
-			controller.Move(moveDir * velocity * Time.deltaTime);
+			controller.Move(moveDir * linearVelocity * Time.deltaTime);
 		}
 	}
 }

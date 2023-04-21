@@ -6,11 +6,12 @@ public class FirstPersonMovement : PlayerMovement
 	{
 		base.Update();
 
-		float x = InputManager.instance.GetAxisRaw("Horizontal");
-		float z = InputManager.instance.GetAxisRaw("Vertical");
-
 		// Use transform.right instead of Vector3.right to move in the local axis.
-		Vector3 move = transform.right * x + transform.forward * z;
-		controller.Move(move * velocity * Time.deltaTime);
+		Vector3 moveDir = transform.right * velocityX + transform.forward * velocityZ;
+
+		if (moveDir.magnitude > 0f)
+			controller.Move(moveDir * linearVelocity * Time.deltaTime);
+		else
+			controller.Move(transform.forward * linearVelocity * Time.deltaTime);
 	}
 }
