@@ -7,11 +7,12 @@ public class FirstPersonMovement : PlayerMovement
 		base.Update();
 
 		// Use transform.right instead of Vector3.right to move in the local axis.
-		Vector3 moveDir = transform.right * velocityX + transform.forward * velocityZ;
 
-		if (moveDir.magnitude > 0f)
-			controller.Move(moveDir * linearVelocity * Time.deltaTime);
-		else
-			controller.Move(transform.forward * linearVelocity * Time.deltaTime);
+		currentDir = (transform.right * velocityX + transform.forward * velocityZ).normalized;
+
+		if (currentDir.magnitude > 0f)
+			previousDir = currentDir;
+		
+		controller.Move(previousDir * linearVelocity * Time.deltaTime);
 	}
 }

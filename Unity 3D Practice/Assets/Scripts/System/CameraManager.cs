@@ -1,20 +1,26 @@
 using UnityEngine;
 using Cinemachine;
 using CSTGames.CommonEnums;
+using Unity.IO.LowLevel.Unsafe;
 
 public class CameraManager : MonoBehaviour
 {
 	public static CameraManager instance { get; private set; }
 
-	// References.
+	[Header("References")]
+	[Space]
 	[SerializeField] private CinemachineFreeLook thirdPersonCam;
 	[SerializeField] private CinemachineVirtualCamera firstPersonCam;
-	
-	[SerializeField] private ThirdPersonMovement move3rdScript;
-	[SerializeField] private FirstPersonMovement move1stScript;
-	[SerializeField] private MouseLook cam1stLookScript;
 
-	[SerializeField] private AnimStateController stateController;
+	private Transform player;
+	private Animator cam3rdAnimator;
+
+	// Scripts
+	private ThirdPersonMovement move3rdScript;
+	private FirstPersonMovement move1stScript;
+	private MouseLook cam1stLookScript;
+
+	private int isAimingHash;
 
 	private void Awake()
 	{
@@ -30,11 +36,18 @@ public class CameraManager : MonoBehaviour
 		thirdPersonCam = GameObject.FindWithTag("ThirdPersonCam").GetComponent<CinemachineFreeLook>();
 		firstPersonCam = GameObject.FindWithTag("FirstPersonCam").GetComponent<CinemachineVirtualCamera>();
 
-		move3rdScript = GameObject.FindWithTag("Player").GetComponent<ThirdPersonMovement>();
-		move1stScript = GameObject.FindWithTag("Player").GetComponent<FirstPersonMovement>();
-		stateController = GameObject.FindWithTag("Player").GetComponent<AnimStateController>();
+		cam3rdAnimator = thirdPersonCam.GetComponent<Animator>();
 
-		cam1stLookScript = GameObject.FindWithTag("FirstPersonCam").GetComponent<MouseLook>();
+		player = GameObject.FindWithTag("Player").transform;
+		move3rdScript = player.GetComponent<ThirdPersonMovement>();
+		move1stScript = player.GetComponent<FirstPersonMovement>();
+
+		cam1stLookScript = firstPersonCam.GetComponent<MouseLook>();
+	}
+
+	private void Start()
+	{
+		isAimingHash = Animator.StringToHash("IsAiming");
 	}
 
 	private void OnEnable()
@@ -59,10 +72,28 @@ public class CameraManager : MonoBehaviour
 	// Update is called once per frame
 	private void Update()
 	{
+		bool wasAiming = cam3rdAnimator.GetBool(isAimingHash);
+
+		if (PlayerActions.isAiming && PlayerActions.allowAimingAgain && !wasAiming)
+		{
+			firstPersonCam.m_Lens.NearClipPlane = .01f;
+			cam3rdAnimator.SetBool(isAimingHash, true);
+		}
+		else if (!PlayerActions.isAiming && wasAiming)
+		{
+			firstPersonCam.m_Lens.NearClipPlane = .2f;
+			cam3rdAnimator.SetBool(isAimingHash, false);
+		}
+
+		SwitchCamera();
+	}
+
+	private void SwitchCamera()
+	{
 		// Check for camera switching trigger key.
 		if (InputManager.instance.GetKeyDown(KeybindingActions.SwitchCamera))
 		{
-			if (CameraSwitcher.IsActive(thirdPersonCam))
+			if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
 			{
 				CameraSwitcher.SwitchCam(firstPersonCam);
 

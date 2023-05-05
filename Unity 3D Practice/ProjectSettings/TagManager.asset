@@ -8,7 +8,10 @@ TagManager:
   - ThirdPersonCam
   - UICanvas
   - MinimapCam
-  - FPS Cam Position
+  - FPSCamPos
+  - PlayerHead
+  - WeaponSocket
+  - TPSAimingCam
   layers:
   - Default
   - TransparentFX

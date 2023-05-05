@@ -28,7 +28,7 @@ public class Minimap : MonoBehaviour
 
 		coordinateText.text = $"{Mathf.Round(playerPos.x)}, {Mathf.Round(playerPos.y)}, {Mathf.Round(playerPos.z)}";
 
-		if (CameraSwitcher.IsActive(tpsCam))
+		if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
 			lookingArrow.eulerAngles = new Vector3(0f, 0f, -tpsCam.m_XAxis.Value + 180f);
 		else
 			lookingArrow.eulerAngles = new Vector3(0f, 0f, -player.eulerAngles.y + 180f);

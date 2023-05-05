@@ -1,45 +1,62 @@
 using UnityEngine;
 
+/// <summary>
+/// This class controls the movement of the first person camera.
+/// </summary>
 public class MouseLook : MonoBehaviour
 {
 	// References.
 	[SerializeField] private Transform player;
+	[SerializeField] private Transform fpsCamPos;
 
-	// Fields.
-	public float mouseSensitivity = 150f;
+	public static float mouseSensitivity { get; set; } = 100f;
 
 	private float xRotation = 0f;
-	//private test t = test.first;
-	//private Rigidbody rb;
+	private float yRotation = 0f;
+	private bool isAlignedWithPlayer;
 	
 	private void Awake()
 	{
 		player = GameObject.FindWithTag("Player").transform;
+		fpsCamPos = GameObject.FindWithTag("FPSCamPos").transform;
 	}
 
-	// Start is called before the first frame update
-	private void Start()
+	private void OnEnable()
 	{
-		Cursor.lockState = CursorLockMode.Locked;
+		transform.localRotation = Quaternion.LookRotation(player.forward, Vector3.up);
+		xRotation = player.eulerAngles.x;
+		yRotation = player.eulerAngles.y;
+		
+		isAlignedWithPlayer = true;
+	}
+
+	private void OnDisable()
+	{
+		isAlignedWithPlayer = false;
 	}
 
 	// Update is called once per frame
 	private void Update()
 	{
+		if (!isAlignedWithPlayer)
+			return;
+
 		float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
 		float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-		xRotation -= mouseY;  // Decreasing because it'll inverse if increasing.
+		// Gameobject rotates counter clockwise along an axis if that axis rotation value is possitive.
+		xRotation -= mouseY;
 		xRotation = Mathf.Clamp(xRotation, -70f, 90f);  // Limit the angle of rotation.
 
-		transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+		yRotation += mouseX;
+		
+		transform.position = fpsCamPos.position;
+
+		if (PlayerActions.isAiming)
+			transform.localRotation = Quaternion.LookRotation(fpsCamPos.forward, Vector3.up);
+		else
+			transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
 
 		player.Rotate(Vector3.up * mouseX);
 	}
-}
-
-public enum test
-{
-	first,
-	second
 }

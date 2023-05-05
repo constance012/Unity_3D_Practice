@@ -19,26 +19,32 @@ public class ThirdPersonMovement : PlayerMovement
 	protected override void Awake()
 	{
 		base.Awake();
-		cam = GameObject.FindWithTag("MainCamera").transform;
+		cam = Camera.main.transform;
 	}
 
 	protected override void Update()
 	{
 		base.Update();
 
-		Vector3 direction = new Vector3(velocityX, 0f, velocityZ).normalized;
+		if (PlayerActions.isAiming)
+		{
+			OnAimingMode();
+			return;
+		}
+
+		currentDir = new Vector3(velocityX, 0f, velocityZ).normalized;
 
 		// Move the player.
-		if (direction.magnitude > 0f || linearVelocity > 0f)
+		if (currentDir.magnitude > 0f || linearVelocity > 0f)
 		{
 			// Decelerate and then stopping.
-			if (direction.magnitude == 0f)
+			if (currentDir.magnitude == 0f)
 			{
 				controller.Move(transform.forward * linearVelocity * Time.deltaTime);
 				return;
 			}
 
-			float facingAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;  // Calculate the angle using Arctan.
+			float facingAngle = Mathf.Atan2(currentDir.x, currentDir.z) * Mathf.Rad2Deg + cam.eulerAngles.y;  // Calculate the angle using Arctan.
 
 			float smoothedAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, facingAngle, ref turnSmoothVelocity, turnSmoothTime);
 
@@ -48,5 +54,21 @@ public class ThirdPersonMovement : PlayerMovement
 			
 			controller.Move(moveDir * linearVelocity * Time.deltaTime);
 		}
+	}
+
+	private void OnAimingMode()
+	{
+		// Rotate the player with the camera.
+		Vector3 euler = new Vector3(transform.eulerAngles.x, cam.eulerAngles.y + 45f, transform.eulerAngles.z);
+
+		transform.rotation = Quaternion.Euler(euler);
+
+		// Move the target relative to the camera transform.
+		currentDir = cam.right * velocityX + cam.forward * velocityZ;
+
+		if (currentDir.magnitude > 0f)
+			previousDir = currentDir;
+		
+		controller.Move(previousDir * linearVelocity * Time.deltaTime);
 	}
 }

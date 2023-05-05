@@ -32,10 +32,11 @@ namespace CSTGames.CommonEnums
 		Jump,
 		Run,
 		Crouch,
-		Dash,
+		Reload,
 		Inventory,
 		Interact,
 		Pause,
-		SwitchCamera
+		SwitchCamera,
+		DropItemInHand
 	}
 }

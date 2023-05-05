@@ -41,6 +41,8 @@ public class PlayerMovement : MonoBehaviour
 	// Protected fields.
 	protected bool isGrounded;
 	protected Vector3 fallMomentum;
+	protected Vector3 currentDir;
+	protected Vector3 previousDir;
 
 	protected virtual void Awake()
 	{

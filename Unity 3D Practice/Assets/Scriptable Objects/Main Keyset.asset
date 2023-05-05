@@ -32,7 +32,7 @@ MonoBehaviour:
   - action: 9
     keyCode: 306
   - action: 10
-    keyCode: 324
+    keyCode: 114
   - action: 11
     keyCode: 116
   - action: 12
@@ -41,3 +41,5 @@ MonoBehaviour:
     keyCode: 112
   - action: 14
     keyCode: 118
+  - action: 15
+    keyCode: 113
