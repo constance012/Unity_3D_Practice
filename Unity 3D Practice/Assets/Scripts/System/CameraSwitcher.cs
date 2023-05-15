@@ -8,14 +8,14 @@ public static class CameraSwitcher
 
 	public static CinemachineVirtualCameraBase activeCam { get; private set; } = null;
 
-	public static CinemachineVirtualCameraBase fpsCam
+	public static CinemachineVirtualCamera fpsCam
 	{
-		get { return cameras.Find(camera => camera.CompareTag("FirstPersonCam")); }
+		get { return cameras.Find(camera => camera.CompareTag("FirstPersonCam")) as CinemachineVirtualCamera; }
 	}
 
-	public static CinemachineVirtualCameraBase tpsCam
+	public static CinemachineFreeLook tpsCam
 	{
-		get { return cameras.Find(camera => camera.CompareTag("ThirdPersonCam")); }
+		get { return cameras.Find(camera => camera.CompareTag("ThirdPersonCam")) as CinemachineFreeLook; }
 	}
 
 	public static bool IsActive(CinemachineVirtualCameraBase cam) => cam == activeCam;

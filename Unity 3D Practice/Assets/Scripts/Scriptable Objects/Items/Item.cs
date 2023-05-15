@@ -40,8 +40,9 @@ public class Item : ScriptableObject
 
 	public float weight;
 
-	public virtual void Use()
+	public virtual bool Use()
 	{
 		Debug.Log($"Using {itemName}.");
+		return false;
 	}
 }

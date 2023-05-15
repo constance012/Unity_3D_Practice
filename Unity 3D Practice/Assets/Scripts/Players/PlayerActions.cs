@@ -6,8 +6,9 @@ public class PlayerActions : MonoBehaviour
 {
 	[Header("References")]
 	[Space]
-	[SerializeField] private Animator animator;
+	[SerializeField] private Animator rigAnimator;
 	[SerializeField] private GameObject crosshair;
+
 	[SerializeField] private Transform fpsCamPos;
 
 	public static Weapon[] weapons = new Weapon[4];
@@ -21,26 +22,17 @@ public class PlayerActions : MonoBehaviour
 	// Properties.
 	public static bool isAiming { get; private set; }
 	public static bool allowAimingAgain { get; set; } = true;
-
-	private readonly Vector3 fpsAimingLocalPos = new Vector3(0.00469999993f, -0.0322999991f, 0.0869999975f);
+	public static Vector3 fpsCamAimingPos { get; } = new Vector3(0.00469999993f, -0.0322999991f, 0.0869999975f);
+	public static Vector3 fpsCamOriginalPos { get; } = new Vector3(0f, 0.065200001f, 0.194900006f);
 
 	private void Awake()
 	{
-		animator = GetComponent<Animator>();
+		rigAnimator = transform.Find("Model/-----RIG LAYERS-----").GetComponent<Animator>();
 		weaponSocket = GameObject.FindWithTag("WeaponSocket").GetComponent<WeaponSocket>();
 
 		crosshair = GameObject.FindWithTag("UICanvas").transform.Find("Gun UI/Crosshair").gameObject;
-		
-		fpsCamPos = GameObject.FindWithTag("FPSCamPos").transform;
-	}
 
-	private void Start()
-	{
-		aimingVertical = Animator.StringToHash("Aiming Vertical");
-		grabRifle = Animator.StringToHash("Pull Out Rifle");
-		hideRifle = Animator.StringToHash("Put Away Rifle");
-		startAiming = Animator.StringToHash("Start Aiming");
-		stopAiming = Animator.StringToHash("End Aiming");
+		fpsCamPos = GameObject.FindWithTag("FPSCamPos").transform;
 	}
 
 	private void Update()
@@ -63,9 +55,8 @@ public class PlayerActions : MonoBehaviour
 
 		if (Input.GetKey(KeyCode.Alpha1) && isWeaponHeld)
 		{
+			EquipWeapon(true);
 			currentWeapon = null;
-
-			animator.SetTrigger(hideRifle);
 		}
 
 		if (Input.GetKey(KeyCode.Alpha2) && !isWeaponHeld)
@@ -73,8 +64,7 @@ public class PlayerActions : MonoBehaviour
 			currentWeapon = weapons[0];
 			weaponSocket.GrabWeapon(currentWeapon);
 
-			animator.SetLayerWeight(1, 1f);
-			animator.SetTrigger(grabRifle);
+			EquipWeapon();
 		}
 	}
 
@@ -84,45 +74,68 @@ public class PlayerActions : MonoBehaviour
 
 		isAiming = false;
 
+		// Check aiming.
 		if (Input.GetKey(KeyCode.Mouse1) && allowAimingAgain)
 		{
 			isAiming = true;
 			fpsCamPos.rotation = Quaternion.LookRotation(weaponSocket.transform.right, fpsCamPos.up);
-
-			float aimingY = animator.GetFloat(aimingVertical);
-			float mouseY = Input.GetAxis("Mouse Y") * .0075f * 10f;
-
-			aimingY += mouseY;
-			aimingY = Mathf.Clamp(aimingY, -1f, 1f);
-
-			animator.SetFloat(aimingVertical, aimingY);
 		}
-
-		int layerIndex = animator.GetLayerIndex("Rifle Aiming");
 		
 		// What to change when starts of stops aiming.
 		if (wasAiming != isAiming)
 		{
+			// Start aiming.
 			if (isAiming)
 			{
-				if (!CameraSwitcher.IsActive(CameraSwitcher.fpsCam))
+				if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
 					crosshair.SetActive(true);
-				
-				animator.SetLayerWeight(layerIndex, 1f);
-				animator.SetTrigger(startAiming);
 
-				fpsCamPos.localPosition = fpsAimingLocalPos;
+				fpsCamPos.localPosition = fpsCamAimingPos;
 			}
+			
+			// Stop aiming.
 			else
 			{
 				crosshair.SetActive(false);
 
-				animator.SetTrigger(stopAiming);
-				animator.SetFloat(aimingVertical, 0f);
-
-				fpsCamPos.localPosition = new Vector3(0f, 0.065200001f, 0.194900006f);
+				fpsCamPos.localPosition = fpsCamOriginalPos;
 				fpsCamPos.localRotation = Quaternion.identity;
 			}
+		}
+	}
+
+	private void EquipWeapon(bool unequip = false)
+	{
+		switch (currentWeapon.weaponType)
+		{
+			case Weapon.WeaponType.Ranged:
+				RangedWeapon rangedWeapon = currentWeapon as RangedWeapon;
+
+				if (!unequip)
+					rigAnimator.Play("Ranged-Equip " + rangedWeapon.gunType);
+				else
+					rigAnimator.SetTrigger("UnequipWeapon");
+				break;
+
+			case Weapon.WeaponType.Melee:
+				break;
+		}
+	}
+
+	/// <summary>
+	/// Callback method for camera active event.
+	/// </summary>
+	public void OnCameraLive()
+	{
+		if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
+		{
+			CameraSwitcher.tpsCam.m_XAxis.Value = transform.eulerAngles.y;
+			crosshair.SetActive(isAiming);
+		}
+
+		else if (CameraSwitcher.IsActive(CameraSwitcher.fpsCam))
+		{
+			return;
 		}
 	}
 }

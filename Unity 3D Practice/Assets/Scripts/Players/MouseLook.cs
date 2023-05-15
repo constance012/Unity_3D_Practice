@@ -10,6 +10,8 @@ public class MouseLook : MonoBehaviour
 	[SerializeField] private Transform fpsCamPos;
 
 	public static float mouseSensitivity { get; set; } = 100f;
+	public static float mouseX { get; private set; }
+	public static float mouseY { get; private set; }
 
 	private float xRotation = 0f;
 	private float yRotation = 0f;
@@ -23,10 +25,13 @@ public class MouseLook : MonoBehaviour
 
 	private void OnEnable()
 	{
-		transform.localRotation = Quaternion.LookRotation(player.forward, Vector3.up);
+		player.rotation = Quaternion.Euler(CameraSwitcher.tpsCam.m_XAxis.Value * Vector3.up);
+
 		xRotation = player.eulerAngles.x;
 		yRotation = player.eulerAngles.y;
-		
+
+		transform.LookAt(fpsCamPos.forward);
+
 		isAlignedWithPlayer = true;
 	}
 
@@ -41,21 +46,24 @@ public class MouseLook : MonoBehaviour
 		if (!isAlignedWithPlayer)
 			return;
 
-		float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-		float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+		mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+		mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
 		// Gameobject rotates counter clockwise along an axis if that axis rotation value is possitive.
 		xRotation -= mouseY;
-		xRotation = Mathf.Clamp(xRotation, -70f, 90f);  // Limit the angle of rotation.
+		xRotation = Mathf.Clamp(xRotation, -70f, 70f);  // Limit the angle of rotation.
 
 		yRotation += mouseX;
 		
 		transform.position = fpsCamPos.position;
 
 		if (PlayerActions.isAiming)
-			transform.localRotation = Quaternion.LookRotation(fpsCamPos.forward, Vector3.up);
+		{
+			Quaternion aimingRotation = Quaternion.Euler(fpsCamPos.eulerAngles.x, fpsCamPos.eulerAngles.y, 0f);
+			transform.rotation = Quaternion.Slerp(transform.rotation, aimingRotation, 10f * Time.fixedDeltaTime);
+		}
 		else
-			transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
+			transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
 
 		player.Rotate(Vector3.up * mouseX);
 	}

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Weapon", menuName = "Items/Weapon/Base Weapon")]
@@ -22,17 +23,28 @@ public class Weapon : Item
 		Single
 	}
 
+	[Serializable]
+	public struct HandGripReferences
+	{
+		public Vector3 localPosition;
+		public Vector3 localEulerAngles;
+
+		public Vector3 elbowLocalPosition;
+	}
+
 	[Header("Types")]
 	[Space]
 	public WeaponType weaponType;
 	public WieldType wieldType;
 	public UseType useType;
 
-	[Header("Orientation")]
+	[Header("Orientation in Hand")]
 	[Space]
-	public Vector3 localPositionInHand;
-	public Vector3 eulerAnglesInHand;
+	public HandGripReferences rightHandGrip;
+	public HandGripReferences leftHandGrip;
 	public float inHandScale;
+	[Space]
+	public Vector3 particlesLocalPosisiton;
 
 	[Header("Shared Properties")]
 	[Space]
@@ -44,4 +56,10 @@ public class Weapon : Item
 	public float useSpeed;
 
 	public float sellPrice;
+
+	public virtual bool Fire(out RaycastHit hitInfo)
+	{
+		hitInfo = new RaycastHit();
+		return false;
+	}
 }

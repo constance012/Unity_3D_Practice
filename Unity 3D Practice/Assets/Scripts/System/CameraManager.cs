@@ -2,6 +2,7 @@ using UnityEngine;
 using Cinemachine;
 using CSTGames.CommonEnums;
 using Unity.IO.LowLevel.Unsafe;
+using System.Reflection;
 
 public class CameraManager : MonoBehaviour
 {
@@ -74,18 +75,50 @@ public class CameraManager : MonoBehaviour
 	{
 		bool wasAiming = cam3rdAnimator.GetBool(isAimingHash);
 
-		if (PlayerActions.isAiming && PlayerActions.allowAimingAgain && !wasAiming)
+		if (PlayerActions.isAiming != wasAiming)
 		{
-			firstPersonCam.m_Lens.NearClipPlane = .01f;
-			cam3rdAnimator.SetBool(isAimingHash, true);
-		}
-		else if (!PlayerActions.isAiming && wasAiming)
-		{
-			firstPersonCam.m_Lens.NearClipPlane = .2f;
-			cam3rdAnimator.SetBool(isAimingHash, false);
+			if (PlayerActions.allowAimingAgain)
+				SetAimingProperties(true);
+			else
+				SetAimingProperties(false);
 		}
 
 		SwitchCamera();
+	}
+
+	private void SetAimingProperties(bool isAiming)
+	{
+		void SetRigProperties(CinemachineOrbitRig rig, float height, float radius, Vector3 offset)
+		{
+			thirdPersonCam.m_Orbits[(int)rig].m_Height = height;
+			thirdPersonCam.m_Orbits[(int)rig].m_Radius = radius;
+
+			CinemachineComposer comp = thirdPersonCam.GetRig((int)rig).GetCinemachineComponent<CinemachineComposer>();
+			comp.m_TrackedObjectOffset = offset;
+		}
+
+		if (isAiming)
+		{
+			firstPersonCam.m_Lens.NearClipPlane = .01f;
+
+			thirdPersonCam.m_SplineCurvature = 0f;
+			SetRigProperties(CinemachineOrbitRig.Top, 3f, 4.2f, new Vector3(0f, .95f, 0f));
+			SetRigProperties(CinemachineOrbitRig.Middle, 1.1f, 4f, new Vector3(0f, 1f, 0f));
+			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, 1.2f, new Vector3(0f, 1.15f, 0f));
+
+			cam3rdAnimator.SetBool(isAimingHash, true);
+		}
+		else
+		{
+			firstPersonCam.m_Lens.NearClipPlane = .2f;
+
+			thirdPersonCam.m_SplineCurvature = .5f;
+			SetRigProperties(CinemachineOrbitRig.Top, 5f, .5f, new Vector3(0f, 0f, 0f));
+			SetRigProperties(CinemachineOrbitRig.Middle, 1.8f, 4f, new Vector3(0f, 1f, 0f));
+			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, .5f, new Vector3(0f, 1f, 0f));
+
+			cam3rdAnimator.SetBool(isAimingHash, false);
+		}
 	}
 
 	private void SwitchCamera()
@@ -113,4 +146,6 @@ public class CameraManager : MonoBehaviour
 			}
 		}
 	}
+
+	public enum CinemachineOrbitRig { Top, Middle, Bottom }
 }

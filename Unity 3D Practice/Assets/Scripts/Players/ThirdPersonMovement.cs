@@ -26,13 +26,15 @@ public class ThirdPersonMovement : PlayerMovement
 	{
 		base.Update();
 
+		HandleLinearHorizontalMovement();
+
 		if (PlayerActions.isAiming)
 		{
 			OnAimingMode();
 			return;
 		}
 
-		currentDir = new Vector3(velocityX, 0f, velocityZ).normalized;
+		currentDir = new Vector3(moveInputX, 0f, moveInputZ).normalized;
 
 		// Move the player.
 		if (currentDir.magnitude > 0f || linearVelocity > 0f)
@@ -58,13 +60,13 @@ public class ThirdPersonMovement : PlayerMovement
 
 	private void OnAimingMode()
 	{
-		// Rotate the player with the camera.
-		Vector3 euler = new Vector3(transform.eulerAngles.x, cam.eulerAngles.y + 45f, transform.eulerAngles.z);
+		float camEulerY = cam.rotation.eulerAngles.y + 45f;
+		Quaternion lookRotation = Quaternion.Euler(0f, camEulerY, 0f);
 
-		transform.rotation = Quaternion.Euler(euler);
+		transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, 10f * Time.fixedDeltaTime);
 
 		// Move the target relative to the camera transform.
-		currentDir = cam.right * velocityX + cam.forward * velocityZ;
+		currentDir = cam.right * moveInputX + cam.forward * moveInputZ;
 
 		if (currentDir.magnitude > 0f)
 			previousDir = currentDir;

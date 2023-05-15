@@ -29,9 +29,16 @@ MonoBehaviour:
   weaponType: 0
   wieldType: 1
   useType: 0
-  localPositionInHand: {x: -0.0658, y: 0.2123, z: 0.0134}
-  eulerAnglesInHand: {x: 348.4441, y: 6.622604, z: 94.254616}
+  rightHandGrip:
+    localPosition: {x: 0.515, y: -0.145, z: -0.045}
+    localEulerAngles: {x: 0, y: 0, z: 274.0661}
+    elbowLocalPosition: {x: -0.259, y: -0.339, z: 0.869}
+  leftHandGrip:
+    localPosition: {x: 1.258, y: 0.068, z: 0.175}
+    localEulerAngles: {x: 302.10608, y: 199.47736, z: 143.21184}
+    elbowLocalPosition: {x: 0.375, y: -0.99, z: -0.488}
   inHandScale: 0.5
+  particlesLocalPosisiton: {x: 2.0494, y: 0.035, z: 0}
   baseDamage: 20
   durability: 100
   knockBack: 2
@@ -44,6 +51,7 @@ MonoBehaviour:
   currentMagazineAmmo: 30
   reloadTime: 1
   promptReload: 0
+  isReloading: 0
   stability: 0.7
   range: 30
   impactForce: 80

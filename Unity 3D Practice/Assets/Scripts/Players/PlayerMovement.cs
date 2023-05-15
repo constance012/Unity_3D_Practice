@@ -1,8 +1,9 @@
 using CSTGames.CommonEnums;
 using System.Collections;
-using System.ComponentModel.Design;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Animations.Rigging;
+using UnityEditor;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -31,15 +32,19 @@ public class PlayerMovement : MonoBehaviour
 	[Space]
 	[Header("Events")]
 	public UnityEvent<bool> onJumpingEvent;
+	public UnityEvent<bool> onStrafeSwitchingEvent;
 
+	// Static fields.
+	public static float linearVelocity { get; protected set; }
 	public static float velocityX { get; protected set; }
 	public static float velocityZ { get; protected set; }
-	public static float linearVelocity { get; protected set; }
+	public static bool useStrafeMovement { get; protected set; }
 	public static bool isRunning { get; protected set; }
-	public static bool isJumping { get; protected set; }
+	public static bool canJumpAgain { get; set; } = true;
 
 	// Protected fields.
 	protected bool isGrounded;
+	protected float moveInputX, moveInputZ;
 	protected Vector3 fallMomentum;
 	protected Vector3 currentDir;
 	protected Vector3 previousDir;
@@ -56,7 +61,6 @@ public class PlayerMovement : MonoBehaviour
 
 		isGrounded = Physics.CheckSphere(groundCheck.position, footRadius, groundMask);
 
-		HandleHorizontalMovement();
 		HandleVerticalMovement();
 	}
 
@@ -121,11 +125,14 @@ public class PlayerMovement : MonoBehaviour
 		if (z > 0f && velocityZ < currentMaxVelocity)
 			velocityZ += acceleration * Time.deltaTime;
 
-		if (x < 0f && velocityX > -currentMaxVelocity)
-			velocityX -= acceleration * Time.deltaTime;
+		if (z < 0f && velocityZ > -currentMaxVelocity)
+			velocityZ -= acceleration * Time.deltaTime;
 
 		if (x > 0f && velocityX < currentMaxVelocity)
 			velocityX += acceleration * Time.deltaTime;
+
+		if (x < 0f && velocityX > -currentMaxVelocity)
+			velocityX -= acceleration * Time.deltaTime;
 
 		// Decrease the forward velocity.
 		if (z == 0f)
@@ -134,17 +141,20 @@ public class PlayerMovement : MonoBehaviour
 				velocityZ -= deceleration * Time.deltaTime;
 
 			if (velocityZ < 0f)
+				velocityZ += deceleration * Time.deltaTime;
+
+			if (velocityZ != 0f && velocityZ > -.05f && velocityZ < .05f)
 				velocityZ = 0f;
 		}
 
 		// Decrease the sideways velocity.
 		if (x == 0f)
 		{
-			if (velocityX < 0f)
-				velocityX += deceleration * Time.deltaTime;
-
 			if (velocityX > 0f)
 				velocityX -= deceleration * Time.deltaTime;
+
+			if (velocityX < 0f)
+				velocityX += deceleration * Time.deltaTime;
 
 			if (velocityX != 0f && velocityX > -.05f && velocityX < .05f)
 				velocityX = 0f;
@@ -178,6 +188,27 @@ public class PlayerMovement : MonoBehaviour
 			// Lock if accelerates from standing still.
 			else if (velocityZ < currentMaxVelocity && velocityZ > (currentMaxVelocity - .05f))
 				velocityZ = currentMaxVelocity;
+		}
+
+		// Lock backward velocity.
+		if (z < 0f)
+		{
+			if (isRunning && velocityZ < -currentMaxVelocity)
+				velocityZ = -currentMaxVelocity;
+
+			// Decelerate from running.
+			else if (velocityZ < -currentMaxVelocity)
+			{
+				velocityZ += deceleration * Time.deltaTime;
+
+				// Lock if decelerates from running.
+				if (velocityZ < -currentMaxVelocity && velocityZ > (-currentMaxVelocity - .05f))
+					velocityZ = -currentMaxVelocity;
+			}
+
+			// Lock if accelerates from standing still.
+			else if (velocityZ > -currentMaxVelocity && velocityZ < (-currentMaxVelocity + .05f))
+				velocityZ = -currentMaxVelocity;
 		}
 
 		// Lock right velocity.
@@ -223,20 +254,48 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
-	private void HandleHorizontalMovement()
+	protected void HandleLinearHorizontalMovement()
 	{
-		//float x = InputManager.instance.GetAxisRaw("Horizontal");
-		//float z = InputManager.instance.GetAxisRaw("Vertical");
+		if (useStrafeMovement)
+		{
+			useStrafeMovement = false;
+			onStrafeSwitchingEvent?.Invoke(useStrafeMovement);
+		}
 
-		velocityX = InputManager.instance.GetAxisRaw("Horizontal");
-		velocityZ = InputManager.instance.GetAxisRaw("Vertical");
-		Vector3 moveVector = new Vector3(velocityX, 0f, velocityZ).normalized;
+		moveInputX = InputManager.instance.GetAxisRaw("Horizontal");
+		moveInputZ = InputManager.instance.GetAxisRaw("Vertical");
+		Vector3 moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
 		isRunning = InputManager.instance.GetKey(KeybindingActions.Run);
 
 		float currentMaxVelocity = isRunning ? maxRunningSpeed : maxWalkingSpeed;
 
+		// Calculate the linear speed.
 		ChangeVelocity(moveVector, currentMaxVelocity);
 		LockOrResetVelocity(moveVector, currentMaxVelocity);
+	}
+
+	protected void HandleStrafeHorizontalMovement()
+	{
+		if (!useStrafeMovement)
+		{
+			useStrafeMovement = true;
+			onStrafeSwitchingEvent?.Invoke(useStrafeMovement);
+		}
+
+		moveInputX = InputManager.instance.GetAxisRaw("Horizontal");
+		moveInputZ = InputManager.instance.GetAxisRaw("Vertical");
+		Vector3 moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
+		isRunning = InputManager.instance.GetKey(KeybindingActions.Run);
+
+		float currentMaxVelocity = isRunning ? maxRunningSpeed : maxWalkingSpeed;
+
+		// Calculate the linear speed.
+		ChangeVelocity(moveVector, currentMaxVelocity);
+		LockOrResetVelocity(moveVector, currentMaxVelocity);
+
+		// Calculate each axis velocity for the animator.
+		ChangeVelocity(moveInputX, moveInputZ, currentMaxVelocity);
+		LockOrResetVelocity(moveInputX, moveInputZ, currentMaxVelocity);
 	}
 
 	private void HandleVerticalMovement()
@@ -245,17 +304,15 @@ public class PlayerMovement : MonoBehaviour
 		if (isGrounded && fallMomentum.y < 0)
 		{
 			fallMomentum.y = -2f;
-			isJumping = false;
 
 			StopCoroutine(Jump());
-			onJumpingEvent?.Invoke(isJumping);
+			onJumpingEvent?.Invoke(false);
 		}
 
 		// Calculate the jump velocity: v = sqrt(h * (-2) * g).
-		if (InputManager.instance.GetKeyDown(KeybindingActions.Jump) && isGrounded)
+		if (InputManager.instance.GetKeyDown(KeybindingActions.Jump) && isGrounded && canJumpAgain)
 		{
-			isJumping = true;
-			onJumpingEvent?.Invoke(isJumping);
+			onJumpingEvent?.Invoke(true);
 			StartCoroutine(Jump());
 		}
 
@@ -268,6 +325,8 @@ public class PlayerMovement : MonoBehaviour
 
 	private IEnumerator Jump()
 	{
+		canJumpAgain = false;
+
 		if (linearVelocity < .05f)
 			yield return new WaitForSeconds(.75f);
 

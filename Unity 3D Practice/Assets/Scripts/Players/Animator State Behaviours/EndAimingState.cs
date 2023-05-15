@@ -10,6 +10,7 @@ public class EndAimingState : StateMachineBehaviour
 	public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		animator.SetLayerWeight(layerIndex, 0f);
+
 		PlayerActions.allowAimingAgain = true;
 	}
 }

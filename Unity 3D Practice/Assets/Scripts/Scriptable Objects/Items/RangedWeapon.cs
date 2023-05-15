@@ -30,50 +30,44 @@ public sealed class RangedWeapon : Weapon
 	public int currentMagazineAmmo;
 	[Space]
 	public float reloadTime;
-	public bool promptReload;
-	private bool isReloading;
+	[HideInInspector] public bool promptReload;
+	[HideInInspector] public bool isReloading;
 	[Space]
 	public float stability;
 	public float range;
 	public float impactForce;
 
-	public override void Use()
+	public override bool Fire(out RaycastHit hitInfo)
 	{
+		hitInfo = new RaycastHit();
+		
 		if (currentMagazineAmmo == 0)
 		{
 			promptReload = true;
-			return;
+			return false;
 		}
 
 		if (isReloading)
-			return;
+			return false;
 
-		base.Use();
-
-		RaycastHit hitObject;
 		Transform camPos = Camera.main.transform;
+		Ray ray = new Ray(camPos.transform.position, camPos.transform.forward);
 
-		if (Physics.Raycast(camPos.transform.position, camPos.transform.forward, out hitObject, range))
+		if (Physics.Raycast(ray, out hitInfo, range))
 		{
-			Debug.Log($"Hit {hitObject.transform.name}");
+			Debug.Log($"Hit {hitInfo.transform.name}");
 
-			if (hitObject.rigidbody != null)
-				hitObject.rigidbody.AddForce(-hitObject.normal * impactForce);
+			if (hitInfo.rigidbody != null)
+				hitInfo.rigidbody.AddForce(-hitInfo.normal * impactForce);
 		}
 
 		currentMagazineAmmo--;
+
+		return true;
 	}
 
-	public IEnumerator Reload()
+	public void Reload()
 	{
-		promptReload = false;
-		isReloading = true;
-		
-		if (remainingAmmo == 0)
-			yield return null;
-
-		yield return new WaitForSeconds(reloadTime);
-
 		int firedBullets = MagazineCapacity - currentMagazineAmmo;
 
 		int reloadedAmmo;

@@ -129,5 +129,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   radius: 1
   player: {fileID: 0}
-  itemPrefab: {fileID: 11400000, guid: cd353e2eba3647e44924cdac840c1e59, type: 2}
-  socket: {fileID: 0}
+  itemPrefab: {fileID: 0}
