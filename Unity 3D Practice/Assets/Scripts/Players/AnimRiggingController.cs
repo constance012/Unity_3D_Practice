@@ -6,7 +6,7 @@ using System.Collections;
 public class AnimRiggingController : MonoBehaviour
 {
 	[SerializeField] private Animator animator;
-	[SerializeField] private RigBuilder rigBuilder;
+	[SerializeField] private static RigBuilder rigBuilder;
 
 	// Parameter ids.
 	private int velXHash, velZHash;
@@ -16,7 +16,7 @@ public class AnimRiggingController : MonoBehaviour
 
 	// Private fields.
 	private Transform headLookTarget;
-	private bool isChangingRigWeight;
+	public static bool isChangingRigWeight { get; private set; }
 
 	private void Awake()
 	{
@@ -77,7 +77,7 @@ public class AnimRiggingController : MonoBehaviour
 			StartCoroutine(ChangeRigLayerWeight("look at ik", RigLayerWeightControl.Increase, 1f, .5f));
 	}
 
-	private IEnumerator ChangeRigLayerWeight(string rigLayerName, RigLayerWeightControl control, float newWeight, float duration = 1f)
+	public static IEnumerator ChangeRigLayerWeight(string rigLayerName, RigLayerWeightControl control, float newWeight, float duration = 1f)
 	{
 		isChangingRigWeight = true;
 

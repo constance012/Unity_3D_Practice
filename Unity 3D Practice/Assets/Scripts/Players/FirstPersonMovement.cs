@@ -6,10 +6,7 @@ public class FirstPersonMovement : PlayerMovement
 	{
 		base.Update();
 
-		if (PlayerActions.isAiming)
-			HandleLinearHorizontalMovement();
-		else
-			HandleStrafeHorizontalMovement();
+		HandleStrafeHorizontalMovement();
 
 		currentDir = (transform.right * moveInputX + transform.forward * moveInputZ).normalized;
 

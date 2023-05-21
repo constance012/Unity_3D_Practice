@@ -37,6 +37,7 @@ public class Item : ScriptableObject
 	[Space]
 	public Mesh mesh;
 	public Material[] materials;
+	public GameObject prefab;
 
 	public float weight;
 

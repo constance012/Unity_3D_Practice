@@ -7,24 +7,30 @@ public class ItemPickup : Interactable
 	[Space]
 	public Item itemPrefab;
 	private Item currentItem;
+	private WeaponSocket weaponSocket;
 
 	// This dropped item's components.
 	private MeshCollider meshCollider;
 	private MeshRenderer meshRenderer;
 	private MeshFilter meshFilter;
+	private Rigidbody rb;
 
 	protected override void Awake()
 	{
 		base.Awake();
 
+		weaponSocket = GameObject.FindWithTag("WeaponSocket").GetComponent<WeaponSocket>();
+		
 		meshCollider = GetComponent<MeshCollider>();
 		meshRenderer = GetComponent<MeshRenderer>();
 		meshFilter = GetComponent<MeshFilter>();
+		rb = GetComponent<Rigidbody>();
 	}
 
 	private void Start()
 	{
 		currentItem = Instantiate(itemPrefab);
+		currentItem.name = itemPrefab.itemName;
 		AddItem();
 	}
 
@@ -40,6 +46,8 @@ public class ItemPickup : Interactable
 		meshFilter.mesh = currentItem.mesh;
 		meshCollider.sharedMesh = currentItem.mesh;
 		meshRenderer.materials = currentItem.materials;
+
+		rb.mass = currentItem.weight;
 	}
 
 	private void Pickup()
@@ -47,7 +55,13 @@ public class ItemPickup : Interactable
 		Debug.Log($"Picking up {currentItem.name}.");
 
 		if (currentItem.category == ItemCategory.Weapon)
-			PlayerActions.weapons[0] = currentItem as Weapon;
+		{
+			Weapon weapon = currentItem as Weapon;
+			int slotIndex = (int)weapon.weaponSlot;
+
+			PlayerActions.weapons[slotIndex] = weapon;
+			weaponSocket.AddWeaponToHolder(weapon);
+		}
 
 		Destroy(this.gameObject);
 	}

@@ -4,6 +4,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Weapon", menuName = "Items/Weapon/Base Weapon")]
 public class Weapon : Item
 {
+	public enum WeaponSlot
+	{
+		Primary,
+		Secondary,
+		CloseRange,
+		Throwable
+	}
 	public enum WeaponType
 	{
 		Ranged,
@@ -34,6 +41,7 @@ public class Weapon : Item
 
 	[Header("Types")]
 	[Space]
+	public WeaponSlot weaponSlot;
 	public WeaponType weaponType;
 	public WieldType wieldType;
 	public UseType useType;
@@ -42,6 +50,8 @@ public class Weapon : Item
 	[Space]
 	public HandGripReferences rightHandGrip;
 	public HandGripReferences leftHandGrip;
+	[Space]
+	public Vector3 inHandOffset;
 	public float inHandScale;
 	[Space]
 	public Vector3 particlesLocalPosisiton;
@@ -53,13 +63,14 @@ public class Weapon : Item
 	public float knockBack;
 
 	[Range(0f, 100f)] public float baseCriticalChance;
+	
+	[Tooltip("The interval time in second between each use")]
 	public float useSpeed;
 
 	public float sellPrice;
 
-	public virtual bool Fire(out RaycastHit hitInfo)
+	public virtual bool FireBullet(Vector3 rayOrigin, Vector3 rayDestination)
 	{
-		hitInfo = new RaycastHit();
 		return false;
 	}
 }

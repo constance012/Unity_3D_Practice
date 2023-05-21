@@ -25,27 +25,36 @@ MonoBehaviour:
   mesh: {fileID: -695774298109068085, guid: a5f56547380d3e6448e877c01e64c479, type: 3}
   materials:
   - {fileID: 2100000, guid: 89b8df5766a2dc1459b66909fd2f643e, type: 2}
+  prefab: {fileID: 5313856188506331232, guid: 7444562fe5798e846a4045a93e123308, type: 3}
   weight: 3.52
+  weaponSlot: 0
   weaponType: 0
   wieldType: 1
   useType: 0
   rightHandGrip:
     localPosition: {x: 0.515, y: -0.145, z: -0.045}
     localEulerAngles: {x: 0, y: 0, z: 274.0661}
-    elbowLocalPosition: {x: -0.259, y: -0.339, z: 0.869}
+    elbowLocalPosition: {x: 0.386, y: 1.158, z: -0.088}
   leftHandGrip:
-    localPosition: {x: 1.258, y: 0.068, z: 0.175}
-    localEulerAngles: {x: 302.10608, y: 199.47736, z: 143.21184}
-    elbowLocalPosition: {x: 0.375, y: -0.99, z: -0.488}
-  inHandScale: 0.5
-  particlesLocalPosisiton: {x: 2.0494, y: 0.035, z: 0}
+    localPosition: {x: 1.156, y: 0.016, z: 0.199}
+    localEulerAngles: {x: 298.65634, y: 238.04639, z: 113.69619}
+    elbowLocalPosition: {x: -0.255, y: 1.193, z: -0.252}
+  inHandOffset: {x: 0.4838, y: 0, z: 0}
+  inHandScale: 0.4
+  particlesLocalPosisiton: {x: 1.825, y: 0.035, z: 0}
   baseDamage: 20
   durability: 100
   knockBack: 2
   baseCriticalChance: 12.6
   useSpeed: 0.2
   sellPrice: 750
+  rayOriginLocalPosition: {x: 0, y: 0, z: 0}
   gunType: 2
+  bulletTracer: {fileID: 439671133536590696, guid: 8774c151cc39505409c940c3be000c04, type: 3}
+  bulletImpactEffect: {fileID: 6835190806984127818, guid: be2e282380d13eb49a76d739139c523c, type: 3}
+  bulletSpeed: 1000
+  bulletDrop: 300
+  bulletMaxLifeTime: 3
   remainingAmmo: 150
   <MagazineCapacity>k__BackingField: 30
   currentMagazineAmmo: 30

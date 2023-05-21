@@ -1,6 +1,7 @@
-using Cinemachine;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
+using CSTGames.CommonEnums;
 
 public class PlayerActions : MonoBehaviour
 {
@@ -17,13 +18,16 @@ public class PlayerActions : MonoBehaviour
 	private Weapon currentWeapon;
 
 	// Animator's hashes.
-	private int aimingVertical, grabRifle, hideRifle, startAiming, stopAiming;
+	private int holsterWeaponHash, isAimingHash;
 
 	// Properties.
 	public static bool isAiming { get; private set; }
-	public static bool allowAimingAgain { get; set; } = true;
-	public static Vector3 fpsCamAimingPos { get; } = new Vector3(0.00469999993f, -0.0322999991f, 0.0869999975f);
+	public static bool isUnequipingDone { get; set; }
+	public static Vector3 fpsCamAimingPos { get; } = new Vector3(0f, -0.09f, 0.065f);
 	public static Vector3 fpsCamOriginalPos { get; } = new Vector3(0f, 0.065200001f, 0.194900006f);
+
+	// Private fields.
+	private bool canSwitchWeapon = true;
 
 	private void Awake()
 	{
@@ -33,6 +37,12 @@ public class PlayerActions : MonoBehaviour
 		crosshair = GameObject.FindWithTag("UICanvas").transform.Find("Gun UI/Crosshair").gameObject;
 
 		fpsCamPos = GameObject.FindWithTag("FPSCamPos").transform;
+	}
+
+	private void Start()
+	{
+		holsterWeaponHash = Animator.StringToHash("HolsterWeapon");
+		isAimingHash = Animator.StringToHash("IsAiming");
 	}
 
 	private void Update()
@@ -51,21 +61,15 @@ public class PlayerActions : MonoBehaviour
 		if (weapons.All(weapon => weapon == null))
 			return;
 
-		bool isWeaponHeld = currentWeapon != null;
-
-		if (Input.GetKey(KeyCode.Alpha1) && isWeaponHeld)
+		if (Input.GetKeyDown(KeyCode.Alpha1) && canSwitchWeapon)
 		{
-			EquipWeapon(true);
-			currentWeapon = null;
+			StartCoroutine(SwitchWeapon((int)Weapon.WeaponSlot.Primary));
 		}
 
-		if (Input.GetKey(KeyCode.Alpha2) && !isWeaponHeld)
-		{
-			currentWeapon = weapons[0];
-			weaponSocket.GrabWeapon(currentWeapon);
-
-			EquipWeapon();
-		}
+		//if (Input.GetKeyDown(KeyCode.Alpha2))
+		//{
+		//	SwitchWeapon((int)Weapon.WeaponSlot.Secondary);
+		//}
 	}
 
 	private void HandleAiming()
@@ -75,22 +79,24 @@ public class PlayerActions : MonoBehaviour
 		isAiming = false;
 
 		// Check aiming.
-		if (Input.GetKey(KeyCode.Mouse1) && allowAimingAgain)
+		if (Input.GetKey(KeyCode.Mouse1))
 		{
 			isAiming = true;
-			fpsCamPos.rotation = Quaternion.LookRotation(weaponSocket.transform.right, fpsCamPos.up);
 		}
 		
 		// What to change when starts of stops aiming.
 		if (wasAiming != isAiming)
 		{
+			//rigAnimator.SetBool(isAimingHash, isAiming);
+			StopAllCoroutines();
+
 			// Start aiming.
 			if (isAiming)
 			{
-				if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
-					crosshair.SetActive(true);
+				crosshair.SetActive(true);
 
 				fpsCamPos.localPosition = fpsCamAimingPos;
+				StartCoroutine(AnimRiggingController.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Increase, 1f, .5f));
 			}
 			
 			// Stop aiming.
@@ -100,6 +106,7 @@ public class PlayerActions : MonoBehaviour
 
 				fpsCamPos.localPosition = fpsCamOriginalPos;
 				fpsCamPos.localRotation = Quaternion.identity;
+				StartCoroutine(AnimRiggingController.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, .5f));
 			}
 		}
 	}
@@ -113,13 +120,49 @@ public class PlayerActions : MonoBehaviour
 
 				if (!unequip)
 					rigAnimator.Play("Ranged-Equip " + rangedWeapon.gunType);
-				else
-					rigAnimator.SetTrigger("UnequipWeapon");
+				else 
+				{
+					rigAnimator.SetTrigger(holsterWeaponHash);
+				}
 				break;
 
 			case Weapon.WeaponType.Melee:
 				break;
 		}
+	}
+
+	private IEnumerator SwitchWeapon(int newWeaponIndex)
+	{
+		canSwitchWeapon = false;
+		isUnequipingDone = true;
+
+		// Unequip the current weapon.
+		if (currentWeapon != null)
+		{
+			isUnequipingDone = false;
+
+			EquipWeapon(true);
+			weaponSocket.HideWeapon();
+		}
+
+		yield return new WaitUntil(() => isUnequipingDone);
+
+		// If the new weapon is the same as the current one, switch to unarmed state.
+		if (currentWeapon == weapons[newWeaponIndex])
+		{
+			rigAnimator.Play("Unarmed");
+			currentWeapon = null;
+		}
+		// Else, equip the new weapon.
+		else
+		{
+			currentWeapon = weapons[newWeaponIndex];
+			weaponSocket.GrabWeapon(currentWeapon);
+
+			EquipWeapon();
+		}
+
+		canSwitchWeapon = true;
 	}
 
 	/// <summary>
@@ -130,12 +173,26 @@ public class PlayerActions : MonoBehaviour
 		if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
 		{
 			CameraSwitcher.tpsCam.m_XAxis.Value = transform.eulerAngles.y;
-			crosshair.SetActive(isAiming);
 		}
 
 		else if (CameraSwitcher.IsActive(CameraSwitcher.fpsCam))
 		{
 			return;
 		}
+	}
+
+	public void OnWeaponDrop()
+	{
+		isAiming = false;
+		crosshair.SetActive(false);
+		
+		StartCoroutine(AnimRiggingController.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, 0f));
+
+		fpsCamPos.localPosition = fpsCamOriginalPos;
+		fpsCamPos.localRotation = Quaternion.identity;
+
+		transform.rotation = Quaternion.Euler(Camera.main.transform.eulerAngles.y * Vector3.up);
+		
+		currentWeapon = null;
 	}
 }

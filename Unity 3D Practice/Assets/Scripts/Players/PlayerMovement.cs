@@ -31,8 +31,8 @@ public class PlayerMovement : MonoBehaviour
 
 	[Space]
 	[Header("Events")]
-	public UnityEvent<bool> onJumpingEvent;
-	public UnityEvent<bool> onStrafeSwitchingEvent;
+	public UnityEvent<bool> onJumpingEvent = new UnityEvent<bool>();
+	public UnityEvent<bool> onStrafeSwitchingEvent = new UnityEvent<bool>();
 
 	// Static fields.
 	public static float linearVelocity { get; protected set; }

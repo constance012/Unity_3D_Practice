@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// This class controls the movement of the first person camera.
 /// </summary>
-public class MouseLook : MonoBehaviour
+public class FpsCamLook : MonoBehaviour
 {
 	// References.
 	[SerializeField] private Transform player;
@@ -25,7 +25,7 @@ public class MouseLook : MonoBehaviour
 
 	private void OnEnable()
 	{
-		player.rotation = Quaternion.Euler(CameraSwitcher.tpsCam.m_XAxis.Value * Vector3.up);
+		transform.rotation = Quaternion.Euler(CameraSwitcher.tpsCam.m_XAxis.Value * Vector3.up);
 
 		xRotation = player.eulerAngles.x;
 		yRotation = player.eulerAngles.y;
@@ -40,8 +40,7 @@ public class MouseLook : MonoBehaviour
 		isAlignedWithPlayer = false;
 	}
 
-	// Update is called once per frame
-	private void Update()
+	private void LateUpdate()
 	{
 		if (!isAlignedWithPlayer)
 			return;
@@ -57,13 +56,7 @@ public class MouseLook : MonoBehaviour
 		
 		transform.position = fpsCamPos.position;
 
-		if (PlayerActions.isAiming)
-		{
-			Quaternion aimingRotation = Quaternion.Euler(fpsCamPos.eulerAngles.x, fpsCamPos.eulerAngles.y, 0f);
-			transform.rotation = Quaternion.Slerp(transform.rotation, aimingRotation, 10f * Time.fixedDeltaTime);
-		}
-		else
-			transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
+		transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
 
 		player.Rotate(Vector3.up * mouseX);
 	}

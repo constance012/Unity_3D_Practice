@@ -30,6 +30,7 @@ public class ThirdPersonMovement : PlayerMovement
 
 		if (PlayerActions.isAiming)
 		{
+			HandleStrafeHorizontalMovement();
 			OnAimingMode();
 			return;
 		}
@@ -60,7 +61,7 @@ public class ThirdPersonMovement : PlayerMovement
 
 	private void OnAimingMode()
 	{
-		float camEulerY = cam.rotation.eulerAngles.y + 45f;
+		float camEulerY = cam.rotation.eulerAngles.y;
 		Quaternion lookRotation = Quaternion.Euler(0f, camEulerY, 0f);
 
 		transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, 10f * Time.fixedDeltaTime);
