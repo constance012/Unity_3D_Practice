@@ -18,7 +18,7 @@ public class Keyset : ScriptableObject
 	public Key[] keyList;
 
 	/// <summary>
-	///  Save the Keyset's data into a json file. Create one if the file doesn't already exist.
+	///  Saves the Keyset's data into a json file. Creates one if the file doesn't already exist.
 	/// </summary>
 	/// <param name="fileName"></param>
 	public void SaveKeysetToJson(string fileName)
@@ -48,7 +48,7 @@ public class Keyset : ScriptableObject
 	}
 
 	/// <summary>
-	/// Load data to the Keyset from a .json file. Use the default file if the previously selected file is missing.
+	/// Loads data to the Keyset from a .json file. Uses the default file if the previously selected file is missing.
 	/// </summary>
 	/// <param name="fileName"></param>
 	public void LoadKeysetFromJson(string fileName)

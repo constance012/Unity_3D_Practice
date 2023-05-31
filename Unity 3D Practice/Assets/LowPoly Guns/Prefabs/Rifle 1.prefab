@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2537001884344466507}
   - component: {fileID: 347281350082545793}
   - component: {fileID: 7727607288425220577}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Rifle 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

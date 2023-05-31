@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 660537340789195362}
   - component: {fileID: -7355987953201997711}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: RPJ
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59,7 +59,7 @@ GameObject:
   - component: {fileID: 3996150317463760819}
   - component: {fileID: 6799553792856328811}
   - component: {fileID: 3246197236049482415}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -142,7 +142,7 @@ GameObject:
   - component: {fileID: 2202451986669702914}
   - component: {fileID: 6250670888017485472}
   - component: {fileID: 3744843737536380597}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Rocket
   m_TagString: Untagged
   m_Icon: {fileID: 0}

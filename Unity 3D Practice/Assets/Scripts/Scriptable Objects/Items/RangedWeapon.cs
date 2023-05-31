@@ -39,7 +39,6 @@ public sealed class RangedWeapon : Weapon
 
 	[Header("Gun Properties")]
 	[Space]
-	public Vector3 rayOriginLocalPosition;
 	
 	[Header("Gun Types")]
 	[Space]
@@ -60,7 +59,7 @@ public sealed class RangedWeapon : Weapon
 	private List<Bullet> bullets = new List<Bullet>();
 
 	[Space]
-	public int remainingAmmo;
+	public int reserveAmmo;
 
 	[field: SerializeField]
 	public int MagazineCapacity { get; private set; }
@@ -116,15 +115,15 @@ public sealed class RangedWeapon : Weapon
 		int firedBullets = MagazineCapacity - currentMagazineAmmo;
 
 		int reloadedAmmo;
-		if (remainingAmmo < firedBullets)
+		if (reserveAmmo < firedBullets)
 		{
-			reloadedAmmo = currentMagazineAmmo + remainingAmmo;
-			remainingAmmo = 0;
+			reloadedAmmo = currentMagazineAmmo + reserveAmmo;
+			reserveAmmo = 0;
 		}
 		else
 		{
 			reloadedAmmo = MagazineCapacity;
-			remainingAmmo -= firedBullets;
+			reserveAmmo -= firedBullets;
 		}
 
 		currentMagazineAmmo = reloadedAmmo;
@@ -133,7 +132,7 @@ public sealed class RangedWeapon : Weapon
 	}
 
 	/// <summary>
-	/// Get the current position of the specified bullet as it travels in the air.
+	/// Gets the current position of the specified bullet as it travels in the air.
 	/// </summary>
 	/// <param name="bullet"></param>
 	/// <returns></returns>
@@ -154,7 +153,12 @@ public sealed class RangedWeapon : Weapon
 
 		Ray ray = new Ray(start, rayDirection);
 
-		if (Physics.Raycast(ray, out hitInfo, distance))
+		// Shift the bits of decimal number "1" to the left 6 times. We'll collide with only the layer at index 6: Player.
+		// Combine that with the bitmask of the "IgnoreRaycast" layer with the OR | operator. So we'll collide with only those 2 layers.
+		// Invert the mask with the ~ operator, we'll collide with everything except those 2 layers.
+		int layerMask = ~(1 << 6 | Physics.IgnoreRaycastLayer);
+
+		if (Physics.Raycast(ray, out hitInfo, distance, layerMask))
 		{
 			Debug.Log($"Hit {hitInfo.transform.name}");
 

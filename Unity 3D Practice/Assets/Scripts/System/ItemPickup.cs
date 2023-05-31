@@ -60,6 +60,8 @@ public class ItemPickup : Interactable
 			int slotIndex = (int)weapon.weaponSlot;
 
 			PlayerActions.weapons[slotIndex] = weapon;
+			PlayerActions.needToRebindAnimator = weapon.rebindAnimator;
+
 			weaponSocket.AddWeaponToHolder(weapon);
 		}
 

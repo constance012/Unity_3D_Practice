@@ -49,7 +49,7 @@ public class AnimRiggingController : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Invoke method for the on jumping event.
+	/// Callback method for the on jumping event of PlayerMovement script.
 	/// </summary>
 	/// <param name="isJumping"></param>
 	public void OnJumping(bool isJumping)
@@ -58,7 +58,7 @@ public class AnimRiggingController : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Invoke method for the on strafe switching event.
+	/// Callback method for the on strafe switching event of PlayerMovement script.
 	/// </summary>
 	/// <param name="useStrafe"></param>
 	public void OnStrafeSwitching(bool useStrafe)

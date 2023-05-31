@@ -46,6 +46,15 @@ public class Weapon : Item
 	public WieldType wieldType;
 	public UseType useType;
 
+	[Header("Holding and Aiming Orientation")]
+	[Space]
+	[Tooltip("The offset of the Multi-position Constraint component of the holding pose.")]
+	public Vector3 holderPositionOffset;
+	public Vector3 holderLocalEulerAngles;
+
+	[Tooltip("The offset of the Multi-position Constraint component of the aiming pose.")]
+	public Vector3 aimingPositionOffset;
+
 	[Header("Orientation in Hand")]
 	[Space]
 	public HandGripReferences rightHandGrip;
@@ -53,8 +62,9 @@ public class Weapon : Item
 	[Space]
 	public Vector3 inHandOffset;
 	public float inHandScale;
+	public bool rebindAnimator;
 	[Space]
-	public Vector3 particlesLocalPosisiton;
+	public Vector3 muzzleFlashLocalPosisiton;
 
 	[Header("Shared Properties")]
 	[Space]

@@ -415,6 +415,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1500466484521054459}
+  - component: {fileID: 206299548}
   m_Layer: 6
   m_Name: Holster Slot_Secondary
   m_TagString: Untagged
@@ -429,14 +430,65 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 652033804768130572}
-  m_LocalRotation: {x: 0.91879123, y: -0.3947439, z: 0.0000000034924594, w: -0.000000001862645}
-  m_LocalPosition: {x: 0.0002988428, y: 0.47566837, z: 0.42784545}
+  m_LocalRotation: {x: 0.5762, y: -0.4552014, z: -0.45004082, w: 0.50818163}
+  m_LocalPosition: {x: 0.2479, y: 0.9719, z: -0.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3318932804528902075}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 10.132, y: -94.57, z: -94.024}
+--- !u!114 &206299548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652033804768130572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8935e03361a14ec4b8edc872f76bc822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Weight: 1
+  m_Data:
+    m_ConstrainedObject: {fileID: 1500466484521054459}
+    m_SourceObjects:
+      m_Length: 1
+      m_Item0:
+        transform: {fileID: 1603866018418758857}
+        weight: 1
+      m_Item1:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item2:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item3:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item4:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item5:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item6:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item7:
+        transform: {fileID: 0}
+        weight: 0
+    m_ConstrainedPositionAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_ConstrainedRotationAxes:
+      x: 0
+      y: 1
+      z: 1
+    m_MaintainPositionOffset: 1
+    m_MaintainRotationOffset: 1
 --- !u!1 &683412105154408824
 GameObject:
   m_ObjectHideFlags: 0
@@ -1159,7 +1211,7 @@ MonoBehaviour:
   m_Effectors:
   - m_Transform: {fileID: 5357411674820621134}
     m_Style:
-      shape: {fileID: 4300000, guid: e050c2b16fe384bd994474655a4b4968, type: 2}
+      shape: {fileID: 4300000, guid: c6793350c150f456688e39a81f97364a, type: 2}
       color: {r: 1, g: 0, b: 0, a: 0.5}
       size: 0.1
       position: {x: 0, y: 0, z: 0}
@@ -11338,6 +11390,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5357411674820621134}
   - component: {fileID: 1087187134496957274}
+  - component: {fileID: 1464804128871152716}
   m_Layer: 6
   m_Name: Holding Pose
   m_TagString: Untagged
@@ -11359,7 +11412,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1633312840405496562}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -175, z: -15}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1087187134496957274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11374,7 +11427,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Weight: 1
   m_Data:
-    m_ConstrainedObject: {fileID: 6653795800426393368}
+    m_ConstrainedObject: {fileID: 5357411674820621134}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
@@ -11401,12 +11454,63 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: 0.23, y: -0.13, z: 0.165}
+    m_Offset: {x: 0, y: 0, z: 0}
     m_ConstrainedAxes:
       x: 1
       y: 1
       z: 1
     m_MaintainOffset: 0
+--- !u!114 &1464804128871152716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3513476612733869899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8935e03361a14ec4b8edc872f76bc822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Weight: 1
+  m_Data:
+    m_ConstrainedObject: {fileID: 6653795800426393368}
+    m_SourceObjects:
+      m_Length: 1
+      m_Item0:
+        transform: {fileID: 5357411674820621134}
+        weight: 1
+      m_Item1:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item2:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item3:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item4:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item5:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item6:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item7:
+        transform: {fileID: 0}
+        weight: 0
+    m_ConstrainedPositionAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_ConstrainedRotationAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_MaintainPositionOffset: 0
+    m_MaintainRotationOffset: 0
 --- !u!1 &3568786144644384472
 GameObject:
   m_ObjectHideFlags: 0
@@ -12077,7 +12181,7 @@ MonoBehaviour:
       size: 0.1
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0}
-    m_Visible: 1
+    m_Visible: 0
 --- !u!114 &110947987489721559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12091,7 +12195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneShape: 1
-  drawBones: 1
+  drawBones: 0
   drawTripods: 0
   boneSize: 1.5
   tripodSize: 1
@@ -12969,8 +13073,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6477030268172606375}
-  m_LocalRotation: {x: 0.13040201, y: -0.9905012, z: -0.005693489, w: 0.04324633}
-  m_LocalPosition: {x: 0.4072, y: 1.2728, z: 0.1534}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -12978,7 +13082,7 @@ Transform:
   - {fileID: 5904650297001315460}
   m_Father: {fileID: 5816744502260555761}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: -175, z: -15}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6316467088894147940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12992,6 +13096,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   droppedItemPrefab: {fileID: 4345611297494309214, guid: d76989a2ad0d91a40bc3830fb9a3fcb0, type: 3}
+  onWeaponPickup:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4939768874091208772}
+        m_TargetAssemblyTypeName: PlayerActions, Assembly-CSharp
+        m_MethodName: OnWeaponPickup
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onWeaponDrop:
     m_PersistentCalls:
       m_Calls:
@@ -13222,10 +13341,10 @@ MonoBehaviour:
     m_ConstrainedPositionAxes:
       x: 1
       y: 1
-      z: 0
+      z: 1
     m_ConstrainedRotationAxes:
-      x: 0
-      y: 0
+      x: 1
+      y: 1
       z: 0
     m_MaintainPositionOffset: 1
     m_MaintainRotationOffset: 1
@@ -13688,7 +13807,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10bdb03db33fb148b858a4a3b646cea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 0
+  m_Weight: 1
   m_Data:
     m_ConstrainedObject: {fileID: 8623039040349107826}
     m_SourceObjects:

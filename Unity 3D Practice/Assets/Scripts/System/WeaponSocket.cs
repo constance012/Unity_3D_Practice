@@ -1,9 +1,9 @@
-using UnityEngine;
-using CSTGames.CommonEnums;
-using TMPro;
 using System.Collections;
-using System.Runtime.InteropServices;
+using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Animations.Rigging;
+using TMPro;
+using CSTGames.CommonEnums;
 
 public class WeaponSocket : MonoBehaviour
 {
@@ -11,12 +11,16 @@ public class WeaponSocket : MonoBehaviour
 
 	[Header("Events")]
 	[Space]
+	public UnityEvent onWeaponPickup = new UnityEvent();
 	public UnityEvent onWeaponDrop = new UnityEvent();
 
 	private Animator reloadTextAnim;
 	private TextMeshProUGUI ammoText;
 
 	private Weapon inHandWeapon;
+
+	private MultiPositionConstraint holdingPose;
+	private MultiPositionConstraint aimingPose;
 
 	private Transform weaponParentPrimary;
 	private Transform weaponParentSecondary;
@@ -31,7 +35,6 @@ public class WeaponSocket : MonoBehaviour
 	private Transform leftElbowHint;
 
 	private ParticleSystem muzzleFlash;
-	private ParticleSystem hitEffect;
 
 	private float timeForNextUse;
 	private bool burstCompleted = true;
@@ -40,6 +43,9 @@ public class WeaponSocket : MonoBehaviour
 	{
 		reloadTextAnim = GameObject.FindWithTag("UICanvas").transform.Find("Gun UI/Reload Text").GetComponent<Animator>();
 		ammoText = GameObject.FindWithTag("UICanvas").transform.Find("Gun UI/Ammo Text").GetComponent<TextMeshProUGUI>();
+
+		holdingPose = transform.parent.Find("RigLayer_Weapon Holding IK/Holding Pose").GetComponent<MultiPositionConstraint>();
+		aimingPose = transform.parent.Find("RigLayer_Weapon Aiming IK/Aiming Pose").GetComponent<MultiPositionConstraint>();
 
 		weaponParentPrimary = transform.parent.Find("RigLayer_Weapon Slot Holder IK/Primary Weapon Holder");
 		weaponParentSecondary = transform.parent.Find("RigLayer_Weapon Slot Holder IK/Secondary Weapon Holder");
@@ -54,12 +60,11 @@ public class WeaponSocket : MonoBehaviour
 		leftElbowHint = transform.parent.Find("RigLayer_Hands IK/LeftHandIK/Left Elbow Hint");
 
 		muzzleFlash = weaponPivot.Find("Muzzle Flash").GetComponent<ParticleSystem>();
-		//hitEffect = transform.Find("Effects/Hit Effect").GetComponent<ParticleSystem>();
 	}
 
 	private void Start()
 	{
-		onWeaponDrop.AddListener(ClearGraphics);
+		onWeaponDrop.AddListener(ClearOrientation);
 
 		reloadTextAnim.GetComponent<TextMeshProUGUI>().text = $"Press {InputManager.instance.GetKeyForAction(KeybindingActions.Reload)} to reload.";
 
@@ -92,37 +97,28 @@ public class WeaponSocket : MonoBehaviour
 		prefab.transform.localPosition = weapon.inHandOffset;
 		prefab.transform.localRotation = Quaternion.identity;
 		prefab.transform.localScale = weapon.inHandScale * Vector3.one;
+
+		onWeaponPickup?.Invoke();
 	}
 
 	public void GrabWeapon(Weapon weapon)
 	{
 		inHandWeapon = weapon;
 
-		// Set the hands' grip references.
-		rightHandGrip.localPosition = inHandWeapon.rightHandGrip.localPosition;
-		rightHandGrip.localRotation = Quaternion.Euler(inHandWeapon.rightHandGrip.localEulerAngles);
-		rightElbowHint.localPosition = inHandWeapon.rightHandGrip.elbowLocalPosition;
-
-		leftHandGrip.localPosition = inHandWeapon.leftHandGrip.localPosition;
-		leftHandGrip.localRotation = Quaternion.Euler(inHandWeapon.leftHandGrip.localEulerAngles);
-		leftElbowHint.localPosition = inHandWeapon.leftHandGrip.elbowLocalPosition;
-
-		// Set the muzzle flash position.
-		muzzleFlash.transform.localPosition = inHandWeapon.particlesLocalPosisiton;
-		muzzleFlash.transform.rotation = Quaternion.LookRotation(weaponPivot.right, muzzleFlash.transform.up);
+		SetupOrientation();
 
 		if (inHandWeapon.weaponType == Weapon.WeaponType.Ranged)
 		{
 			RangedWeapon rangedWeapon = inHandWeapon as RangedWeapon;
 
-			ammoText.text = $"{rangedWeapon.currentMagazineAmmo} / {rangedWeapon.remainingAmmo}";
+			ammoText.text = $"{rangedWeapon.currentMagazineAmmo} / {rangedWeapon.reserveAmmo}";
 			ammoText.gameObject.SetActive(true);
 		}
 	}
 
-	public void HideWeapon()
+	public void UnequipWeapon()
 	{
-		ClearGraphics();
+		ClearOrientation();
 		inHandWeapon = null;
 		ammoText.gameObject.SetActive(false);
 	}
@@ -142,7 +138,7 @@ public class WeaponSocket : MonoBehaviour
 		Transform mainCamera = Camera.main.transform;
 
 		droppedItemPrefab.GetComponent<ItemPickup>().itemPrefab = inHandWeapon;
-		Vector3 dropPosition = transform.position + mainCamera.forward;
+		Vector3 dropPosition = transform.position;
 
 		GameObject droppedWeapon = Instantiate(droppedItemPrefab, dropPosition, Quaternion.identity);
 		droppedWeapon.GetComponent<Rigidbody>().AddForce(mainCamera.forward * 2f, ForceMode.Impulse);
@@ -190,36 +186,62 @@ public class WeaponSocket : MonoBehaviour
 		if (!PlayerActions.isAiming)
 			return;
 		
-		switch (weapon.useType)
-		{
-			case Weapon.UseType.Automatic:
-				if (InputManager.instance.GetKey(KeybindingActions.PrimaryAttack) && timeForNextUse <= 0f)
-				{
-					Shoot(weapon);
-					timeForNextUse = weapon.useSpeed;  // Interval before the next use.
-				}
-				break;
+		if (timeForNextUse <= 0f)
+			switch (weapon.useType)
+			{
+				case Weapon.UseType.Automatic:
+					if (InputManager.instance.GetKey(KeybindingActions.PrimaryAttack))
+					{
+						Shoot(weapon);
+						timeForNextUse = weapon.useSpeed;  // Interval before the next shot.
+					}
+					break;
 			
-			case Weapon.UseType.Burst:
-				if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack) && burstCompleted)
-					StartCoroutine(BurstFire(weapon));
-				break;
+				case Weapon.UseType.Burst:
+					if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack) && burstCompleted)
+						StartCoroutine(BurstFire(weapon));
+					break;
 			
-			case Weapon.UseType.Single:
-				if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack))
-					Shoot(weapon);
-				break;
-		}
+				case Weapon.UseType.Single:
+					if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack))
+					{
+						Shoot(weapon);
+						timeForNextUse = weapon.useSpeed;
+					}
+					break;
+			}
 	}
 
-	private void ClearGraphics()
+	private void SetupOrientation()
+	{
+		// Set the holding pose offset and rotation.
+		holdingPose.data.offset = inHandWeapon.holderPositionOffset;
+		holdingPose.transform.localRotation = Quaternion.Euler(inHandWeapon.holderLocalEulerAngles);
+
+		aimingPose.data.offset = inHandWeapon.aimingPositionOffset;
+
+		// Set the hands' grip references.
+		rightHandGrip.localPosition = inHandWeapon.rightHandGrip.localPosition;
+		rightHandGrip.localRotation = Quaternion.Euler(inHandWeapon.rightHandGrip.localEulerAngles);
+		rightElbowHint.localPosition = inHandWeapon.rightHandGrip.elbowLocalPosition;
+
+		leftHandGrip.localPosition = inHandWeapon.leftHandGrip.localPosition;
+		leftHandGrip.localRotation = Quaternion.Euler(inHandWeapon.leftHandGrip.localEulerAngles);
+		leftElbowHint.localPosition = inHandWeapon.leftHandGrip.elbowLocalPosition;
+
+		// Set the muzzle flash position.
+		muzzleFlash.transform.localPosition = inHandWeapon.muzzleFlashLocalPosisiton;
+		muzzleFlash.transform.rotation = Quaternion.LookRotation(weaponPivot.right, muzzleFlash.transform.up);
+	}
+
+	private void ClearOrientation()
 	{
 		rightHandGrip.localPosition = Vector3.zero;
-		rightHandGrip.eulerAngles = Vector3.zero;
+		rightHandGrip.localRotation = Quaternion.identity;
 		rightElbowHint.localPosition = Vector3.zero;
 
 		leftHandGrip.localPosition = Vector3.zero;
-		leftHandGrip.eulerAngles = Vector3.zero;
+		leftHandGrip.localRotation = Quaternion.identity;
 		leftElbowHint.localPosition = Vector3.zero;
 
 		muzzleFlash.transform.localPosition = Vector3.zero;
@@ -235,7 +257,7 @@ public class WeaponSocket : MonoBehaviour
 		{
 			muzzleFlash.Emit(1);
 
-			ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.remainingAmmo}";
+			ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
 		}
 	}
 
@@ -258,7 +280,7 @@ public class WeaponSocket : MonoBehaviour
 		weapon.promptReload = false;
 		weapon.isReloading = true;
 
-		if (weapon.remainingAmmo == 0)
+		if (weapon.reserveAmmo == 0)
 		{
 			weapon.isReloading = false;
 			yield break;
@@ -267,6 +289,6 @@ public class WeaponSocket : MonoBehaviour
 		yield return new WaitForSeconds(weapon.reloadTime);
 
 		weapon.Reload();
-		ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.remainingAmmo}";
+		ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
 	}
 }

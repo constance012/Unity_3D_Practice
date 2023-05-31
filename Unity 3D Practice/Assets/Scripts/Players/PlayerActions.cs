@@ -18,9 +18,10 @@ public class PlayerActions : MonoBehaviour
 	private Weapon currentWeapon;
 
 	// Animator's hashes.
-	private int holsterWeaponHash, isAimingHash;
+	private int holsterWeaponHash;
 
 	// Properties.
+	public static bool needToRebindAnimator { get; set; }
 	public static bool isAiming { get; private set; }
 	public static bool isUnequipingDone { get; set; }
 	public static Vector3 fpsCamAimingPos { get; } = new Vector3(0f, -0.09f, 0.065f);
@@ -42,14 +43,13 @@ public class PlayerActions : MonoBehaviour
 	private void Start()
 	{
 		holsterWeaponHash = Animator.StringToHash("HolsterWeapon");
-		isAimingHash = Animator.StringToHash("IsAiming");
 	}
 
 	private void Update()
 	{
 		SelectWeapon();
 
-		if (currentWeapon == null)
+		if (currentWeapon == null || !canSwitchWeapon)
 			return;
 
 		HandleAiming();
@@ -61,15 +61,14 @@ public class PlayerActions : MonoBehaviour
 		if (weapons.All(weapon => weapon == null))
 			return;
 
-		if (Input.GetKeyDown(KeyCode.Alpha1) && canSwitchWeapon)
+		if (canSwitchWeapon)
 		{
-			StartCoroutine(SwitchWeapon((int)Weapon.WeaponSlot.Primary));
-		}
+			if (Input.GetKeyDown(KeyCode.Alpha1))
+				StartCoroutine(SwitchWeapon((int)Weapon.WeaponSlot.Primary));
 
-		//if (Input.GetKeyDown(KeyCode.Alpha2))
-		//{
-		//	SwitchWeapon((int)Weapon.WeaponSlot.Secondary);
-		//}
+			if (Input.GetKeyDown(KeyCode.Alpha2))
+				StartCoroutine(SwitchWeapon((int)Weapon.WeaponSlot.Secondary));
+		}
 	}
 
 	private void HandleAiming()
@@ -87,7 +86,6 @@ public class PlayerActions : MonoBehaviour
 		// What to change when starts of stops aiming.
 		if (wasAiming != isAiming)
 		{
-			//rigAnimator.SetBool(isAimingHash, isAiming);
 			StopAllCoroutines();
 
 			// Start aiming.
@@ -119,7 +117,7 @@ public class PlayerActions : MonoBehaviour
 				RangedWeapon rangedWeapon = currentWeapon as RangedWeapon;
 
 				if (!unequip)
-					rigAnimator.Play("Ranged-Equip " + rangedWeapon.gunType);
+					rigAnimator.Play("Ranged-Equip " + rangedWeapon.itemName);
 				else 
 				{
 					rigAnimator.SetTrigger(holsterWeaponHash);
@@ -142,7 +140,7 @@ public class PlayerActions : MonoBehaviour
 			isUnequipingDone = false;
 
 			EquipWeapon(true);
-			weaponSocket.HideWeapon();
+			weaponSocket.UnequipWeapon();
 		}
 
 		yield return new WaitUntil(() => isUnequipingDone);
@@ -181,6 +179,34 @@ public class PlayerActions : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// Callback method for the <c>onWeaponPickup</c> event of the <c>WeaponSocket</c> script.
+	/// </summary>
+	public void OnWeaponPickup()
+	{
+		if (needToRebindAnimator)
+		{
+			// Switch back to the previous holding weapon after rebinding the animator.
+			if (currentWeapon != null)
+			{
+				int indexBeforeRebind = (int)currentWeapon.weaponSlot;
+				currentWeapon = null;
+
+				rigAnimator.Rebind();
+
+				SwitchWeapon(indexBeforeRebind);
+			}
+			// Otherwise, simply rebind.
+			else
+				rigAnimator.Rebind();
+
+			needToRebindAnimator = false;
+		}
+	}
+
+	/// <summary>
+	/// Callback method for the <c>onWeaponDrop</c> event of the <c>WeaponSocket</c> script.
+	/// </summary>
 	public void OnWeaponDrop()
 	{
 		isAiming = false;
