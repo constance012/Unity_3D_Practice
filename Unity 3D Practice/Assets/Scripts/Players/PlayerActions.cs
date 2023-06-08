@@ -50,7 +50,13 @@ public class PlayerActions : MonoBehaviour
 		SelectWeapon();
 
 		if (currentWeapon == null || !canSwitchWeapon)
+		{
+			// Stop aiming if was doing so.
+			if (isAiming)
+				HandleAiming();
+
 			return;
+		}
 
 		HandleAiming();
 	}
@@ -78,7 +84,7 @@ public class PlayerActions : MonoBehaviour
 		isAiming = false;
 
 		// Check aiming.
-		if (Input.GetKey(KeyCode.Mouse1))
+		if (Input.GetKey(KeyCode.Mouse1) && currentWeapon != null)
 		{
 			isAiming = true;
 		}

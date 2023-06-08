@@ -4,6 +4,7 @@ using UnityEngine.Events;
 using UnityEngine.Animations.Rigging;
 using TMPro;
 using CSTGames.CommonEnums;
+using Unity.VisualScripting;
 
 public class WeaponSocket : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class WeaponSocket : MonoBehaviour
 	private TextMeshProUGUI ammoText;
 
 	private Weapon inHandWeapon;
+	private WeaponRecoil recoil;
 
 	private MultiPositionConstraint holdingPose;
 	private MultiPositionConstraint aimingPose;
@@ -104,6 +106,7 @@ public class WeaponSocket : MonoBehaviour
 	public void GrabWeapon(Weapon weapon)
 	{
 		inHandWeapon = weapon;
+		GetWeaponRecoil(weapon.weaponSlot);
 
 		SetupOrientation();
 
@@ -119,7 +122,10 @@ public class WeaponSocket : MonoBehaviour
 	public void UnequipWeapon()
 	{
 		ClearOrientation();
+
 		inHandWeapon = null;
+		recoil = null;
+		
 		ammoText.gameObject.SetActive(false);
 	}
 
@@ -138,7 +144,8 @@ public class WeaponSocket : MonoBehaviour
 		Transform mainCamera = Camera.main.transform;
 
 		droppedItemPrefab.GetComponent<ItemPickup>().itemPrefab = inHandWeapon;
-		Vector3 dropPosition = transform.position;
+		Vector3 dropPosition = transform.position + mainCamera.forward;
+		Debug.Log("Drop position: " + dropPosition);
 
 		GameObject droppedWeapon = Instantiate(droppedItemPrefab, dropPosition, Quaternion.identity);
 		droppedWeapon.GetComponent<Rigidbody>().AddForce(mainCamera.forward * 2f, ForceMode.Impulse);
@@ -164,6 +171,28 @@ public class WeaponSocket : MonoBehaviour
 
 		// Clear the weapon in hands.
 		inHandWeapon = null;
+	}
+
+	private void GetWeaponRecoil(Weapon.WeaponSlot slot)
+	{
+		switch (slot)
+		{
+			case Weapon.WeaponSlot.Primary:
+				recoil = weaponParentPrimary.GetComponentInChildren<WeaponRecoil>();
+				break;
+
+			case Weapon.WeaponSlot.Secondary:
+				recoil = weaponParentSecondary.GetComponentInChildren<WeaponRecoil>();
+				break;
+
+			case Weapon.WeaponSlot.CloseRange:
+				break;
+			case Weapon.WeaponSlot.Throwable:
+				break;
+		}
+
+		if (recoil.rigAnimator == null)
+			recoil.rigAnimator = transform.parent.GetComponent<Animator>();
 	}
 
 	private void UseRangedWeapon()
@@ -256,6 +285,7 @@ public class WeaponSocket : MonoBehaviour
 		if (weapon.FireBullet(rayOrigin, rayDestination))
 		{
 			muzzleFlash.Emit(1);
+			recoil.GenerateRecoil();
 
 			ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
 		}

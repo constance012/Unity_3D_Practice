@@ -25,7 +25,10 @@ public class FpsCamLook : MonoBehaviour
 
 	private void OnEnable()
 	{
-		transform.rotation = Quaternion.Euler(CameraSwitcher.tpsCam.m_XAxis.Value * Vector3.up);
+		if (!CameraSwitcher.doneInitializing)
+			return;
+
+		player.rotation = Quaternion.Euler(CameraSwitcher.tpsCam.m_XAxis.Value * Vector3.up);
 
 		xRotation = player.eulerAngles.x;
 		yRotation = player.eulerAngles.y;

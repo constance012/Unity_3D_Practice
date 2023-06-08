@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using System.Linq;
 
 public static class CameraSwitcher
 {
-	static List<CinemachineVirtualCameraBase> cameras = new List<CinemachineVirtualCameraBase>();
+	private static List<CinemachineVirtualCameraBase> cameras = new List<CinemachineVirtualCameraBase>();
 
 	public static CinemachineVirtualCameraBase activeCam { get; private set; } = null;
 
@@ -16,6 +17,11 @@ public static class CameraSwitcher
 	public static CinemachineFreeLook tpsCam
 	{
 		get { return cameras.Find(camera => camera.CompareTag("ThirdPersonCam")) as CinemachineFreeLook; }
+	}
+
+	public static bool doneInitializing
+	{
+		get { return cameras != null && cameras.Any(); }
 	}
 
 	public static bool IsActive(CinemachineVirtualCameraBase cam) => cam == activeCam;
