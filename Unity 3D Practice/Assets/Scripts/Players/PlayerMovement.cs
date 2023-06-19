@@ -7,6 +7,10 @@ using UnityEditor;
 
 public class PlayerMovement : MonoBehaviour
 {
+	[Header("Debugging")]
+	[Space]
+	public AnimationCurve fallSpeedCurve = new AnimationCurve();
+	
 	[Header("References")]
 	[Space]
 	[SerializeField] protected CharacterController controller;
@@ -318,6 +322,8 @@ public class PlayerMovement : MonoBehaviour
 
 		// Calculate the free fall distance: s = v * t = g * t^2.
 		fallMomentum.y += (gravity * Time.deltaTime);
+		fallMomentum.y = Mathf.Max(fallMomentum.y, -20f);
+		fallSpeedCurve.AddKey(Time.realtimeSinceStartup, fallMomentum.y);
 
 		// Apply jump to the player.
 		controller.Move(fallMomentum * Time.deltaTime);

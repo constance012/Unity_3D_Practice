@@ -15,7 +15,7 @@ public class Item : ScriptableObject
 	[Header("ID")]
 	[Space]
 
-	public string id;
+	[ReadOnly] public string id;
 	[ContextMenu("Generate ID")]
 	private void GenerateID()
 	{
@@ -25,7 +25,7 @@ public class Item : ScriptableObject
 	[Header("Basic Info")]
 	[Space]
 	public ItemCategory category;
-	public int slotIndex = -1;
+	[ReadOnly] public int slotIndex = -1;
 
 	public string itemName;
 	[TextArea(5, 10)] public string description;

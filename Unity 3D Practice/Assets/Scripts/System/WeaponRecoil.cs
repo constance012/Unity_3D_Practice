@@ -1,6 +1,7 @@
 using UnityEngine;
 using Cinemachine;
 
+[RequireComponent(typeof(CinemachineImpulseSource))]
 public class WeaponRecoil : MonoBehaviour
 {
 	[Header("References")]
@@ -16,17 +17,17 @@ public class WeaponRecoil : MonoBehaviour
 	public float duration;
 
 	// Private fields.
-	private float timeToRecoil;
+	private float _timeToRecoil;
 	
-	private CinemachineFreeLook thirdPersonCam;
-	private CinemachineVirtualCamera firstPersonCam;
+	private CinemachineFreeLook _thirdPersonCam;
+	private CinemachineVirtualCamera _firstPersonCam;
 
 	private void Awake()
 	{
 		cameraShake = GetComponent<CinemachineImpulseSource>();
 
-		thirdPersonCam = CameraSwitcher.tpsCam;
-		firstPersonCam = CameraSwitcher.fpsCam;
+		_thirdPersonCam = CameraSwitcher.tpsCam;
+		_firstPersonCam = CameraSwitcher.fpsCam;
 	}
 
 	private void Update()
@@ -34,17 +35,18 @@ public class WeaponRecoil : MonoBehaviour
 		float horizontalRecoil = recoilForces.x * Mathf.Sin(Time.time * 4f) / 10f;
 		float verticalRecoil = recoilForces.y / 1000f;
 
-		if (timeToRecoil > 0f)
+		if (_timeToRecoil > 0f)
 		{
-			thirdPersonCam.m_YAxis.Value -= (verticalRecoil * Time.deltaTime) / duration;
-			thirdPersonCam.m_XAxis.Value += (horizontalRecoil * Time.deltaTime) / duration;
-			timeToRecoil -= Time.deltaTime;
+			_thirdPersonCam.m_YAxis.Value -= (verticalRecoil * Time.deltaTime) / duration;
+			_thirdPersonCam.m_XAxis.Value += (horizontalRecoil * Time.deltaTime) / duration;
+
+			_timeToRecoil -= Time.deltaTime;
 		}
 	}
 
 	public void GenerateRecoil()
 	{
-		timeToRecoil = duration;
+		_timeToRecoil = duration;
 
 		cameraShake.GenerateImpulse(Camera.main.transform.forward);
 

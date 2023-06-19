@@ -10,8 +10,8 @@ public class FpsCamLook : MonoBehaviour
 	[SerializeField] private Transform fpsCamPos;
 
 	public static float mouseSensitivity { get; set; } = 100f;
-	public static float mouseX { get; private set; }
-	public static float mouseY { get; private set; }
+	public static float mouseX { get; set; }
+	public static float mouseY { get; set; }
 
 	private float xRotation = 0f;
 	private float yRotation = 0f;
@@ -50,6 +50,7 @@ public class FpsCamLook : MonoBehaviour
 
 		mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
 		mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+		Debug.Log($"{mouseX}, {mouseY}");
 
 		// Gameobject rotates counter clockwise along an axis if that axis rotation value is possitive.
 		xRotation -= mouseY;

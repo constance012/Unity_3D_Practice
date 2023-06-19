@@ -1,6 +1,5 @@
 using UnityEngine;
 using CSTGames.CommonEnums;
-using TMPro.EditorUtilities;
 
 public class Interactable : MonoBehaviour
 {
