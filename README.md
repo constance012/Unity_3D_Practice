@@ -1,7 +1,7 @@
 # Unity_3D_Practice
 All the things I've learnt in Unity 3D go here. Stuff like animation, shader, material, lighting,...
 
-Credits for packages I used:
+Credits for assets and tools I used:
 + "Grass Flowers Pack Free" by ALP - https://assetstore.unity.com/packages/2d/textures-materials/nature/grass-flowers-pack-free-138810
 + "3D GUNS | Guns Pack" by Shanshel - https://assetstore.unity.com/packages/3d/props/weapons/3d-guns-guns-pack-228975
 + "Particle Pack" by Unity Technologies - https://assetstore.unity.com/packages/vfx/particles/particle-pack-127325
