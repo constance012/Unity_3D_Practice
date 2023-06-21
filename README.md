@@ -2,7 +2,8 @@
 All the things I've learnt in Unity 3D go here. Stuff like animation, shader, material, lighting,...
 
 Credits for packages I used:
-+ "Jammo Character" by Mix and Jam - https://assetstore.unity.com/packages/3d/characters/jammo-character-mix-and-jam-158456
 + "Grass Flowers Pack Free" by ALP - https://assetstore.unity.com/packages/2d/textures-materials/nature/grass-flowers-pack-free-138810
 + "3D GUNS | Guns Pack" by Shanshel - https://assetstore.unity.com/packages/3d/props/weapons/3d-guns-guns-pack-228975
 + "Particle Pack" by Unity Technologies - https://assetstore.unity.com/packages/vfx/particles/particle-pack-127325
++ "Grass Painter Tool" by MinionsArt - https://www.patreon.com/posts/54164790
++ "Yughues Free Fabric Materials" by Yughues - https://assetstore.unity.com/packages/2d/textures-materials/fabric/yughues-free-fabric-materials-13002
