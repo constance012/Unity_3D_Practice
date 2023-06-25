@@ -55,8 +55,9 @@ public sealed class RangedWeapon : Weapon
 	public float bulletSpeed = 1000f;
 	public float bulletDrop = 0f;
 	public float bulletMaxLifeTime = 3f;
+	public Vector2 bulletSpread;
 
-	private List<Bullet> bullets = new List<Bullet>();
+	private List<Bullet> _bullets = new List<Bullet>();
 
 	[Space]
 	public int reserveAmmo;
@@ -76,6 +77,17 @@ public sealed class RangedWeapon : Weapon
 	public float range;
 	public float impactForce;
 
+	// Shift the bits of decimal number "1" to the left 6 times. We'll collide with only the layer at index 6: Player.
+	// Combine that with the bitmask of other layers we want to collide with the OR | operator. So we'll collide with only those layers.
+	// Invert the mask with the ~ operator, we'll collide with everything except those layers.
+	public const int LAYER_TO_RAYCAST = ~(1 << 6 | 1 << 11 | Physics.IgnoreRaycastLayer);
+
+	public void ClearBullets()
+	{
+		_bullets.ForEach(bullet => Destroy(bullet.tracer.gameObject));
+		_bullets.Clear();
+	}
+
 	public override bool FireBullet(Vector3 rayOrigin, Vector3 rayDestination)
 	{		
 		if (currentMagazineAmmo == 0)
@@ -86,10 +98,17 @@ public sealed class RangedWeapon : Weapon
 
 		if (isReloading)
 			return false;
+		
+		// Calculate the direction and apply the spread.
+		Vector3 initialDirection = (rayDestination - rayOrigin).normalized;
 
-		Vector3 velocity = (rayDestination - rayOrigin).normalized * bulletSpeed;
+		float spreadX = Random.Range(-bulletSpread.x, bulletSpread.x);
+		float spreadY = Random.Range(-bulletSpread.y, bulletSpread.y);
+
+		Vector3 velocity = (initialDirection + new Vector3(spreadX, spreadY, 0f)) * bulletSpeed;
+
 		Bullet bullet = new Bullet(rayOrigin, velocity, bulletTracer);
-		bullets.Add(bullet);
+		_bullets.Add(bullet);
 
 		currentMagazineAmmo--;
 
@@ -98,16 +117,23 @@ public sealed class RangedWeapon : Weapon
 
 	public void UpdateBullets(float deltaTime)
 	{
-		bullets.ForEach(bullet =>
+		foreach (Bullet bullet in _bullets)
 		{
+			if (bullet.aliveTime >= bulletMaxLifeTime)
+			{
+				Destroy(bullet.tracer.gameObject);
+				bullet.readyToBeDestroyed = true;
+				continue;
+			}
+
 			Vector3 posBefore = GetBulletPosition(bullet);
 			bullet.aliveTime += deltaTime;
 			Vector3 posAfter = GetBulletPosition(bullet);
 
 			RaycastAtDeltaPosition(posBefore, posAfter, bullet);
-		});
+		}
 
-		bullets.RemoveAll(bullet => bullet.aliveTime >= bulletMaxLifeTime);
+		_bullets.RemoveAll(bullet => bullet.readyToBeDestroyed);
 	}
 
 	public void Reload()
@@ -153,12 +179,7 @@ public sealed class RangedWeapon : Weapon
 
 		Ray ray = new Ray(start, rayDirection);
 
-		// Shift the bits of decimal number "1" to the left 6 times. We'll collide with only the layer at index 6: Player.
-		// Combine that with the bitmask of the "IgnoreRaycast" layer with the OR | operator. So we'll collide with only those 2 layers.
-		// Invert the mask with the ~ operator, we'll collide with everything except those 2 layers.
-		int layerMask = ~(1 << 6 | Physics.IgnoreRaycastLayer);
-
-		if (Physics.Raycast(ray, out hitInfo, distance, layerMask))
+		if (Physics.Raycast(ray, out hitInfo, distance, LAYER_TO_RAYCAST))
 		{
 			Debug.Log($"Hit {hitInfo.transform.name}");
 

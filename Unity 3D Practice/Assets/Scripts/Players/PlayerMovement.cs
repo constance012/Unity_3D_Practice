@@ -2,10 +2,8 @@ using CSTGames.CommonEnums;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Animations.Rigging;
-using UnityEditor;
 
-public class PlayerMovement : MonoBehaviour
+public abstract class PlayerMovement : MonoBehaviour
 {
 	[Header("Debugging")]
 	[Space]
@@ -14,48 +12,59 @@ public class PlayerMovement : MonoBehaviour
 	[Header("References")]
 	[Space]
 	[SerializeField] protected CharacterController controller;
+	[SerializeField] protected Animator animator;
 	[SerializeField] protected Transform groundCheck;
-	[SerializeField] protected LayerMask groundMask;
+	[SerializeField] protected LayerMask whatIsGround;
 
 	[Space]
 	[Header("Movement")]
 	[Space]
-	public const float maxWalkingSpeed = 1.5f;
-	public const float maxRunningSpeed = 7f;
+	public const float MAX_WALKING_SPEED = 1.5f;
+	public const float MAX_RUNNING_SPEED = 7f;
 
-	public float acceleration;
-	public float deceleration;
+	[Min(0f)] public float acceleration;
+	[Min(0f)] public float deceleration;
+	[Min(0f), Tooltip("How quick would we slow down before performing an 180 turn?")] public float turn180Deceleration;
 
 	[Space]
 	[Header("Jump, Gravity")]
 	[Space]
 	public float jumpHeight = 3f;
-	public float gravity = -9.8f;
+	public float gravity = 9.8f;
 	public float footRadius = 0.4f;
+
+	[Header("Pushing Power")]
+	[Space]
+	public float pushPower;
 
 	[Space]
 	[Header("Events")]
-	public UnityEvent<bool> onJumpingEvent = new UnityEvent<bool>();
+	public UnityEvent onJumpingEvent = new UnityEvent();
 	public UnityEvent<bool> onStrafeSwitchingEvent = new UnityEvent<bool>();
 
 	// Static fields.
 	public static float linearVelocity { get; protected set; }
 	public static float velocityX { get; protected set; }
 	public static float velocityZ { get; protected set; }
-	public static bool useStrafeMovement { get; protected set; }
-	public static bool isRunning { get; protected set; }
 	public static bool canJumpAgain { get; set; } = true;
 
 	// Protected fields.
-	protected bool isGrounded;
+	protected bool isJumping;
 	protected float moveInputX, moveInputZ;
 	protected Vector3 fallMomentum;
 	protected Vector3 currentDir;
 	protected Vector3 previousDir;
+	protected bool isRunning;
+
+	// Private fields.
+	private bool _useStrafeMovement;
+	private bool _isGrounded;
+	private bool _turned180;
 
 	protected virtual void Awake()
 	{
 		controller = GetComponent<CharacterController>();
+		animator = GetComponent<Animator>();
 		groundCheck = transform.Find("Ground Check");
 	}
 
@@ -63,9 +72,34 @@ public class PlayerMovement : MonoBehaviour
 	{
 		Cursor.lockState = Input.GetKey(KeyCode.LeftAlt) ? CursorLockMode.None : CursorLockMode.Locked;
 
-		isGrounded = Physics.CheckSphere(groundCheck.position, footRadius, groundMask);
+		_isGrounded = Physics.CheckSphere(groundCheck.position, footRadius, whatIsGround);
 
 		HandleVerticalMovement();
+	}
+
+	protected void LateUpdate()
+	{
+		controller.Move(fallMomentum * Time.deltaTime);
+	}
+
+	private void OnControllerColliderHit(ControllerColliderHit hit)
+	{
+		Rigidbody body = hit.collider.attachedRigidbody;
+
+		// no rigidbody
+		if (body == null || body.isKinematic)
+			return;
+
+		// We dont want to push objects below us
+		if (hit.moveDirection.y < -0.3f)
+			return;
+
+		// Calculate push direction from move direction,
+		// we only push objects to the sides never up and down
+		Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+
+		// Apply the push
+		body.velocity = pushDir * pushPower;
 	}
 
 	/// <summary>
@@ -80,8 +114,10 @@ public class PlayerMovement : MonoBehaviour
 
 		if (moveVector.magnitude == 0f)
 		{
+			float decelerateValue = _turned180 ? turn180Deceleration : deceleration;
+
 			if (linearVelocity > 0f)
-				linearVelocity -= deceleration * Time.deltaTime;
+				linearVelocity -= decelerateValue * Time.deltaTime;
 
 			if (linearVelocity < 0f)
 				linearVelocity = 0f;
@@ -260,18 +296,13 @@ public class PlayerMovement : MonoBehaviour
 
 	protected void HandleLinearHorizontalMovement()
 	{
-		if (useStrafeMovement)
+		if (_useStrafeMovement)
 		{
-			useStrafeMovement = false;
-			onStrafeSwitchingEvent?.Invoke(useStrafeMovement);
+			_useStrafeMovement = false;
+			onStrafeSwitchingEvent?.Invoke(_useStrafeMovement);
 		}
 
-		moveInputX = InputManager.instance.GetAxisRaw("Horizontal");
-		moveInputZ = InputManager.instance.GetAxisRaw("Vertical");
-		Vector3 moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
-		isRunning = InputManager.instance.GetKey(KeybindingActions.Run);
-
-		float currentMaxVelocity = isRunning ? maxRunningSpeed : maxWalkingSpeed;
+		GetInputSignals(out Vector3 moveVector, out float currentMaxVelocity);
 
 		// Calculate the linear speed.
 		ChangeVelocity(moveVector, currentMaxVelocity);
@@ -280,18 +311,13 @@ public class PlayerMovement : MonoBehaviour
 
 	protected void HandleStrafeHorizontalMovement()
 	{
-		if (!useStrafeMovement)
+		if (!_useStrafeMovement)
 		{
-			useStrafeMovement = true;
-			onStrafeSwitchingEvent?.Invoke(useStrafeMovement);
+			_useStrafeMovement = true;
+			onStrafeSwitchingEvent?.Invoke(_useStrafeMovement);
 		}
 
-		moveInputX = InputManager.instance.GetAxisRaw("Horizontal");
-		moveInputZ = InputManager.instance.GetAxisRaw("Vertical");
-		Vector3 moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
-		isRunning = InputManager.instance.GetKey(KeybindingActions.Run);
-
-		float currentMaxVelocity = isRunning ? maxRunningSpeed : maxWalkingSpeed;
+		GetInputSignals(out Vector3 moveVector, out float currentMaxVelocity);
 
 		// Calculate the linear speed.
 		ChangeVelocity(moveVector, currentMaxVelocity);
@@ -303,39 +329,55 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleVerticalMovement()
-	{
-		// Force the player to stand on the ground, just for better tho.
-		if (isGrounded && fallMomentum.y < 0)
+	{	
+		if (_isGrounded)
 		{
-			fallMomentum.y = -2f;
-
-			StopCoroutine(Jump());
-			onJumpingEvent?.Invoke(false);
+			fallMomentum.y = -controller.stepOffset;
+			isJumping = false;
 		}
 
-		// Calculate the jump velocity: v = sqrt(h * (-2) * g).
-		if (InputManager.instance.GetKeyDown(KeybindingActions.Jump) && isGrounded && canJumpAgain)
+		if (!_isGrounded)
 		{
-			onJumpingEvent?.Invoke(true);
-			StartCoroutine(Jump());
+			// Calculate the free fall distance: s = v * t = g * t^2.
+			fallMomentum.y -= (gravity * Time.deltaTime);
+			fallMomentum.y = Mathf.Max(fallMomentum.y, -20f);
 		}
 
-		// Calculate the free fall distance: s = v * t = g * t^2.
-		fallMomentum.y += (gravity * Time.deltaTime);
-		fallMomentum.y = Mathf.Max(fallMomentum.y, -20f);
+		if (InputManager.instance.GetKeyDown(KeybindingActions.Jump) && canJumpAgain)
+		{
+			Jump();
+			onJumpingEvent?.Invoke();
+		}
+
 		fallSpeedCurve.AddKey(Time.realtimeSinceStartup, fallMomentum.y);
 
-		// Apply jump to the player.
 		controller.Move(fallMomentum * Time.deltaTime);
 	}
 
-	private IEnumerator Jump()
+	private void Jump()
 	{
-		canJumpAgain = false;
+		animator.SetBool("IsJumping", true);
+		isJumping = true;
 
-		if (linearVelocity < .05f)
-			yield return new WaitForSeconds(.75f);
+		// Calculate the jump velocity: v = sqrt(2 * h * g).
+		fallMomentum.y = Mathf.Sqrt(jumpHeight * 2f * gravity);
+		controller.Move(fallMomentum * Time.deltaTime);
+	}
 
-		fallMomentum.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+	private void GetInputSignals(out Vector3 moveVector, out float currentMaxVelocity)
+	{
+		moveInputX = InputManager.instance.GetAxisRaw("Horizontal");
+		moveInputZ = InputManager.instance.GetAxisRaw("Vertical");
+
+		moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
+		isRunning = InputManager.instance.GetKey(KeybindingActions.Run);
+
+		currentMaxVelocity = isRunning ? MAX_RUNNING_SPEED : MAX_WALKING_SPEED;
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.white;
+		Gizmos.DrawWireSphere(groundCheck.position, footRadius);
 	}
 }

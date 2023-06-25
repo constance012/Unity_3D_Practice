@@ -50,11 +50,14 @@ public class FpsCamLook : MonoBehaviour
 
 		mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
 		mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-		Debug.Log($"{mouseX}, {mouseY}");
 
 		// Gameobject rotates counter clockwise along an axis if that axis rotation value is possitive.
 		xRotation -= mouseY;
-		xRotation = Mathf.Clamp(xRotation, -70f, 70f);  // Limit the angle of rotation.
+
+		if (PlayerActions.isAiming)
+			xRotation = Mathf.Clamp(xRotation, -40f, 40f);  // Limit the angle of rotation.
+		else
+			xRotation = Mathf.Clamp(xRotation, -70f, 70f);  // Limit the angle of rotation.
 
 		yRotation += mouseX;
 		

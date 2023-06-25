@@ -4,7 +4,8 @@ using UnityEngine.Events;
 using UnityEngine.Animations.Rigging;
 using TMPro;
 using CSTGames.CommonEnums;
-using Unity.VisualScripting;
+using static Weapon;
+using System;
 
 public class WeaponSocket : MonoBehaviour
 {
@@ -38,8 +39,8 @@ public class WeaponSocket : MonoBehaviour
 
 	private ParticleSystem muzzleFlash;
 
-	private float timeForNextUse;
-	private bool burstCompleted = true;
+	private float _timeForNextUse;
+	private bool _burstCompleted = true;
 
 	private void Awake()
 	{
@@ -64,6 +65,14 @@ public class WeaponSocket : MonoBehaviour
 		muzzleFlash = weaponPivot.Find("Muzzle Flash").GetComponent<ParticleSystem>();
 	}
 
+	private void OnDisable()
+	{
+		if (inHandWeapon?.weaponType == WeaponType.Ranged)
+			(inHandWeapon as RangedWeapon).ClearBullets();
+
+		inHandWeapon = null;
+	}
+
 	private void Start()
 	{
 		onWeaponDrop.AddListener(ClearOrientation);
@@ -82,22 +91,22 @@ public class WeaponSocket : MonoBehaviour
 		if (inHandWeapon == null)
 			return;
 		
-		if (inHandWeapon.weaponType == Weapon.WeaponType.Ranged)
+		if (inHandWeapon.weaponType == WeaponType.Ranged)
 			UseRangedWeapon();
 	}
 
+	#region Weapons Management
 	public void AddWeaponToHolder(Weapon weapon)
 	{
 		GameObject prefab = Instantiate(weapon.prefab);
 		prefab.name = weapon.itemName;
 
-		if (weapon.weaponSlot == Weapon.WeaponSlot.Primary)
+		if (weapon.weaponSlot == WeaponSlot.Primary)
 			prefab.transform.parent = weaponParentPrimary;
 		else
 			prefab.transform.parent = weaponParentSecondary;
 
-		prefab.transform.localPosition = weapon.inHandOffset;
-		prefab.transform.localRotation = Quaternion.identity;
+		prefab.transform.SetLocalPositionAndRotation(weapon.inHandOffset, Quaternion.identity);
 		prefab.transform.localScale = weapon.inHandScale * Vector3.one;
 
 		onWeaponPickup?.Invoke();
@@ -110,7 +119,7 @@ public class WeaponSocket : MonoBehaviour
 
 		SetupOrientation();
 
-		if (inHandWeapon.weaponType == Weapon.WeaponType.Ranged)
+		if (inHandWeapon.weaponType == WeaponType.Ranged)
 		{
 			RangedWeapon rangedWeapon = inHandWeapon as RangedWeapon;
 
@@ -157,11 +166,11 @@ public class WeaponSocket : MonoBehaviour
 		// Destroy the weapon game object in the corresponding parent.
 		switch (inHandWeapon.weaponSlot)
 		{
-			case Weapon.WeaponSlot.Primary:
+			case WeaponSlot.Primary:
 				Destroy(weaponParentPrimary.transform.Find(inHandWeapon.itemName).gameObject);
 				break;
 
-			case Weapon.WeaponSlot.Secondary:
+			case WeaponSlot.Secondary:
 				Destroy(weaponParentSecondary.transform.Find(inHandWeapon.itemName).gameObject);
 				break;
 		}
@@ -173,31 +182,92 @@ public class WeaponSocket : MonoBehaviour
 		inHandWeapon = null;
 	}
 
-	private void GetWeaponRecoil(Weapon.WeaponSlot slot)
+	private void GetWeaponRecoil(WeaponSlot slot)
 	{
 		switch (slot)
 		{
-			case Weapon.WeaponSlot.Primary:
+			case WeaponSlot.Primary:
 				recoil = weaponParentPrimary.GetComponentInChildren<WeaponRecoil>();
 				break;
 
-			case Weapon.WeaponSlot.Secondary:
+			case WeaponSlot.Secondary:
 				recoil = weaponParentSecondary.GetComponentInChildren<WeaponRecoil>();
 				break;
 
-			case Weapon.WeaponSlot.CloseRange:
+			case WeaponSlot.CloseRange:
 				break;
-			case Weapon.WeaponSlot.Throwable:
+			case WeaponSlot.Throwable:
 				break;
 		}
 
 		if (recoil.rigAnimator == null)
 			recoil.rigAnimator = transform.parent.GetComponent<Animator>();
 	}
+	#endregion
 
+	#region Weapon Orientation in Hands
+	public void ResetWeaponOffset(WeaponSlot slot)
+	{
+		if (inHandWeapon == null)
+			return;
+
+		string weaponName = inHandWeapon.itemName;
+		Debug.Log($"Reset the offset of {weaponName} to default.");
+
+		switch (slot)
+		{
+			case WeaponSlot.Primary:
+				weaponParentPrimary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHandOffset, Quaternion.identity);
+				break;
+
+			case WeaponSlot.Secondary:
+				weaponParentSecondary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHandOffset, Quaternion.identity);
+				break;
+		}
+	}
+
+	private void SetupOrientation()
+	{
+		// Set the holding pose offset and rotation.
+		holdingPose.data.offset = inHandWeapon.holderPositionOffset;
+		holdingPose.transform.localRotation = Quaternion.Euler(inHandWeapon.holderLocalEulerAngles);
+
+		aimingPose.data.offset = inHandWeapon.aimingPositionOffset;
+
+		// Set the right hand's orientation.
+		rightHandGrip.SetLocalPositionAndRotation(inHandWeapon.rightHandGrip.localPosition,
+							Quaternion.Euler(inHandWeapon.rightHandGrip.localEulerAngles));
+
+		rightElbowHint.localPosition = inHandWeapon.rightHandGrip.elbowLocalPosition;
+
+		// Set the left hand's orientation.
+		leftHandGrip.SetLocalPositionAndRotation(inHandWeapon.leftHandGrip.localPosition,
+							Quaternion.Euler(inHandWeapon.leftHandGrip.localEulerAngles));
+
+		leftElbowHint.localPosition = inHandWeapon.leftHandGrip.elbowLocalPosition;
+
+		// Set the muzzle flash position.
+		muzzleFlash.transform.localPosition = inHandWeapon.muzzleFlashLocalPosisiton;
+		muzzleFlash.transform.rotation = Quaternion.LookRotation(weaponPivot.right, muzzleFlash.transform.up);
+	}
+
+	private void ClearOrientation()
+	{
+		rightHandGrip.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		rightElbowHint.localPosition = Vector3.zero;
+
+		leftHandGrip.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		leftElbowHint.localPosition = Vector3.zero;
+
+		muzzleFlash.transform.localPosition = Vector3.zero;
+		muzzleFlash.transform.rotation = Quaternion.identity;
+	}
+	#endregion
+
+	#region Weapon's using method.
 	private void UseRangedWeapon()
 	{
-		timeForNextUse -= Time.deltaTime;
+		_timeForNextUse -= Time.deltaTime;
 
 		RangedWeapon weapon = inHandWeapon as RangedWeapon;
 
@@ -214,67 +284,37 @@ public class WeaponSocket : MonoBehaviour
 		// Use the weapon in hand only if the player is aiming.
 		if (!PlayerActions.isAiming)
 			return;
-		
-		if (timeForNextUse <= 0f)
+
+		if (_timeForNextUse <= 0f)
+		{
 			switch (weapon.useType)
 			{
-				case Weapon.UseType.Automatic:
+				case UseType.Automatic:
 					if (InputManager.instance.GetKey(KeybindingActions.PrimaryAttack))
 					{
 						Shoot(weapon);
-						timeForNextUse = weapon.useSpeed;  // Interval before the next shot.
+						_timeForNextUse = weapon.useSpeed;
 					}
 					break;
-			
-				case Weapon.UseType.Burst:
-					if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack) && burstCompleted)
+
+				case UseType.Burst:
+					if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack) && _burstCompleted)
+					{
 						StartCoroutine(BurstFire(weapon));
+						_timeForNextUse = weapon.useSpeed;
+					}
 					break;
-			
-				case Weapon.UseType.Single:
+
+				case UseType.Single:
 					if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack))
 					{
 						Shoot(weapon);
-						timeForNextUse = weapon.useSpeed;
+						_timeForNextUse = weapon.useSpeed;
 					}
 					break;
 			}
-	}
-
-	private void SetupOrientation()
-	{
-		// Set the holding pose offset and rotation.
-		holdingPose.data.offset = inHandWeapon.holderPositionOffset;
-		holdingPose.transform.localRotation = Quaternion.Euler(inHandWeapon.holderLocalEulerAngles);
-
-		aimingPose.data.offset = inHandWeapon.aimingPositionOffset;
-
-		// Set the hands' grip references.
-		rightHandGrip.localPosition = inHandWeapon.rightHandGrip.localPosition;
-		rightHandGrip.localRotation = Quaternion.Euler(inHandWeapon.rightHandGrip.localEulerAngles);
-		rightElbowHint.localPosition = inHandWeapon.rightHandGrip.elbowLocalPosition;
-
-		leftHandGrip.localPosition = inHandWeapon.leftHandGrip.localPosition;
-		leftHandGrip.localRotation = Quaternion.Euler(inHandWeapon.leftHandGrip.localEulerAngles);
-		leftElbowHint.localPosition = inHandWeapon.leftHandGrip.elbowLocalPosition;
-
-		// Set the muzzle flash position.
-		muzzleFlash.transform.localPosition = inHandWeapon.muzzleFlashLocalPosisiton;
-		muzzleFlash.transform.rotation = Quaternion.LookRotation(weaponPivot.right, muzzleFlash.transform.up);
-	}
-
-	private void ClearOrientation()
-	{
-		rightHandGrip.localPosition = Vector3.zero;
-		rightHandGrip.localRotation = Quaternion.identity;
-		rightElbowHint.localPosition = Vector3.zero;
-
-		leftHandGrip.localPosition = Vector3.zero;
-		leftHandGrip.localRotation = Quaternion.identity;
-		leftElbowHint.localPosition = Vector3.zero;
-
-		muzzleFlash.transform.localPosition = Vector3.zero;
-		muzzleFlash.transform.rotation = Quaternion.identity;
+			
+		}
 	}
 
 	private void Shoot(RangedWeapon weapon)
@@ -293,7 +333,7 @@ public class WeaponSocket : MonoBehaviour
 
 	private IEnumerator BurstFire(RangedWeapon weapon)
 	{
-		burstCompleted = false;
+		_burstCompleted = false;
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -302,7 +342,7 @@ public class WeaponSocket : MonoBehaviour
 			Shoot(weapon);
 		}
 
-		burstCompleted = true;
+		_burstCompleted = true;
 	}
 
 	private IEnumerator Reload(RangedWeapon weapon)
@@ -321,4 +361,5 @@ public class WeaponSocket : MonoBehaviour
 		weapon.Reload();
 		ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
 	}
+	#endregion
 }

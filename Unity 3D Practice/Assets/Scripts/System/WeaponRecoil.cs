@@ -32,7 +32,7 @@ public class WeaponRecoil : MonoBehaviour
 
 	private void Update()
 	{
-		float horizontalRecoil = recoilForces.x * Mathf.Sin(Time.time * 4f) / 10f;
+		float horizontalRecoil = Random.Range(-recoilForces.x, recoilForces.x);
 		float verticalRecoil = recoilForces.y / 1000f;
 
 		if (_timeToRecoil > 0f)

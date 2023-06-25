@@ -12,6 +12,7 @@ TagManager:
   - PlayerHead
   - WeaponSocket
   - TPSAimingCam
+  - WorldCanvas
   layers:
   - Default
   - TransparentFX
@@ -21,10 +22,10 @@ TagManager:
   - UI
   - Player
   - Environment
-  - Enemies
-  - 
-  - 
-  - 
+  - Enemy
+  - Cloth
+  - Interactable
+  - Quick Pulling Orb
   - 
   - 
   - 

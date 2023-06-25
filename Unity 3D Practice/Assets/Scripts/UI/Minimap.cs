@@ -11,14 +11,14 @@ public class Minimap : MonoBehaviour
 	[SerializeField] private Transform lookingArrow;
 	[SerializeField] private TextMeshProUGUI coordinateText;
 
-	[SerializeField] private CinemachineFreeLook tpsCam;
+	private CinemachineFreeLook tpsCam;
 
 	private void Awake()
 	{
 		minimapCam = GameObject.FindWithTag("MinimapCam").GetComponent<Camera>();
 		player = GameObject.FindWithTag("Player").transform;
-		lookingArrow = transform.Find("Looking Arrow");
-		coordinateText = transform.Find("Coordinate").GetComponent<TextMeshProUGUI>();
+		lookingArrow = transform.Find("Player Icon");
+		coordinateText = transform.Find("Coordinate Text").GetComponent<TextMeshProUGUI>();
 		tpsCam = GameObject.FindWithTag("ThirdPersonCam").GetComponent<CinemachineFreeLook>();
 	}
 
@@ -29,9 +29,9 @@ public class Minimap : MonoBehaviour
 		coordinateText.text = $"{Mathf.Round(playerPos.x)}, {Mathf.Round(playerPos.y)}, {Mathf.Round(playerPos.z)}";
 
 		if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
-			lookingArrow.eulerAngles = new Vector3(0f, 0f, -tpsCam.m_XAxis.Value + 180f);
+			lookingArrow.rotation = Quaternion.Euler(new Vector3(0f, 0f, -tpsCam.m_XAxis.Value));
 		else
-			lookingArrow.eulerAngles = new Vector3(0f, 0f, -player.eulerAngles.y + 180f);
+			lookingArrow.rotation = Quaternion.Euler(new Vector3(0f, 0f, -player.eulerAngles.y));
 
 		playerPos.y = minimapCam.transform.position.y;
 		

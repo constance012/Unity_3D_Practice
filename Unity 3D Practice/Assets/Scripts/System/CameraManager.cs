@@ -29,8 +29,8 @@ public class CameraManager : MonoBehaviour
 			instance = this;
 		else
 		{
-			Debug.LogWarning("More than 1 instance of Camera Manger found!!!");
-			instance = null;
+			Debug.LogWarning("More than 1 instance of Camera Manger found!! Destroy the newest one.");
+			Destroy(gameObject);
 			return;
 		}
 
@@ -75,6 +75,14 @@ public class CameraManager : MonoBehaviour
 
 		if (InputManager.instance.GetKeyDown(KeybindingActions.SwitchCamera))
 			SwitchCamera();
+	}
+
+	public void ToggleMovementScript(CinemachineVirtualCameraBase activeCam, bool state)
+	{
+		if (activeCam == CameraSwitcher.tpsCam)
+			move3rdScript.enabled = state;
+		else
+			move1stScript.enabled = state;
 	}
 
 	private void SetAimingProperties(bool isAiming)

@@ -58,6 +58,7 @@ MonoBehaviour:
   bulletSpeed: 800
   bulletDrop: 200
   bulletMaxLifeTime: 3
+  bulletSpread: {x: 0.02, y: 0.02}
   reserveAmmo: 150
   <MagazineCapacity>k__BackingField: 30
   currentMagazineAmmo: 30

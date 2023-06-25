@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using CSTGames.CommonEnums;
+using static Weapon;
 
 public class PlayerActions : MonoBehaviour
 {
@@ -70,10 +71,10 @@ public class PlayerActions : MonoBehaviour
 		if (canSwitchWeapon)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
-				StartCoroutine(SwitchWeapon((int)Weapon.WeaponSlot.Primary));
+				StartCoroutine(SwitchWeapon((int)WeaponSlot.Primary));
 
 			if (Input.GetKeyDown(KeyCode.Alpha2))
-				StartCoroutine(SwitchWeapon((int)Weapon.WeaponSlot.Secondary));
+				StartCoroutine(SwitchWeapon((int)WeaponSlot.Secondary));
 		}
 	}
 
@@ -100,7 +101,7 @@ public class PlayerActions : MonoBehaviour
 				crosshair.SetActive(true);
 
 				fpsCamPos.localPosition = fpsCamAimingPos;
-				StartCoroutine(AnimRiggingController.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Increase, 1f, .5f));
+				StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Increase, 1f, .5f));
 			}
 			
 			// Stop aiming.
@@ -108,9 +109,8 @@ public class PlayerActions : MonoBehaviour
 			{
 				crosshair.SetActive(false);
 
-				fpsCamPos.localPosition = fpsCamOriginalPos;
-				fpsCamPos.localRotation = Quaternion.identity;
-				StartCoroutine(AnimRiggingController.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, .5f));
+				fpsCamPos.SetLocalPositionAndRotation(fpsCamOriginalPos, Quaternion.identity);
+				StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, .5f));
 			}
 		}
 	}
@@ -119,7 +119,7 @@ public class PlayerActions : MonoBehaviour
 	{
 		switch (currentWeapon.weaponType)
 		{
-			case Weapon.WeaponType.Ranged:
+			case WeaponType.Ranged:
 				RangedWeapon rangedWeapon = currentWeapon as RangedWeapon;
 
 				if (!unequip)
@@ -130,7 +130,7 @@ public class PlayerActions : MonoBehaviour
 				}
 				break;
 
-			case Weapon.WeaponType.Melee:
+			case WeaponType.Melee:
 				break;
 		}
 	}
@@ -152,7 +152,7 @@ public class PlayerActions : MonoBehaviour
 		yield return new WaitUntil(() => isUnequipingDone);
 
 		// If the new weapon is the same as the current one, switch to unarmed state.
-		if (currentWeapon == weapons[newWeaponIndex])
+		if (currentWeapon == weapons[newWeaponIndex] || weapons[newWeaponIndex] == null)
 		{
 			rigAnimator.Play("Unarmed");
 			currentWeapon = null;
@@ -161,6 +161,7 @@ public class PlayerActions : MonoBehaviour
 		else
 		{
 			currentWeapon = weapons[newWeaponIndex];
+
 			weaponSocket.GrabWeapon(currentWeapon);
 
 			EquipWeapon();
@@ -188,9 +189,9 @@ public class PlayerActions : MonoBehaviour
 	/// <summary>
 	/// Callback method for the <c>onWeaponPickup</c> event of the <c>WeaponSocket</c> script.
 	/// </summary>
-	public void OnWeaponPickup()
+	public void OnWeaponPickup(bool forcedRebind = false)
 	{
-		if (needToRebindAnimator)
+		if (needToRebindAnimator || forcedRebind)
 		{
 			// Switch back to the previous holding weapon after rebinding the animator.
 			if (currentWeapon != null)
@@ -200,7 +201,7 @@ public class PlayerActions : MonoBehaviour
 
 				rigAnimator.Rebind();
 
-				SwitchWeapon(indexBeforeRebind);
+				StartCoroutine(SwitchWeapon(indexBeforeRebind));
 			}
 			// Otherwise, simply rebind.
 			else
@@ -215,13 +216,17 @@ public class PlayerActions : MonoBehaviour
 	/// </summary>
 	public void OnWeaponDrop()
 	{
+		if (currentWeapon == null)
+			return;
+
 		isAiming = false;
 		crosshair.SetActive(false);
+		rigAnimator.Play("Unarmed");
+		weaponSocket.ResetWeaponOffset(currentWeapon.weaponSlot);
 		
-		StartCoroutine(AnimRiggingController.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, 0f));
+		StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, 0f));
 
-		fpsCamPos.localPosition = fpsCamOriginalPos;
-		fpsCamPos.localRotation = Quaternion.identity;
+		fpsCamPos.SetLocalPositionAndRotation(fpsCamOriginalPos, Quaternion.identity);
 
 		transform.rotation = Quaternion.Euler(Camera.main.transform.eulerAngles.y * Vector3.up);
 		

@@ -1,6 +1,4 @@
 using UnityEngine;
-using CSTGames.CommonEnums;
-using UnityEditor.iOS.Extensions.Common;
 
 public class ThirdPersonMovement : PlayerMovement
 {
