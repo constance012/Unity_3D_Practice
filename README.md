@@ -9,3 +9,4 @@ Credits for assets and tools I used:
 + "Yughues Free Fabric Materials" by Yughues - https://assetstore.unity.com/packages/2d/textures-materials/fabric/yughues-free-fabric-materials-13002
 + "Unity Jiggle Physics" by naelstrof - https://github.com/naelstrof/UnityJigglePhysics
 + "AllSky Free - 10 Sky / Skybox Set" by rpgwhitelock - https://assetstore.unity.com/packages/2d/textures-materials/sky/allsky-free-10-sky-skybox-set-146014
++ "Low Poly Combat Drone" by VoodooPlay - https://assetstore.unity.com/packages/3d/low-poly-combat-drone-82234

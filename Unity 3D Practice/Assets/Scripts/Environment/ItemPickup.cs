@@ -19,7 +19,7 @@ public class ItemPickup : Interactable
 	{
 		base.Awake();
 
-		weaponSocket = GameObject.FindWithTag("WeaponSocket").GetComponent<WeaponSocket>();
+		weaponSocket = GameObjectExtensions.GetComponentWithTag<WeaponSocket>("WeaponSocket");
 		
 		meshCollider = GetComponent<MeshCollider>();
 		meshRenderer = GetComponent<MeshRenderer>();
@@ -59,10 +59,10 @@ public class ItemPickup : Interactable
 			Weapon weapon = currentItem as Weapon;
 			int slotIndex = (int)weapon.weaponSlot;
 
-			PlayerActions.weapons[slotIndex] = weapon;
 			PlayerActions.needToRebindAnimator = weapon.rebindAnimator;
-
 			weaponSocket.AddWeaponToHolder(weapon);
+
+			PlayerActions.weapons[slotIndex] = weapon;
 		}
 
 		Destroy(this.gameObject);

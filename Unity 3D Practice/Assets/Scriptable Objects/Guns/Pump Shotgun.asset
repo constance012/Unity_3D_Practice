@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d064fed358cdf479c17a9d5bc61244, type: 3}
+  m_Name: Pump Shotgun
+  m_EditorClassIdentifier: 
+  id: 147ac034-c00e-43b0-b5aa-649b00ea89d9
+  category: 2
+  slotIndex: -1
+  itemName: Pump Shotgun
+  description: A pump-action shotgun, it has incredibly high damage output but at
+    the cost of range.
+  rarity:
+    title: Common
+    color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0}
+  icon: {fileID: 0}
+  mesh: {fileID: 1773197216858952008, guid: f33a6750edda74241bd72bbd1b8fec7d, type: 3}
+  materials:
+  - {fileID: 2100000, guid: 89b8df5766a2dc1459b66909fd2f643e, type: 2}
+  prefab: {fileID: 5855586643228379229, guid: c9841888fa5041d499ada59f73087c6a, type: 3}
+  weight: 3.71
+  weaponSlot: 0
+  weaponType: 0
+  wieldType: 1
+  useType: 2
+  holderPositionOffset: {x: 0.15, y: 0, z: 0.05}
+  holderLocalEulerAngles: {x: 345.19815, y: 218.34825, z: 323.48434}
+  aimingPositionOffset: {x: -0.02, y: -0.08, z: -0.18}
+  rightHandGrip:
+    localPosition: {x: 0.636, y: 0.014, z: -0.092}
+    localEulerAngles: {x: 358.5475, y: 350.2878, z: 254.52022}
+    elbowLocalPosition: {x: 0.36, y: 1.1270001, z: -0.10499999}
+  leftHandGrip:
+    localPosition: {x: 1.327, y: -0.051, z: 0.149}
+    localEulerAngles: {x: 274.06714, y: 347.17288, z: 337.56555}
+    elbowLocalPosition: {x: -0.307, y: 1.193, z: -0.252}
+  inHandOffset: {x: 0.4838, y: 0, z: 0}
+  inHandScale: 0.45
+  rebindAnimator: 0
+  muzzleFlashLocalPosisiton: {x: 1.8115, y: 0.0604, z: 0}
+  baseDamage: 80
+  durability: 100
+  knockBack: 7
+  baseCriticalChance: 22.6
+  useSpeed: 1
+  sellPrice: 3050
+  gunType: 3
+  bulletTracer: {fileID: 439671133536590696, guid: 8774c151cc39505409c940c3be000c04, type: 3}
+  bulletImpactEffect: {fileID: 6835190806984127818, guid: be2e282380d13eb49a76d739139c523c, type: 3}
+  projectilePrefab: {fileID: 0}
+  trackingRigidity: 0
+  bulletSpeed: 800
+  bulletDrop: 200
+  bulletsPerShot: 6
+  bulletMaxLifeTime: 3
+  bulletSpread: {x: 0.07, y: 0.07}
+  reserveAmmo: 72
+  <MagazineCapacity>k__BackingField: 8
+  currentMagazineAmmo: 8
+  infiniteAmmo: 0
+  reloadTime: 0.6
+  promptReload: 0
+  isReloading: 0
+  stability: 0.6
+  range: 30
+  impactForce: 250

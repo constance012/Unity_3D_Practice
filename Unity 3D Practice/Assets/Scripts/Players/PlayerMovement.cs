@@ -42,23 +42,24 @@ public abstract class PlayerMovement : MonoBehaviour
 	public UnityEvent onJumpingEvent = new UnityEvent();
 	public UnityEvent<bool> onStrafeSwitchingEvent = new UnityEvent<bool>();
 
-	// Static fields.
+	// Public static fields.
 	public static float linearVelocity { get; protected set; }
 	public static float velocityX { get; protected set; }
 	public static float velocityZ { get; protected set; }
-	public static bool canJumpAgain { get; set; } = true;
+	public static bool canJumpAgain { get; set; } = true;	
 
 	// Protected fields.
-	protected bool isJumping;
+	protected static Vector3 fallMomentum;
+	protected static bool isJumping;
+	protected static bool isRunning;
+	private static bool _isGrounded;
+	
 	protected float moveInputX, moveInputZ;
-	protected Vector3 fallMomentum;
 	protected Vector3 currentDir;
 	protected Vector3 previousDir;
-	protected bool isRunning;
 
 	// Private fields.
-	private bool _useStrafeMovement;
-	private bool _isGrounded;
+	private static bool _useStrafeMovement;
 	private bool _turned180;
 
 	protected virtual void Awake()
@@ -356,7 +357,7 @@ public abstract class PlayerMovement : MonoBehaviour
 
 	private void Jump()
 	{
-		animator.SetBool("IsJumping", true);
+		animator.SetBool(AnimationHandler.isJumpingHash, true);
 		isJumping = true;
 
 		// Calculate the jump velocity: v = sqrt(2 * h * g).
@@ -370,7 +371,7 @@ public abstract class PlayerMovement : MonoBehaviour
 		moveInputZ = InputManager.instance.GetAxisRaw("Vertical");
 
 		moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
-		isRunning = InputManager.instance.GetKey(KeybindingActions.Run);
+		isRunning = InputManager.instance.GetKey(KeybindingActions.Run) && !PlayerActions.isAiming;
 
 		currentMaxVelocity = isRunning ? MAX_RUNNING_SPEED : MAX_WALKING_SPEED;
 	}

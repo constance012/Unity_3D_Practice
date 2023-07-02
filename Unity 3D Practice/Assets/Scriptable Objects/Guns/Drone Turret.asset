@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d064fed358cdf479c17a9d5bc61244, type: 3}
+  m_Name: Drone Turret
+  m_EditorClassIdentifier: 
+  id: 4962bb70-bd34-466f-9a93-915c79ff23d3
+  category: 2
+  slotIndex: -1
+  itemName: Drone Turret
+  description: Automatic turret for drone.
+  rarity:
+    title: Common
+    color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0}
+  icon: {fileID: 0}
+  mesh: {fileID: 0}
+  materials: []
+  prefab: {fileID: 0}
+  weight: 0
+  weaponSlot: 0
+  weaponType: 0
+  wieldType: 1
+  useType: 0
+  holderPositionOffset: {x: 0, y: 0, z: 0}
+  holderLocalEulerAngles: {x: 0, y: 0, z: 0}
+  aimingPositionOffset: {x: 0, y: 0, z: 0}
+  rightHandGrip:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    elbowLocalPosition: {x: 0, y: 0, z: 0}
+  leftHandGrip:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    elbowLocalPosition: {x: 0, y: 0, z: 0}
+  inHandOffset: {x: 0, y: 0, z: 0}
+  inHandScale: 0
+  rebindAnimator: 0
+  muzzleFlashLocalPosisiton: {x: 0, y: 0, z: 0}
+  baseDamage: 10
+  durability: 100
+  knockBack: 2
+  baseCriticalChance: 17.9
+  useSpeed: 0.2
+  sellPrice: 5000
+  gunType: 2
+  bulletTracer: {fileID: 0}
+  bulletImpactEffect: {fileID: 6835190806984127818, guid: 963ef1883eafb1d4b8f7b86d4e76c6f1, type: 3}
+  projectilePrefab: {fileID: 9142825904421325442, guid: 22f6a09a2307bac4f980926566c4ebc4, type: 3}
+  trackingRigidity: 720
+  bulletSpeed: 30
+  bulletDrop: 0
+  bulletMaxLifeTime: 5
+  bulletSpread: {x: 0.05, y: 0.05}
+  reserveAmmo: 999
+  <MagazineCapacity>k__BackingField: 999
+  currentMagazineAmmo: 999
+  infiniteAmmo: 1
+  reloadTime: 0
+  promptReload: 0
+  isReloading: 0
+  stability: 0.8
+  range: 100
+  impactForce: 50

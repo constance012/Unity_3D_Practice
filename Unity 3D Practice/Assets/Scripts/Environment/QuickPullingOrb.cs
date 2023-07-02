@@ -43,7 +43,7 @@ public class QuickPullingOrb : Interactable
 	{
 		base.Awake();
 
-		worldCanvas = GameObject.FindWithTag("WorldCanvas").GetComponent<Canvas>();
+		worldCanvas = GameObjectExtensions.GetComponentWithTag<Canvas>("WorldCanvas");
 
 		_mat = GetComponent<MeshRenderer>().material;
 		_lineRenderer = GetComponent<LineRenderer>();

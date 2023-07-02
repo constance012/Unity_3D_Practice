@@ -44,9 +44,17 @@ MeshCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 171527776781687000}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 4
+  serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
@@ -72,7 +80,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     m_ImpulseDuration: 0.2
-    m_ImpulseType: 0
+    m_ImpulseType: 3
     m_DissipationRate: 0.25
     m_RawSignal: {fileID: 0}
     m_AmplitudeGain: 1
@@ -115,8 +123,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c043adca6df125241b97649c9cf053ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  verticalRecoil: 0
-  horizontalRecoil: 0
+  cameraShake: {fileID: 0}
+  rigAnimator: {fileID: 0}
+  recoilForces: {x: 0, y: 0}
   duration: 0
 --- !u!1 &464400116022313441
 GameObject:

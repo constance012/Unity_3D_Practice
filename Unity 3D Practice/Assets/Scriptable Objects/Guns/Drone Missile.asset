@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d064fed358cdf479c17a9d5bc61244, type: 3}
+  m_Name: Drone Missile
+  m_EditorClassIdentifier: 
+  id: 4962bb70-bd34-466f-9a93-915c79ff23d3
+  category: 2
+  slotIndex: -1
+  itemName: Drone Missile
+  description: Missile pod for drone, can be either straight or homing, depends on
+    drone's configuration.
+  rarity:
+    title: Common
+    color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0}
+  icon: {fileID: 0}
+  mesh: {fileID: 0}
+  materials: []
+  prefab: {fileID: 0}
+  weight: 0
+  weaponSlot: 0
+  weaponType: 0
+  wieldType: 1
+  useType: 0
+  holderPositionOffset: {x: 0, y: 0, z: 0}
+  holderLocalEulerAngles: {x: 0, y: 0, z: 0}
+  aimingPositionOffset: {x: 0, y: 0, z: 0}
+  rightHandGrip:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    elbowLocalPosition: {x: 0, y: 0, z: 0}
+  leftHandGrip:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    elbowLocalPosition: {x: 0, y: 0, z: 0}
+  inHandOffset: {x: 0, y: 0, z: 0}
+  inHandScale: 0
+  rebindAnimator: 0
+  muzzleFlashLocalPosisiton: {x: 0, y: 0, z: 0}
+  baseDamage: 20
+  durability: 100
+  knockBack: 5
+  baseCriticalChance: 23
+  useSpeed: 7
+  sellPrice: 7500
+  gunType: 6
+  bulletTracer: {fileID: 0}
+  bulletImpactEffect: {fileID: 8103653390665697335, guid: 32631d3b164430b40b711da3a694239a, type: 3}
+  projectilePrefab: {fileID: 2991270226837069777, guid: a08d37ac73fd27f4caffedc2120f77f0, type: 3}
+  trackingRigidity: 360
+  bulletSpeed: 15
+  bulletDrop: 0
+  bulletMaxLifeTime: 30
+  bulletSpread: {x: 0, y: 0}
+  reserveAmmo: 999
+  <MagazineCapacity>k__BackingField: 999
+  currentMagazineAmmo: 999
+  infiniteAmmo: 1
+  reloadTime: 0
+  promptReload: 0
+  isReloading: 0
+  stability: 0.8
+  range: 100
+  impactForce: 200

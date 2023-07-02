@@ -1,8 +1,29 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class GameObjectExtensions
 {
+	public static TComponent GetComponentWithTag<TComponent>(string tag)
+	{
+		GameObject gameObject = GameObject.FindWithTag(tag);
+		return gameObject.GetComponent<TComponent>();
+	}
+
+	public static TComponent GetComponentWithTag<TComponent>(string tag, string childName)
+	{
+		GameObject gameObject = GameObject.FindWithTag(tag);
+		Transform child = gameObject.transform.Find(childName);
+
+		return child.GetComponent<TComponent>();
+	}
+
+	public static Transform FindChildTransformWithTag(string tag, string childName)
+	{
+		GameObject gameObject = GameObject.FindWithTag(tag);
+		Transform child = gameObject.transform.Find(childName);
+
+		return child;
+	}
+
 	public static void DisablePlayer(this GameObject player)
 	{
 		player.TryGetComponent(out PlayerActions actionScript);

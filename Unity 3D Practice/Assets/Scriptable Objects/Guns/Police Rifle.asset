@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d064fed358cdf479c17a9d5bc61244, type: 3}
+  m_Name: Police Rifle
+  m_EditorClassIdentifier: 
+  id: a1bbf284-32aa-4855-88c6-ba740afc842e
+  category: 2
+  slotIndex: -1
+  itemName: Police Rifle
+  description: A very commonly used rifle in military. It can be fired in either
+    automatic or burst mode.
+  rarity:
+    title: Common
+    color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+  icon: {fileID: 0}
+  mesh: {fileID: -695774298109068085, guid: a5f56547380d3e6448e877c01e64c479, type: 3}
+  materials:
+  - {fileID: 2100000, guid: 89b8df5766a2dc1459b66909fd2f643e, type: 2}
+  prefab: {fileID: 5313856188506331232, guid: 7444562fe5798e846a4045a93e123308, type: 3}
+  weight: 3.52
+  weaponSlot: 0
+  weaponType: 0
+  wieldType: 1
+  useType: 0
+  holderPositionOffset: {x: 0.23, y: -0.13, z: 0.165}
+  holderLocalEulerAngles: {x: 0, y: 185, z: 345}
+  aimingPositionOffset: {x: -0.02, y: -0.06, z: -0.08}
+  rightHandGrip:
+    localPosition: {x: 0.515, y: -0.145, z: -0.045}
+    localEulerAngles: {x: 0, y: 0, z: 274.0661}
+    elbowLocalPosition: {x: 0.36, y: 1.1270001, z: -0.10499999}
+  leftHandGrip:
+    localPosition: {x: 1.07, y: -0.013, z: 0.173}
+    localEulerAngles: {x: 278.93524, y: 245.68561, z: 85.06136}
+    elbowLocalPosition: {x: -0.307, y: 1.193, z: -0.252}
+  inHandOffset: {x: 0.4838, y: 0, z: 0}
+  inHandScale: 0.4
+  rebindAnimator: 0
+  muzzleFlashLocalPosisiton: {x: 1.844, y: 0.0402, z: 0}
+  baseDamage: 20
+  durability: 100
+  knockBack: 2
+  baseCriticalChance: 12.6
+  useSpeed: 0.15
+  sellPrice: 2300
+  gunType: 2
+  bulletTracer: {fileID: 439671133536590696, guid: 8774c151cc39505409c940c3be000c04, type: 3}
+  bulletImpactEffect: {fileID: 6835190806984127818, guid: be2e282380d13eb49a76d739139c523c, type: 3}
+  bulletSpeed: 800
+  bulletDrop: 200
+  bulletMaxLifeTime: 3
+  bulletSpread: {x: 0.02, y: 0.02}
+  reserveAmmo: 150
+  <MagazineCapacity>k__BackingField: 30
+  currentMagazineAmmo: 30
+  infiniteAmmo: 0
+  reloadTime: 1
+  promptReload: 0
+  isReloading: 0
+  stability: 0.7
+  range: 100
+  impactForce: 80

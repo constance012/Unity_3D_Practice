@@ -42,8 +42,8 @@ public class DayNightController : MonoBehaviour
 
 	private void Awake()
 	{
-		_dateText = transform.Find("Date Text").GetComponent<TextMeshProUGUI>();
-		_timeText = transform.Find("Time Text").GetComponent<TextMeshProUGUI>();
+		_dateText = transform.GetComponentInChildren<TextMeshProUGUI>("Date Text");
+		_timeText = transform.GetComponentInChildren<TextMeshProUGUI>("Time Text");
 
 		if (RenderSettings.sun != null)
 		{
@@ -66,6 +66,9 @@ public class DayNightController : MonoBehaviour
 
 	private void Start()
 	{
+		if (timeMultiplier == 0f)
+			Debug.LogWarning("WARNING: Time is currently freezing.");
+
 		_startTime = DateTime.Now.Date + TimeSpan.FromHours(timeOfDay);
 		_currentTime = _startTime;
 
@@ -88,7 +91,7 @@ public class DayNightController : MonoBehaviour
 	private void UpdateTime()
 	{
 		_currentTime = _currentTime.AddSeconds(Time.deltaTime * timeMultiplier);
-		float timeOfDayNormalized = (float)_currentTime.TimeOfDay.TotalSeconds / r_OneDayTime;
+		float timeOfDayNormalized = Mathf.InverseLerp(0f, r_OneDayTime, (float)_currentTime.TimeOfDay.TotalSeconds);
 
 		directionalLight.color = sunColor.Evaluate(timeOfDayNormalized);
 		RenderSettings.ambientLight = ambientColor.Evaluate(timeOfDayNormalized);

@@ -34,7 +34,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7866212465378870108
 MeshFilter:
@@ -235,7 +235,7 @@ MonoBehaviour:
   interactRadius: 15
   player: {fileID: 0}
   pullSpeed: 4
-  animationSpeed: 5
+  animationSpeed: 10
   releaseRadius: 0.3
   deadZoneRadius: 2.5
   worldCanvas: {fileID: 0}

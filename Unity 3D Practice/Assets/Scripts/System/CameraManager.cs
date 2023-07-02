@@ -34,8 +34,8 @@ public class CameraManager : MonoBehaviour
 			return;
 		}
 
-		thirdPersonCam = GameObject.FindWithTag("ThirdPersonCam").GetComponent<CinemachineFreeLook>();
-		firstPersonCam = GameObject.FindWithTag("FirstPersonCam").GetComponent<CinemachineVirtualCamera>();
+		thirdPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineFreeLook>("ThirdPersonCam");
+		firstPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineVirtualCamera>("FirstPersonCam");
 
 		cam3rdAnimator = thirdPersonCam.GetComponent<Animator>();
 

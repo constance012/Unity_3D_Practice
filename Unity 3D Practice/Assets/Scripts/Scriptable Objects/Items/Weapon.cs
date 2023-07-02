@@ -61,7 +61,7 @@ public class Weapon : Item
 	public HandGripReferences leftHandGrip;
 	[Space]
 	public Vector3 inHandOffset;
-	public float inHandScale;
+	public float inHandScale = 1f;
 	public bool rebindAnimator;
 	[Space]
 	public Vector3 muzzleFlashLocalPosisiton;
@@ -82,6 +82,16 @@ public class Weapon : Item
 	public float sellPrice;
 
 	public virtual bool FireBullet(Vector3 rayOrigin, Vector3 rayDestination)
+	{
+		return false;
+	}
+
+	public virtual bool FireBullet(Ray shootRay)
+	{
+		return false;
+	}
+
+	public virtual bool FireProjectile(Ray shootRay, Transform target = null)
 	{
 		return false;
 	}

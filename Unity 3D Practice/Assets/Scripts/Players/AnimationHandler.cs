@@ -8,10 +8,13 @@ public class AnimationHandler : MonoBehaviour
 	[SerializeField] private Animator animator;
 	[SerializeField] private static RigBuilder rigBuilder;
 
-	// Parameter ids.
-	private int velXHash, velZHash;
-	private int speedHash;
-	private int useStrafeMovementHash;
+	// Animators' parameter hashes.
+	public static int velXHash, velZHash;
+	public static int speedHash;
+	public static int useStrafeMovementHash;
+	public static int isJumpingHash;
+
+	public static int holsterWeaponHash;
 
 	// Private fields.
 	private Transform headLookTarget;
@@ -27,10 +30,15 @@ public class AnimationHandler : MonoBehaviour
 
 	private void Start()
 	{
+		// Player's animator.
 		velXHash = Animator.StringToHash("Velocity X");
 		velZHash = Animator.StringToHash("Velocity Z");
 		speedHash = Animator.StringToHash("Speed");
 		useStrafeMovementHash = Animator.StringToHash("UseStrafeMovement");
+		isJumpingHash = Animator.StringToHash("IsJumping");
+
+		// Rig layers animator.
+		holsterWeaponHash = Animator.StringToHash("HolsterWeapon");
 	}
 
 	private void Update()
