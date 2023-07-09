@@ -10,3 +10,6 @@ Credits for assets and tools I used:
 + "Unity Jiggle Physics" by naelstrof - https://github.com/naelstrof/UnityJigglePhysics
 + "AllSky Free - 10 Sky / Skybox Set" by rpgwhitelock - https://assetstore.unity.com/packages/2d/textures-materials/sky/allsky-free-10-sky-skybox-set-146014
 + "Low Poly Combat Drone" by VoodooPlay - https://assetstore.unity.com/packages/3d/low-poly-combat-drone-82234
++ "[Graphy] - Ultimate FPS Counter - Stats Monitor & Debugger" by Tayx - https://assetstore.unity.com/packages/tools/gui/graphy-ultimate-fps-counter-stats-monitor-debugger-105778
++ "VFX Bullet Casing" by Simon Mercuzot - https://assetstore.unity.com/packages/3d/characters/vfx-bullet-casing-120111
++ "Modern Guns: Handgun" by Nokobot - https://assetstore.unity.com/packages/3d/props/guns/modern-guns-handgun-129821

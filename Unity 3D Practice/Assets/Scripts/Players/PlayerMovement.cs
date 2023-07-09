@@ -71,8 +71,6 @@ public abstract class PlayerMovement : MonoBehaviour
 
 	protected virtual void Update()
 	{
-		Cursor.lockState = Input.GetKey(KeyCode.LeftAlt) ? CursorLockMode.None : CursorLockMode.Locked;
-
 		_isGrounded = Physics.CheckSphere(groundCheck.position, footRadius, whatIsGround);
 
 		HandleVerticalMovement();

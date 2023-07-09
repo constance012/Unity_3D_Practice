@@ -15,6 +15,9 @@ public class AnimationHandler : MonoBehaviour
 	public static int isJumpingHash;
 
 	public static int holsterWeaponHash;
+	public static int endAimingHash;
+
+	public static int endReloadingHash;
 
 	// Private fields.
 	private Transform headLookTarget;
@@ -39,6 +42,9 @@ public class AnimationHandler : MonoBehaviour
 
 		// Rig layers animator.
 		holsterWeaponHash = Animator.StringToHash("HolsterWeapon");
+		endAimingHash = Animator.StringToHash("EndAiming");
+
+		endReloadingHash = Animator.StringToHash("EndReloading");
 	}
 
 	private void Update()

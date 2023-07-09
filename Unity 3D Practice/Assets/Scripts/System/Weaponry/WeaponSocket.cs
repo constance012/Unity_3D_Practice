@@ -5,17 +5,27 @@ using UnityEngine.Animations.Rigging;
 using TMPro;
 using CSTGames.CommonEnums;
 using static Weapon;
+using static RangedWeapon;
 
 public class WeaponSocket : MonoBehaviour
 {
 	[SerializeField] private GameObject droppedItemPrefab;
 
+	[Header("Hand References")]
+	[Space]
+	[SerializeField] private Transform leftHand;
+	[SerializeField] private Transform rightHand;
+
 	[Header("Events")]
+	[Space]
+	public WeaponAnimationEvents weaponEvent;
+
 	[Space]
 	public UnityEvent onWeaponPickup = new UnityEvent();
 	public UnityEvent onWeaponDrop = new UnityEvent();
+	public UnityEvent onWeaponReloadingDone = new UnityEvent();
 
-	private Animator reloadTextAnim;
+	private Animator rigAnimator;
 	private TextMeshProUGUI ammoText;
 
 	private Weapon inHandWeapon;
@@ -38,12 +48,19 @@ public class WeaponSocket : MonoBehaviour
 
 	private ParticleSystem muzzleFlash;
 
+	[ReadOnly] public bool forcedAiming;
+
+	// Private fields.
+	private GameObject _magazineInHand;
+	private IEnumerator _reloadCoroutine;
 	private float _timeForNextUse;
 	private bool _burstCompleted = true;
 
 	private void Awake()
 	{
-		reloadTextAnim = GameObjectExtensions.GetComponentWithTag<Animator>("UICanvas", "Gun UI/Reload Text");
+		weaponEvent = transform.parent.GetComponent<WeaponAnimationEvents>();
+
+		rigAnimator = transform.parent.GetComponent<Animator>();
 		ammoText = GameObjectExtensions.GetComponentWithTag<TextMeshProUGUI>("UICanvas", "Gun UI/Ammo Text");
 
 		holdingPose = transform.parent.GetComponentInChildren<MultiPositionConstraint>("RigLayer_Weapon Holding IK/Holding Pose");
@@ -66,7 +83,7 @@ public class WeaponSocket : MonoBehaviour
 
 	private void OnDisable()
 	{
-		if (inHandWeapon?.weaponType == WeaponType.Ranged)
+		if (inHandWeapon != null && inHandWeapon.weaponType == WeaponType.Ranged)
 			(inHandWeapon as RangedWeapon).ClearBullets();
 
 		inHandWeapon = null;
@@ -74,9 +91,11 @@ public class WeaponSocket : MonoBehaviour
 
 	private void Start()
 	{
-		onWeaponDrop.AddListener(ClearOrientation);
+		if (leftHand == null)
+			Debug.LogWarning("Left hand reference is null, please assign it through the inspector.");
 
-		reloadTextAnim.GetComponent<TextMeshProUGUI>().text = $"Press {InputManager.instance.GetKeyForAction(KeybindingActions.Reload)} to reload.";
+		weaponEvent.weaponAnimationCallback.AddListener(OnWeaponEventCallback);
+		onWeaponDrop.AddListener(ClearOrientation);
 
 		ammoText.gameObject.SetActive(inHandWeapon != null);
 	}
@@ -120,7 +139,7 @@ public class WeaponSocket : MonoBehaviour
 				break;
 		}
 
-		prefab.transform.SetLocalPositionAndRotation(weapon.inHandOffset, Quaternion.identity);
+		prefab.transform.SetLocalPositionAndRotation(weapon.inHolsterOffset, Quaternion.identity);
 		prefab.transform.localScale = weapon.inHandScale * Vector3.one;
 
 		onWeaponPickup?.Invoke();
@@ -159,9 +178,6 @@ public class WeaponSocket : MonoBehaviour
 
 		// Disable UI elements.
 		ammoText.gameObject.SetActive(false);
-		
-		if (reloadTextAnim.GetBool("Slide In"))
-			reloadTextAnim.SetBool("Slide In", false);
 
 		// Instantiate a dropped item prefab and throw it out.
 		Transform mainCamera = Camera.main.transform;
@@ -230,11 +246,11 @@ public class WeaponSocket : MonoBehaviour
 		switch (slot)
 		{
 			case WeaponSlot.Primary:
-				weaponParentPrimary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHandOffset, Quaternion.identity);
+				weaponParentPrimary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHolsterOffset, Quaternion.identity);
 				break;
 
 			case WeaponSlot.Secondary:
-				weaponParentSecondary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHandOffset, Quaternion.identity);
+				weaponParentSecondary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHolsterOffset, Quaternion.identity);
 				break;
 		}
 	}
@@ -276,7 +292,7 @@ public class WeaponSocket : MonoBehaviour
 	}
 	#endregion
 
-	#region Weapon's using method.
+	#region Weapons using method.
 	private void UseRangedWeapon()
 	{
 		_timeForNextUse -= Time.deltaTime;
@@ -285,48 +301,54 @@ public class WeaponSocket : MonoBehaviour
 
 		weapon.UpdateBullets(Time.deltaTime);
 
-		if (weapon.promptReload && !reloadTextAnim.GetBool("Slide In"))
-			reloadTextAnim.SetBool("Slide In", true);
-		else if (!weapon.promptReload && reloadTextAnim.GetBool("Slide In"))
-			reloadTextAnim.SetBool("Slide In", false);
-
-		if (InputManager.instance.GetKeyDown(KeybindingActions.Reload) && !weapon.isReloading)
-			StartCoroutine(Reload(weapon));
+		if (!weapon.isReloading && (InputManager.instance.GetKeyDown(KeybindingActions.Reload) || weapon.promptReload))
+			ReloadWeapon(weapon);
 
 		// Use the weapon in hand only if the player is aiming.
 		if (!PlayerActions.isAiming)
 			return;
 
 		if (_timeForNextUse <= 0f)
+			ShootWeapon(weapon);
+	}
+	#endregion
+
+
+	#region Weapon shooting.
+	private void ShootWeapon(RangedWeapon weapon)
+	{
+		switch (weapon.useType)
 		{
-			switch (weapon.useType)
-			{
-				case UseType.Automatic:
-					if (InputManager.instance.GetKey(KeybindingActions.PrimaryAttack))
-					{
-						Shoot(weapon);
-					}
-					break;
+			case UseType.Automatic:
+				if (InputManager.instance.GetKey(KeybindingActions.PrimaryAttack))
+				{
+					SingleFire(weapon);
+				}
+				break;
 
-				case UseType.Burst:
-					if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack) && _burstCompleted)
-					{
-						StartCoroutine(BurstFire(weapon));
-					}
-					break;
+			case UseType.Burst:
+				if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack) && _burstCompleted)
+				{
+					StartCoroutine(BurstFire(weapon));
+				}
+				break;
 
-				case UseType.Single:
-					if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack))
-					{
-						Shoot(weapon);
-					}
-					break;
-			}
+			case UseType.Single:
+				if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack))
+				{
+					SingleFire(weapon);
+				}
+				break;
 		}
 	}
 
-	private void Shoot(RangedWeapon weapon)
+	private void SingleFire(RangedWeapon weapon)
 	{
+		if (weapon.isReloading && !weapon.canShootWhileReloading)
+			return;
+
+		ForceStopReloading(weapon);
+
 		Vector3 rayOrigin = muzzleFlash.transform.position;
 		Vector3 rayDestination = crosshairTarget.position;
 
@@ -343,34 +365,187 @@ public class WeaponSocket : MonoBehaviour
 
 	private IEnumerator BurstFire(RangedWeapon weapon)
 	{
+		if (weapon.isReloading && !weapon.canShootWhileReloading)
+			yield break;
+
+		ForceStopReloading(weapon);
+
 		_burstCompleted = false;
 
 		for (int i = 0; i < 3; i++)
 		{
 			yield return new WaitForSeconds(.1f);
 
-			Shoot(weapon);
+			SingleFire(weapon);
 		}
 
 		_burstCompleted = true;
 		_timeForNextUse = weapon.useSpeed;
 	}
+	#endregion
 
-	private IEnumerator Reload(RangedWeapon weapon)
+	#region Weapons reloading.
+	/// <summary>
+	/// Stop reloading if are doing so.
+	/// </summary>
+	/// <param name="weapon"></param>
+	private void ForceStopReloading(RangedWeapon weapon)
+	{
+		if (_reloadCoroutine != null)
+		{
+			StopCoroutine(_reloadCoroutine);
+
+			rigAnimator.Play("Stand By", 2);
+			weapon.isReloading = false;
+			_reloadCoroutine = null;
+		}
+	}
+
+	private void ReloadWeapon(RangedWeapon weapon)
 	{
 		weapon.promptReload = false;
 		weapon.isReloading = true;
 
-		if (weapon.reserveAmmo == 0)
+		if (weapon.reserveAmmo == 0 || weapon.currentMagazineAmmo == weapon.MagazineCapacity)
 		{
 			weapon.isReloading = false;
-			yield break;
+			return;
 		}
 
+		forcedAiming = true;
+
+		switch (weapon.gunType)
+		{
+			case GunType.Shotgun:
+				_reloadCoroutine = SingleRoundReload(weapon);
+				StartCoroutine(_reloadCoroutine);
+				break;
+
+			default:
+				_reloadCoroutine = StandardReload(weapon);
+				StartCoroutine(_reloadCoroutine);
+				break;
+		}
+	}
+
+	private IEnumerator StandardReload(RangedWeapon weapon)
+	{
 		yield return new WaitForSeconds(weapon.reloadTime);
 
-		weapon.Reload();
+		weapon.StandardReload();
 		ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
+
+		weapon.isReloading = false;
+		_reloadCoroutine = null;
+
+		forcedAiming = false;
+		onWeaponReloadingDone?.Invoke();
+	}
+
+	private IEnumerator SingleRoundReload(RangedWeapon weapon)
+	{
+		rigAnimator.Play($"Start Reload {weapon.itemName}", 2);
+
+		yield return new WaitForSeconds(.5f);
+		
+		int firedBullets = weapon.MagazineCapacity - weapon.currentMagazineAmmo;
+
+		for (int i = firedBullets; i > 0; i--)
+		{
+			rigAnimator.Play($"Reloading {weapon.itemName}", 2, 0f);
+
+			yield return new WaitForSeconds(weapon.reloadTime);
+
+			weapon.SingleRoundReload();
+			ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
+		}
+
+		rigAnimator.SetTrigger(AnimationHandler.endReloadingHash);
+
+		yield return new WaitForSeconds(.5f);
+
+		weapon.isReloading = false;
+		_reloadCoroutine = null;
+
+		forcedAiming = false;
+		onWeaponReloadingDone?.Invoke();
+	}
+
+	#endregion
+
+	#region Weapon Events.
+	private void OnWeaponEventCallback(string action)
+	{
+		action = action.Trim().ToLower().Replace(' ', '_');
+
+		RangedWeapon weapon = inHandWeapon as RangedWeapon;
+
+		switch (action)
+		{
+			case "eject_bullet_casing":
+				EjectBulletCasing(weapon);
+				break;
+
+			case "drop_magazine_gun":
+				break;
+
+			case "drop_magazine_left_hand":
+				break;
+
+			case "drop_magazine_right_hand":
+				break;
+
+			case "grab_new_magazine":
+				GrabNewMagazine();
+				break;
+
+			case "attach_magazine_to_gun":
+				AttachMagazineToGun(weapon);
+				break;
+
+			case "detach_magazine_to_left_hand":
+				DetachMagazineToLeftHand();
+				break;
+
+			case "detach_magazine_to_right_hand":
+				DetachMagazineToRightHand();
+				break;
+
+			default:
+				return;
+		}
+	}
+
+	private void EjectBulletCasing(RangedWeapon weapon)
+	{
+		Instantiate(weapon.bulletCasing, recoil.caseEjector.position, recoil.caseEjector.rotation);
+	}
+
+	private void DetachMagazineToLeftHand()
+	{
+		_magazineInHand = Instantiate(recoil.magazine, leftHand, true);
+
+		recoil.magazine.SetActive(false);
+	}
+
+	private void DetachMagazineToRightHand()
+	{
+		_magazineInHand = Instantiate(recoil.magazine, rightHand, true);
+
+		recoil.magazine.SetActive(false);
+	}
+
+	private void GrabNewMagazine()
+	{
+		_magazineInHand.SetActive(true);
+	}
+
+	private void AttachMagazineToGun(RangedWeapon weapon)
+	{
+		if (!weapon.inactiveMagazine)
+			recoil.magazine.SetActive(true);
+
+		Destroy(_magazineInHand);
 	}
 	#endregion
 }

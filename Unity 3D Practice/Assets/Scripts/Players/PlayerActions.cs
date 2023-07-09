@@ -6,12 +6,14 @@ using static Weapon;
 
 public class PlayerActions : MonoBehaviour
 {
+	[Header("Debugging")]
+	[Space]
+	[SerializeField] private bool holdToAim;
+	
 	[Header("References")]
 	[Space]
 	[SerializeField] private Animator rigAnimator;
 	[SerializeField] private GameObject crosshair;
-
-	[SerializeField] private Transform fpsCamPos;
 
 	public static Weapon[] weapons = new Weapon[4];
 
@@ -22,8 +24,6 @@ public class PlayerActions : MonoBehaviour
 	public static bool needToRebindAnimator { get; set; }
 	public static bool isAiming { get; private set; }
 	public static bool isUnequipingDone { get; set; }
-	public static Vector3 fpsCamAimingPos { get; } = new Vector3(0f, -0.09f, 0.065f);
-	public static Vector3 fpsCamOriginalPos { get; } = new Vector3(0f, 0.065200001f, 0.194900006f);
 
 	// Private fields.
 	private bool _switchingWeapon;
@@ -34,8 +34,6 @@ public class PlayerActions : MonoBehaviour
 		weaponSocket = GameObjectExtensions.GetComponentWithTag<WeaponSocket>("WeaponSocket");
 
 		crosshair = GameObjectExtensions.FindChildTransformWithTag("UICanvas", "Gun UI/Crosshair").gameObject;
-
-		fpsCamPos = GameObject.FindWithTag("FPSCamPos").transform;
 	}
 
 	private void Update()
@@ -70,42 +68,65 @@ public class PlayerActions : MonoBehaviour
 		}
 	}
 
+	#region Aiming Weapon.
+	private void SetAimingBehaviour(bool state, bool setTrigger = true)
+	{
+		if (state)
+		{
+			rigAnimator.Play($"Start Aiming {currentWeapon.itemName}", 1);
+
+			StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Increase, 1f, .5f));
+		}
+		else
+		{
+			if (setTrigger)
+				rigAnimator.SetTrigger(AnimationHandler.endAimingHash);
+
+			StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, .5f));
+		}
+		
+		crosshair.SetActive(state);
+		isAiming = state;
+	}
+
+	private void CheckForAimingInput()
+	{
+		if (_switchingWeapon)
+			return;
+
+		if (weaponSocket.forcedAiming)
+		{
+			isAiming = true;
+			return;
+		}
+
+		if (holdToAim)
+		{
+			isAiming = false;
+
+			// Check aiming.
+			if (Input.GetKey(KeyCode.Mouse1))
+				isAiming = true;
+		}
+		else if (Input.GetKeyDown(KeyCode.Mouse1))
+			isAiming = !isAiming;
+	}
+
 	private void HandleAiming()
 	{
 		bool wasAiming = isAiming;
 
-		isAiming = false;
-
-		// Check aiming.
-		if (Input.GetKey(KeyCode.Mouse1) && !_switchingWeapon)
-		{
-			isAiming = true;
-		}
+		CheckForAimingInput();
 		
 		// What to change when starts of stops aiming.
 		if (wasAiming != isAiming)
 		{
 			StopAllCoroutines();
-
-			// Start aiming.
-			if (isAiming)
-			{
-				crosshair.SetActive(true);
-
-				fpsCamPos.localPosition = fpsCamAimingPos;
-				StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Increase, 1f, .5f));
-			}
 			
-			// Stop aiming.
-			else
-			{
-				crosshair.SetActive(false);
-
-				fpsCamPos.SetLocalPositionAndRotation(fpsCamOriginalPos, Quaternion.identity);
-				StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, .5f));
-			}
+			SetAimingBehaviour(isAiming);
 		}
 	}
+	#endregion
 
 	private void EquipWeapon(bool unequip = false)
 	{
@@ -129,6 +150,8 @@ public class PlayerActions : MonoBehaviour
 
 	private IEnumerator SwitchWeapon(int newWeaponIndex)
 	{
+		SetAimingBehaviour(false, isAiming);
+
 		_switchingWeapon = true;
 		isUnequipingDone = true;
 
@@ -185,6 +208,8 @@ public class PlayerActions : MonoBehaviour
 	{
 		if (needToRebindAnimator || forcedRebind)
 		{
+			SetAimingBehaviour(false, isAiming);
+
 			// Switch back to the previous holding weapon after rebinding the animator.
 			if (currentWeapon != null)
 			{
@@ -211,17 +236,20 @@ public class PlayerActions : MonoBehaviour
 		if (currentWeapon == null)
 			return;
 
-		isAiming = false;
-		crosshair.SetActive(false);
+		SetAimingBehaviour(false, isAiming);
 		rigAnimator.Play("Unarmed");
+
 		weaponSocket.ResetWeaponOffset(currentWeapon.weaponSlot);
 		
 		StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, 0f));
 
-		fpsCamPos.SetLocalPositionAndRotation(fpsCamOriginalPos, Quaternion.identity);
-
 		transform.rotation = Quaternion.Euler(Camera.main.transform.eulerAngles.y * Vector3.up);
 		
 		currentWeapon = null;
+	}
+
+	public void OnWeaponReloadingDone()
+	{
+		SetAimingBehaviour(false, isAiming);
 	}
 }

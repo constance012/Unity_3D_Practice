@@ -49,6 +49,7 @@ public sealed class RangedWeapon : Weapon
 	[Space]
 	public TrailRenderer bulletTracer;
 	public ParticleSystem bulletImpactEffect;
+	public ParticleSystem bulletCasing;
 
 	[Header("Projectile (If use prefab shooting).")]
 	[Space]
@@ -77,9 +78,11 @@ public sealed class RangedWeapon : Weapon
 	public int MagazineCapacity { get; private set; }
 	[Min(0f)] public int currentMagazineAmmo;
 	public bool infiniteAmmo;
+	[Tooltip("Is the magazine game object of this gun inactive?")] public bool inactiveMagazine;
 	
 	[Space]
 	[Min(0f)] public float reloadTime;
+	public bool canShootWhileReloading;
 	[HideInInspector] public bool promptReload;
 	[HideInInspector] public bool isReloading;
 
@@ -96,6 +99,7 @@ public sealed class RangedWeapon : Weapon
 
 	private Vector3 _bulletOrigin;
 
+	#region Bullets Management.
 	public void ClearBullets()
 	{
 		_bullets.ForEach(bullet => Destroy(bullet.tracer.gameObject));
@@ -104,7 +108,8 @@ public sealed class RangedWeapon : Weapon
 
 	public override bool FireBullet(Vector3 rayOrigin, Vector3 rayDestination)
 	{
-		CheckForAmmo();
+		if (!CheckForAmmo())
+			return false;
 
 		_bulletOrigin = rayOrigin;
 
@@ -121,7 +126,8 @@ public sealed class RangedWeapon : Weapon
 
 	public override bool FireBullet(Ray shootRay)
 	{
-		CheckForAmmo();
+		if (!CheckForAmmo())
+			return false;
 
 		_bulletOrigin = shootRay.origin;
 
@@ -135,7 +141,8 @@ public sealed class RangedWeapon : Weapon
 
 	public override bool FireProjectile(Ray shootRay, Transform target = null)
 	{
-		CheckForAmmo();
+		if (!CheckForAmmo())
+			return false;
 
 		_bulletOrigin = shootRay.origin;
 
@@ -186,8 +193,10 @@ public sealed class RangedWeapon : Weapon
 			RaycastAtDeltaPosition(posBefore, posAfter, bullet);
 		}
 	}
+	#endregion
 
-	public void Reload()
+	#region Bullet Reloading.
+	public void StandardReload()
 	{
 		int firedBullets = MagazineCapacity - currentMagazineAmmo;
 
@@ -208,6 +217,20 @@ public sealed class RangedWeapon : Weapon
 		isReloading = false;
 	}
 
+	public void SingleRoundReload()
+	{
+		if (reserveAmmo == 0)
+		{
+			isReloading = false;
+			return;
+		}
+
+		currentMagazineAmmo++;
+		reserveAmmo--;
+	}
+	#endregion
+
+	#region Private Methods.
 	private bool DestroyBullet(Bullet bullet)
 	{
 		if (bullet.readyToBeDestroyed)
@@ -290,4 +313,5 @@ public sealed class RangedWeapon : Weapon
 		impactObj.AlignWithNormal(hitInfo.point, hitInfo.normal);
 		impactObj.Emit(1);
 	}
+	#endregion
 }

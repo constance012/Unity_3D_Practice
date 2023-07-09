@@ -3,7 +3,7 @@
 public static class TransformExtensions
 {
 	/// <summary>
-	/// Gets a component of type TComponent in any child of this Transform, includes inactive ones.
+	/// Gets a component of type TComponent in a specified child of this Transform, includes inactive ones.
 	/// </summary>
 	/// <typeparam name="TComponent"></typeparam>
 	/// <param name="transform"></param>

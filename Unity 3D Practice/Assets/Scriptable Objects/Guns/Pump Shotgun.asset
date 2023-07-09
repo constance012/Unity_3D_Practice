@@ -33,7 +33,7 @@ MonoBehaviour:
   useType: 2
   holderPositionOffset: {x: 0.15, y: 0, z: 0.05}
   holderLocalEulerAngles: {x: 345.19815, y: 218.34825, z: 323.48434}
-  aimingPositionOffset: {x: -0.02, y: -0.08, z: -0.18}
+  aimingPositionOffset: {x: 0, y: 0, z: 0}
   rightHandGrip:
     localPosition: {x: 0.636, y: 0.014, z: -0.092}
     localEulerAngles: {x: 358.5475, y: 350.2878, z: 254.52022}
@@ -42,19 +42,20 @@ MonoBehaviour:
     localPosition: {x: 1.327, y: -0.051, z: 0.149}
     localEulerAngles: {x: 274.06714, y: 347.17288, z: 337.56555}
     elbowLocalPosition: {x: -0.307, y: 1.193, z: -0.252}
-  inHandOffset: {x: 0.4838, y: 0, z: 0}
+  inHolsterOffset: {x: 0.4838, y: 0, z: 0}
   inHandScale: 0.45
-  rebindAnimator: 0
+  rebindAnimator: 1
   muzzleFlashLocalPosisiton: {x: 1.8115, y: 0.0604, z: 0}
   baseDamage: 80
   durability: 100
   knockBack: 7
   baseCriticalChance: 22.6
-  useSpeed: 1
+  useSpeed: 0.84
   sellPrice: 3050
   gunType: 3
   bulletTracer: {fileID: 439671133536590696, guid: 8774c151cc39505409c940c3be000c04, type: 3}
   bulletImpactEffect: {fileID: 6835190806984127818, guid: be2e282380d13eb49a76d739139c523c, type: 3}
+  bulletCasing: {fileID: 198995447496872438, guid: 522b470e09ed8b8488c6b8788f9d6206, type: 3}
   projectilePrefab: {fileID: 0}
   trackingRigidity: 0
   bulletSpeed: 800
@@ -66,7 +67,9 @@ MonoBehaviour:
   <MagazineCapacity>k__BackingField: 8
   currentMagazineAmmo: 8
   infiniteAmmo: 0
-  reloadTime: 0.6
+  inactiveMagazine: 1
+  reloadTime: 1
+  canShootWhileReloading: 1
   promptReload: 0
   isReloading: 0
   stability: 0.6

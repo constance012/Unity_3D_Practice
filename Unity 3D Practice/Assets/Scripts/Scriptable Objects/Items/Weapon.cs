@@ -60,7 +60,7 @@ public class Weapon : Item
 	public HandGripReferences rightHandGrip;
 	public HandGripReferences leftHandGrip;
 	[Space]
-	public Vector3 inHandOffset;
+	public Vector3 inHolsterOffset;
 	public float inHandScale = 1f;
 	public bool rebindAnimator;
 	[Space]
