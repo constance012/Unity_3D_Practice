@@ -98,10 +98,10 @@ public class GrassComputeHandler : MonoBehaviour
 	Bounds bounds;
 
 	// The data to reset the args buffer with every frame
-	// 0: vertex count per draw instance. We will only use one instance
-	// 1: instance count. One
+	// 0: vertex count per draw Instance. We will only use one Instance
+	// 1: Instance count. One
 	// 2: start vertex location if using a Graphics Buffer
-	// 3: and start instance location if using a Graphics Buffer
+	// 3: and start Instance location if using a Graphics Buffer
 	private int[] argsBufferReset = new int[] { 0, 1, 0, 0 };
 
 #if UNITY_EDITOR

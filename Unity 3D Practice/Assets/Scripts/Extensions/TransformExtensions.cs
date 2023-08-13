@@ -1,35 +1,35 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public static class TransformExtensions
 {
 	/// <summary>
-	/// Gets a component of type TComponent in a specified child of this Transform, includes inactive ones.
+	/// Finds any child with the matching name within this Transform, traverses through the hierarchy using Breadth-first Search.
 	/// </summary>
-	/// <typeparam name="TComponent"></typeparam>
 	/// <param name="transform"></param>
 	/// <param name="childName"></param>
 	/// <returns></returns>
-	public static TComponent GetComponentInChildren<TComponent>(this Transform transform, string childName)
+	public static Transform FindAny(this Transform transform, string childName)
 	{
-		Transform child = transform.Find(childName);
-		return child.GetComponent<TComponent>();
+		Queue<Transform> queue = new Queue<Transform>();
+		queue.Enqueue(transform);
+
+		while (queue.Count > 0)
+		{
+			Transform current = queue.Dequeue();
+
+			if (current.name == childName)
+				return current;
+
+			foreach (Transform grandChild in current)
+				queue.Enqueue(grandChild);
+		}
+
+		return null;
 	}
 
 	/// <summary>
-	/// Gets an array of components in a specified child of this Transform, includes inactive ones.
-	/// </summary>
-	/// <typeparam name="TComponent"></typeparam>
-	/// <param name="transform"></param>
-	/// <param name="childToSearch"></param>
-	/// <returns></returns>
-	public static TComponent[] GetComponentsInChildren<TComponent>(this Transform transform, string childToSearch)
-	{
-		Transform child = transform.Find(childToSearch);
-		return child.GetComponentsInChildren<TComponent>();
-	}
-
-	/// <summary>
-	/// Reset the local or world transform of a game object.
+	/// Resets the local or world transform of a game object.
 	/// </summary>
 	/// <param name="transform"></param>
 	/// <param name="isLocal"></param>

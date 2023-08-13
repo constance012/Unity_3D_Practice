@@ -22,9 +22,6 @@ MonoBehaviour:
     title: Common
     color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0}
   icon: {fileID: 0}
-  mesh: {fileID: 1773197216858952008, guid: f33a6750edda74241bd72bbd1b8fec7d, type: 3}
-  materials:
-  - {fileID: 2100000, guid: 89b8df5766a2dc1459b66909fd2f643e, type: 2}
   prefab: {fileID: 5855586643228379229, guid: c9841888fa5041d499ada59f73087c6a, type: 3}
   weight: 3.71
   weaponSlot: 0
@@ -32,8 +29,8 @@ MonoBehaviour:
   wieldType: 1
   useType: 2
   holderPositionOffset: {x: 0.15, y: 0, z: 0.05}
-  holderLocalEulerAngles: {x: 345.19815, y: 218.34825, z: 323.48434}
-  aimingPositionOffset: {x: 0, y: 0, z: 0}
+  holderLocalEulerAngles: {x: 345.19815, y: 218.3483, z: 323.48434}
+  aimingPositionOffset: {x: 0, y: 0.03, z: 0}
   rightHandGrip:
     localPosition: {x: 0.636, y: 0.014, z: -0.092}
     localEulerAngles: {x: 358.5475, y: 350.2878, z: 254.52022}
@@ -60,16 +57,19 @@ MonoBehaviour:
   trackingRigidity: 0
   bulletSpeed: 800
   bulletDrop: 200
-  bulletsPerShot: 6
+  bulletsPerShot: 7
   bulletMaxLifeTime: 3
   bulletSpread: {x: 0.07, y: 0.07}
-  reserveAmmo: 72
+  reserveAmmo: 8
   <MagazineCapacity>k__BackingField: 8
   currentMagazineAmmo: 8
   infiniteAmmo: 0
-  inactiveMagazine: 1
-  reloadTime: 1
+  magazineDropForce: 0
+  activeMagazine: 0
+  activeMagazineInHand: 0
+  reloadTime: 0.8
   canShootWhileReloading: 1
+  hasReloadAnimation: 1
   promptReload: 0
   isReloading: 0
   stability: 0.6

@@ -104,13 +104,13 @@ public class QuickPullingOrb : Interactable
 		int layerToCheck = 1 << this.gameObject.layer;
 		bool hitSomething = Physics.Raycast(ray, out RaycastHit hitInfo, interactRadius, layerToCheck);
 
-		if (hitSomething && hitInfo.transform.TryGetComponent<QuickPullingOrb>(out QuickPullingOrb instance))
+		if (hitSomething && hitInfo.transform.TryGetComponent<QuickPullingOrb>(out QuickPullingOrb Instance))
 		{
-			instance._mat.SetColor("_BaseColor", _readyColor);
-			instance._uiTextClone.SetActive(true);
+			Instance._mat.SetColor("_BaseColor", _readyColor);
+			Instance._uiTextClone.SetActive(true);
 
-			if (InputManager.instance.GetKeyDown(KeybindingActions.Interact) && !_isCoroutineRunning)
-				instance.Interact();
+			if (InputManager.Instance.GetKeyDown(KeybindingActions.Interact) && !_isCoroutineRunning)
+				Instance.Interact();
 		}
 		else
 		{

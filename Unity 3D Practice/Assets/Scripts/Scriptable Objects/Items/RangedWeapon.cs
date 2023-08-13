@@ -38,55 +38,65 @@ public sealed class RangedWeapon : Weapon
 		}
 	}
 
-	[Header("Gun Properties")]
-	[Space]
+	[Header("GUN PROPERTIES")]
 	
-	[Header("Gun Types")]
-	[Space]
+	[Header("Gun Types"), Space]
 	public GunType gunType;
 
-	[Header("Effect (If use raycast shooting)")]
-	[Space]
+	[Header("Effects (If use raycast shooting)"), Space]
 	public TrailRenderer bulletTracer;
 	public ParticleSystem bulletImpactEffect;
 	public ParticleSystem bulletCasing;
 
-	[Header("Projectile (If use prefab shooting).")]
-	[Space]
+	[Header("Projectiles (If use prefab shooting)."), Space]
 	public ProjectileBase projectilePrefab;
 	
 	[Range(90f, 1000f), Tooltip("How sharp does the projectile turn to reach its target? Measures in deg/s.")]
 	public float trackingRigidity;
 
-	[Header("Ammunition")]
-	[Space]
+	[Header("BULLETS"), Space]
+
+	[Header("Properties"), Space]
 	[Min(0f)] public float bulletSpeed = 1000f;
 	public float bulletDrop = 0f;
 	
 	[Min(1), Tooltip("How many bullets per shot? Most guns are 1, except the shotgun of course.")] 
 	public int bulletsPerShot = 1;
-	
 	[Min(3f)] public float bulletMaxLifeTime = 3f;
+
+	[Header("Spreading"), Space]
 	public Vector2 bulletSpread;
+	[Tooltip("AUTOMATIC ONLY: How fast would this weapon reach its max spread?")] public float spreadGainRate;
 
-	private List<Bullet> _bullets = new List<Bullet>();
+	[Header("AMMUNATION"), Space]
 
-	[Space]
+	[Header("Ammo Info"), Space]
 	[Min(0f)] public int reserveAmmo;
 
 	[field: SerializeField, Min(0f)]
 	public int MagazineCapacity { get; private set; }
-	[Min(0f)] public int currentMagazineAmmo;
-	public bool infiniteAmmo;
-	[Tooltip("Is the magazine game object of this gun inactive?")] public bool inactiveMagazine;
 	
-	[Space]
+	[Min(0f)] public int currentMagazineAmmo;
+	
+	public bool infiniteAmmo;
+
+	[Header("Magazine Info"), Space]
+	[Range(0f, 10f)] public float magazineDropForce;
+
+	[Tooltip("Is the magazine game object of this gun active?")]
+	public bool activeMagazine;
+
+	[Tooltip("Is the magazine game object detached to the player's hand active?")]
+	public bool activeMagazineInHand;
+
+	[Header("Reloading Info"), Space]
 	[Min(0f)] public float reloadTime;
 	public bool canShootWhileReloading;
+	public bool hasReloadAnimation;
 	[HideInInspector] public bool promptReload;
 	[HideInInspector] public bool isReloading;
 
-	[Header("Stats")]
+	[Header("STATS"), Space]
 	[Space]
 	public float stability;
 	[Min(0f)] public float range;
@@ -96,8 +106,15 @@ public sealed class RangedWeapon : Weapon
 	// Combine that with the bitmask of other layers we want to collide with the OR | operator. So we'll collide with only those layers.
 	// Invert the mask with the ~ operator, we'll collide with everything except those layers.
 	public const int LAYER_TO_RAYCAST = ~(1 << 6 | 1 << 11 | Physics.IgnoreRaycastLayer);
+	
+	// Properties.
+	public bool CanReload => reserveAmmo > 0 && currentMagazineAmmo < MagazineCapacity;
 
+	// Private fields.
+	private List<Bullet> _bullets = new List<Bullet>();
 	private Vector3 _bulletOrigin;
+	private Vector2 _currentSpread;
+
 
 	#region Bullets Management.
 	public void ClearBullets()
@@ -105,6 +122,8 @@ public sealed class RangedWeapon : Weapon
 		_bullets.ForEach(bullet => Destroy(bullet.tracer.gameObject));
 		_bullets.Clear();
 	}
+
+	public void ResetSpreading() => _currentSpread.Set(0f, 0f);
 
 	public override bool FireBullet(Vector3 rayOrigin, Vector3 rayDestination)
 	{
@@ -200,31 +219,22 @@ public sealed class RangedWeapon : Weapon
 	{
 		int firedBullets = MagazineCapacity - currentMagazineAmmo;
 
-		int reloadedAmmo;
 		if (reserveAmmo < firedBullets)
 		{
-			reloadedAmmo = currentMagazineAmmo + reserveAmmo;
+			currentMagazineAmmo += reserveAmmo;
 			reserveAmmo = 0;
 		}
 		else
 		{
-			reloadedAmmo = MagazineCapacity;
+			currentMagazineAmmo += firedBullets;
 			reserveAmmo -= firedBullets;
 		}
-
-		currentMagazineAmmo = reloadedAmmo;
 
 		isReloading = false;
 	}
 
 	public void SingleRoundReload()
 	{
-		if (reserveAmmo == 0)
-		{
-			isReloading = false;
-			return;
-		}
-
 		currentMagazineAmmo++;
 		reserveAmmo--;
 	}
@@ -257,13 +267,35 @@ public sealed class RangedWeapon : Weapon
 	{
 		for (int i = 0; i < bulletsPerShot; i++)
 		{
-			float spreadX = Random.Range(-bulletSpread.x, bulletSpread.x);
-			float spreadY = Random.Range(-bulletSpread.y, bulletSpread.y);
+			ApplySpreading(out float spreadX, out float spreadY);
 
 			Vector3 velocity = (direction + new Vector3(spreadX, spreadY, 0f)) * bulletSpeed;
 
 			Bullet bullet = new Bullet(_bulletOrigin, velocity, bulletTracer);
 			_bullets.Add(bullet);
+		}
+	}
+
+	private void ApplySpreading(out float spreadX, out float spreadY)
+	{
+		if (useType != UseType.Automatic)
+		{
+			spreadX = Random.Range(-bulletSpread.x, bulletSpread.x);
+			spreadY = Random.Range(-bulletSpread.y, bulletSpread.y);
+			return;
+		}
+
+		spreadX = Random.Range(-_currentSpread.x, _currentSpread.x);
+		spreadY = Random.Range(-_currentSpread.y, _currentSpread.y);
+
+		// The longer the user holds the fire button, the wider the spread.
+		if (_currentSpread.magnitude < bulletSpread.magnitude)
+		{
+			_currentSpread.x += Time.deltaTime * spreadGainRate;
+			_currentSpread.y += Time.deltaTime * spreadGainRate;
+
+			_currentSpread.x = Mathf.Clamp(_currentSpread.x, 0f, bulletSpread.x);
+			_currentSpread.y = Mathf.Clamp(_currentSpread.y, 0f, bulletSpread.y);
 		}
 	}
 

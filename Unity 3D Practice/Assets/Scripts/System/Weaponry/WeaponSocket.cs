@@ -28,9 +28,6 @@ public class WeaponSocket : MonoBehaviour
 	private Animator rigAnimator;
 	private TextMeshProUGUI ammoText;
 
-	private Weapon inHandWeapon;
-	private WeaponRecoil recoil;
-
 	private MultiPositionConstraint holdingPose;
 	private MultiPositionConstraint aimingPose;
 
@@ -40,19 +37,16 @@ public class WeaponSocket : MonoBehaviour
 	private Transform weaponPivot;
 	private Transform crosshairTarget;
 
-	private Transform rightHandGrip;
-	private Transform rightElbowHint;
-
-	private Transform leftHandGrip;
-	private Transform leftElbowHint;
-
 	private ParticleSystem muzzleFlash;
 
-	[ReadOnly] public bool forcedAiming;
+	public static bool ForcedAiming { get; private set; }
 
 	// Private fields.
+	private Weapon _inHandWeapon;
+	private FirearmMono _firearm;
 	private GameObject _magazineInHand;
 	private IEnumerator _reloadCoroutine;
+	
 	private float _timeForNextUse;
 	private bool _burstCompleted = true;
 
@@ -72,21 +66,15 @@ public class WeaponSocket : MonoBehaviour
 		weaponPivot = transform.Find("Weapon Pivot");
 		crosshairTarget = Camera.main.transform.Find("Crosshair Target");
 
-		rightHandGrip = weaponPivot.Find("Right Hand Grip");
-		rightElbowHint = transform.parent.Find("RigLayer_Hands IK/RightHandIK/Right Elbow Hint");
-
-		leftHandGrip = weaponPivot.Find("Left Hand Grip");
-		leftElbowHint = transform.parent.Find("RigLayer_Hands IK/LeftHandIK/Left Elbow Hint");
-
 		muzzleFlash = weaponPivot.GetComponentInChildren<ParticleSystem>("Muzzle Flash");
 	}
 
 	private void OnDisable()
 	{
-		if (inHandWeapon != null && inHandWeapon.weaponType == WeaponType.Ranged)
-			(inHandWeapon as RangedWeapon).ClearBullets();
+		if (_inHandWeapon != null && _inHandWeapon.weaponType == WeaponType.Ranged)
+			(_inHandWeapon as RangedWeapon).ClearBullets();
 
-		inHandWeapon = null;
+		_inHandWeapon = null;
 	}
 
 	private void Start()
@@ -97,19 +85,19 @@ public class WeaponSocket : MonoBehaviour
 		weaponEvent.weaponAnimationCallback.AddListener(OnWeaponEventCallback);
 		onWeaponDrop.AddListener(ClearOrientation);
 
-		ammoText.gameObject.SetActive(inHandWeapon != null);
+		ammoText.gameObject.SetActive(_inHandWeapon != null);
 	}
 
 	public void Update()
 	{
 		// Drop the weapon in hand.
-		if (InputManager.instance.GetKeyDown(KeybindingActions.DropItemInHand))
-			DropWeapon(inHandWeapon);
+		if (InputManager.Instance.GetKeyDown(KeybindingActions.DropItemInHand))
+			DropWeapon(_inHandWeapon);
 
-		if (inHandWeapon == null)
+		if (_inHandWeapon == null)
 			return;
 		
-		if (inHandWeapon.weaponType == WeaponType.Ranged)
+		if (_inHandWeapon.weaponType == WeaponType.Ranged)
 			UseRangedWeapon();
 	}
 
@@ -147,14 +135,14 @@ public class WeaponSocket : MonoBehaviour
 
 	public void GrabWeapon(Weapon weapon)
 	{
-		inHandWeapon = weapon;
+		_inHandWeapon = weapon;
 		GetWeaponRecoil(weapon.weaponSlot);
 
 		SetupOrientation();
 
-		if (inHandWeapon.weaponType == WeaponType.Ranged)
+		if (_inHandWeapon.weaponType == WeaponType.Ranged)
 		{
-			RangedWeapon rangedWeapon = inHandWeapon as RangedWeapon;
+			RangedWeapon rangedWeapon = _inHandWeapon as RangedWeapon;
 
 			ammoText.text = $"{rangedWeapon.currentMagazineAmmo} / {rangedWeapon.reserveAmmo}";
 			ammoText.gameObject.SetActive(true);
@@ -165,8 +153,8 @@ public class WeaponSocket : MonoBehaviour
 	{
 		ClearOrientation();
 
-		inHandWeapon = null;
-		recoil = null;
+		_inHandWeapon = null;
+		_firearm = null;
 		
 		ammoText.gameObject.SetActive(false);
 	}
@@ -182,11 +170,13 @@ public class WeaponSocket : MonoBehaviour
 		// Instantiate a dropped item prefab and throw it out.
 		Transform mainCamera = Camera.main.transform;
 
-		droppedItemPrefab.GetComponent<ItemPickup>().itemPrefab = weaponToDrop;
+		droppedItemPrefab.GetComponent<ItemPickup>().itemData = weaponToDrop;
 		Vector3 dropPosition = transform.position + mainCamera.forward;
 		Debug.Log("Drop position: " + dropPosition);
 
 		GameObject droppedWeapon = Instantiate(droppedItemPrefab, dropPosition, Quaternion.identity);
+
+		droppedWeapon.name = weaponToDrop.itemName;
 		droppedWeapon.GetComponent<Rigidbody>().AddForce(mainCamera.forward * 2f, ForceMode.Impulse);
 
 		// Remove the weapon from the weapons array.
@@ -208,7 +198,7 @@ public class WeaponSocket : MonoBehaviour
 		// Invoke the event.
 		onWeaponDrop?.Invoke();
 
-		inHandWeapon = null;
+		_inHandWeapon = null;
 	}
 
 	private void GetWeaponRecoil(WeaponSlot slot)
@@ -216,11 +206,11 @@ public class WeaponSocket : MonoBehaviour
 		switch (slot)
 		{
 			case WeaponSlot.Primary:
-				recoil = weaponParentPrimary.GetComponentInChildren<WeaponRecoil>();
+				_firearm = weaponParentPrimary.GetComponentInChildren<FirearmMono>();
 				break;
 
 			case WeaponSlot.Secondary:
-				recoil = weaponParentSecondary.GetComponentInChildren<WeaponRecoil>();
+				_firearm = weaponParentSecondary.GetComponentInChildren<FirearmMono>();
 				break;
 
 			case WeaponSlot.CloseRange:
@@ -229,28 +219,28 @@ public class WeaponSocket : MonoBehaviour
 				break;
 		}
 
-		if (recoil.rigAnimator == null)
-			recoil.rigAnimator = transform.parent.GetComponent<Animator>();
+		if (_firearm.rigAnimator == null)
+			_firearm.rigAnimator = transform.parent.GetComponent<Animator>();
 	}
 	#endregion
 
 	#region Weapon Orientation in Hands
 	public void ResetWeaponOffset(WeaponSlot slot)
 	{
-		if (inHandWeapon == null)
+		if (_inHandWeapon == null)
 			return;
 
-		string weaponName = inHandWeapon.itemName;
+		string weaponName = _inHandWeapon.itemName;
 		Debug.Log($"Reset the offset of {weaponName} to default.");
 
 		switch (slot)
 		{
 			case WeaponSlot.Primary:
-				weaponParentPrimary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHolsterOffset, Quaternion.identity);
+				weaponParentPrimary.transform.Find(weaponName).SetLocalPositionAndRotation(_inHandWeapon.inHolsterOffset, Quaternion.identity);
 				break;
 
 			case WeaponSlot.Secondary:
-				weaponParentSecondary.transform.Find(weaponName).SetLocalPositionAndRotation(inHandWeapon.inHolsterOffset, Quaternion.identity);
+				weaponParentSecondary.transform.Find(weaponName).SetLocalPositionAndRotation(_inHandWeapon.inHolsterOffset, Quaternion.identity);
 				break;
 		}
 	}
@@ -258,36 +248,18 @@ public class WeaponSocket : MonoBehaviour
 	private void SetupOrientation()
 	{
 		// Set the holding pose offset and rotation.
-		holdingPose.data.offset = inHandWeapon.holderPositionOffset;
-		holdingPose.transform.localRotation = Quaternion.Euler(inHandWeapon.holderLocalEulerAngles);
+		holdingPose.data.offset = _inHandWeapon.holderPositionOffset;
+		holdingPose.transform.localRotation = Quaternion.Euler(_inHandWeapon.holderLocalEulerAngles);
 
-		aimingPose.data.offset = inHandWeapon.aimingPositionOffset;
-
-		// Set the right hand's orientation.
-		rightHandGrip.SetLocalPositionAndRotation(inHandWeapon.rightHandGrip.localPosition,
-							Quaternion.Euler(inHandWeapon.rightHandGrip.localEulerAngles));
-
-		rightElbowHint.localPosition = inHandWeapon.rightHandGrip.elbowLocalPosition;
-
-		// Set the left hand's orientation.
-		leftHandGrip.SetLocalPositionAndRotation(inHandWeapon.leftHandGrip.localPosition,
-							Quaternion.Euler(inHandWeapon.leftHandGrip.localEulerAngles));
-
-		leftElbowHint.localPosition = inHandWeapon.leftHandGrip.elbowLocalPosition;
+		aimingPose.data.offset = _inHandWeapon.aimingPositionOffset;
 
 		// Set the muzzle flash position.
-		muzzleFlash.transform.localPosition = inHandWeapon.muzzleFlashLocalPosisiton;
+		muzzleFlash.transform.localPosition = _inHandWeapon.muzzleFlashLocalPosisiton;
 		muzzleFlash.transform.rotation = Quaternion.LookRotation(weaponPivot.right, muzzleFlash.transform.up);
 	}
 
 	private void ClearOrientation()
 	{
-		rightHandGrip.ResetTransform(true);
-		rightElbowHint.localPosition = Vector3.zero;
-
-		leftHandGrip.ResetTransform(true);
-		leftElbowHint.localPosition = Vector3.zero;
-
 		muzzleFlash.transform.ResetTransform(true);
 	}
 	#endregion
@@ -297,22 +269,26 @@ public class WeaponSocket : MonoBehaviour
 	{
 		_timeForNextUse -= Time.deltaTime;
 
-		RangedWeapon weapon = inHandWeapon as RangedWeapon;
+		RangedWeapon weapon = _inHandWeapon as RangedWeapon;
 
 		weapon.UpdateBullets(Time.deltaTime);
 
-		if (!weapon.isReloading && (InputManager.instance.GetKeyDown(KeybindingActions.Reload) || weapon.promptReload))
+		if (!weapon.isReloading && (InputManager.Instance.GetKeyDown(KeybindingActions.Reload) || weapon.promptReload))
 			ReloadWeapon(weapon);
 
 		// Use the weapon in hand only if the player is aiming.
-		if (!PlayerActions.isAiming)
+		if (!PlayerActions.IsAiming)
 			return;
 
 		if (_timeForNextUse <= 0f)
+		{
 			ShootWeapon(weapon);
+
+			if (weapon.currentMagazineAmmo == 0)
+				_firearm.firearmAnimator.TryPlay("Empty Magazine");
+		}
 	}
 	#endregion
-
 
 	#region Weapon shooting.
 	private void ShootWeapon(RangedWeapon weapon)
@@ -320,21 +296,25 @@ public class WeaponSocket : MonoBehaviour
 		switch (weapon.useType)
 		{
 			case UseType.Automatic:
-				if (InputManager.instance.GetKey(KeybindingActions.PrimaryAttack))
+				if (InputManager.Instance.GetKey(KeybindingActions.PrimaryAttack))
 				{
 					SingleFire(weapon);
+				}
+				else
+				{
+					weapon.ResetSpreading();
 				}
 				break;
 
 			case UseType.Burst:
-				if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack) && _burstCompleted)
+				if (InputManager.Instance.GetKeyDown(KeybindingActions.PrimaryAttack) && _burstCompleted)
 				{
 					StartCoroutine(BurstFire(weapon));
 				}
 				break;
 
 			case UseType.Single:
-				if (InputManager.instance.GetKeyDown(KeybindingActions.PrimaryAttack))
+				if (InputManager.Instance.GetKeyDown(KeybindingActions.PrimaryAttack))
 				{
 					SingleFire(weapon);
 				}
@@ -355,12 +335,11 @@ public class WeaponSocket : MonoBehaviour
 		if (weapon.FireBullet(rayOrigin, rayDestination))
 		{
 			muzzleFlash.Emit(1);
-			recoil.GenerateRecoil();
+			_firearm.GenerateRecoil(weapon.itemName);
 
 			ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
+			_timeForNextUse = weapon.useSpeed;
 		}
-
-		_timeForNextUse = weapon.useSpeed;
 	}
 
 	private IEnumerator BurstFire(RangedWeapon weapon)
@@ -371,8 +350,9 @@ public class WeaponSocket : MonoBehaviour
 		ForceStopReloading(weapon);
 
 		_burstCompleted = false;
+		int shotCount = Mathf.Min(weapon.currentMagazineAmmo, 3);
 
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < shotCount; i++)
 		{
 			yield return new WaitForSeconds(.1f);
 
@@ -394,6 +374,7 @@ public class WeaponSocket : MonoBehaviour
 		if (_reloadCoroutine != null)
 		{
 			StopCoroutine(_reloadCoroutine);
+			Destroy(_magazineInHand);
 
 			rigAnimator.Play("Stand By", 2);
 			weapon.isReloading = false;
@@ -406,13 +387,13 @@ public class WeaponSocket : MonoBehaviour
 		weapon.promptReload = false;
 		weapon.isReloading = true;
 
-		if (weapon.reserveAmmo == 0 || weapon.currentMagazineAmmo == weapon.MagazineCapacity)
+		if (!weapon.CanReload)
 		{
 			weapon.isReloading = false;
 			return;
 		}
 
-		forcedAiming = true;
+		ForcedAiming = true;
 
 		switch (weapon.gunType)
 		{
@@ -430,15 +411,17 @@ public class WeaponSocket : MonoBehaviour
 
 	private IEnumerator StandardReload(RangedWeapon weapon)
 	{
+		rigAnimator.Play($"Reloading {weapon.itemName}", 2, 0f);
+
 		yield return new WaitForSeconds(weapon.reloadTime);
 
-		weapon.StandardReload();
-		ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
+		if (!weapon.hasReloadAnimation)
+			LoadNewMagazine(weapon);
 
 		weapon.isReloading = false;
 		_reloadCoroutine = null;
 
-		forcedAiming = false;
+		ForcedAiming = false;
 		onWeaponReloadingDone?.Invoke();
 	}
 
@@ -448,9 +431,7 @@ public class WeaponSocket : MonoBehaviour
 
 		yield return new WaitForSeconds(.5f);
 		
-		int firedBullets = weapon.MagazineCapacity - weapon.currentMagazineAmmo;
-
-		for (int i = firedBullets; i > 0; i--)
+		while (weapon.CanReload)
 		{
 			rigAnimator.Play($"Reloading {weapon.itemName}", 2, 0f);
 
@@ -467,7 +448,7 @@ public class WeaponSocket : MonoBehaviour
 		weapon.isReloading = false;
 		_reloadCoroutine = null;
 
-		forcedAiming = false;
+		ForcedAiming = false;
 		onWeaponReloadingDone?.Invoke();
 	}
 
@@ -478,7 +459,7 @@ public class WeaponSocket : MonoBehaviour
 	{
 		action = action.Trim().ToLower().Replace(' ', '_');
 
-		RangedWeapon weapon = inHandWeapon as RangedWeapon;
+		RangedWeapon weapon = _inHandWeapon as RangedWeapon;
 
 		switch (action)
 		{
@@ -486,13 +467,12 @@ public class WeaponSocket : MonoBehaviour
 				EjectBulletCasing(weapon);
 				break;
 
-			case "drop_magazine_gun":
+			case "drop_magazine_from_gun":
+				DropMagazineFromGun(weapon);
 				break;
 
-			case "drop_magazine_left_hand":
-				break;
-
-			case "drop_magazine_right_hand":
+			case "drop_magazine_from_hand":
+				DropMagazineFromHand(weapon);
 				break;
 
 			case "grab_new_magazine":
@@ -504,11 +484,15 @@ public class WeaponSocket : MonoBehaviour
 				break;
 
 			case "detach_magazine_to_left_hand":
-				DetachMagazineToLeftHand();
+				DetachMagazineToLeftHand(weapon);
 				break;
 
 			case "detach_magazine_to_right_hand":
-				DetachMagazineToRightHand();
+				DetachMagazineToRightHand(weapon);
+				break;
+
+			case "load_new_magazine":
+				LoadNewMagazine(weapon);
 				break;
 
 			default:
@@ -518,34 +502,66 @@ public class WeaponSocket : MonoBehaviour
 
 	private void EjectBulletCasing(RangedWeapon weapon)
 	{
-		Instantiate(weapon.bulletCasing, recoil.caseEjector.position, recoil.caseEjector.rotation);
+		Instantiate(weapon.bulletCasing, _firearm.caseEjector.position, _firearm.caseEjector.rotation);
 	}
 
-	private void DetachMagazineToLeftHand()
+	private void DropMagazineFromGun(RangedWeapon weapon)
 	{
-		_magazineInHand = Instantiate(recoil.magazine, leftHand, true);
+		GameObject droppedMagazine = Instantiate(_firearm.magazine, _firearm.magazine.WorldPosition(), _firearm.magazine.WorldRotation());
 
-		recoil.magazine.SetActive(false);
+		droppedMagazine.AddComponent<Rigidbody>().AddForce(-_firearm.transform.up * weapon.magazineDropForce, ForceMode.Impulse);
+		droppedMagazine.AddComponent<BoxCollider>();
+		droppedMagazine.transform.localScale *= weapon.inHandScale;
+
+		_firearm.magazine.SetActive(false);
 	}
 
-	private void DetachMagazineToRightHand()
+	private void DropMagazineFromHand(RangedWeapon weapon)
 	{
-		_magazineInHand = Instantiate(recoil.magazine, rightHand, true);
+		GameObject droppedMagazine = Instantiate(_magazineInHand, _magazineInHand.WorldPosition(), _magazineInHand.WorldRotation());
 
-		recoil.magazine.SetActive(false);
+		droppedMagazine.AddComponent<Rigidbody>();
+		droppedMagazine.AddComponent<BoxCollider>();
+		droppedMagazine.transform.localScale *= weapon.inHandScale;
+
+		_magazineInHand.SetActive(false);
 	}
 
 	private void GrabNewMagazine()
 	{
 		_magazineInHand.SetActive(true);
 	}
-
+	
 	private void AttachMagazineToGun(RangedWeapon weapon)
 	{
-		if (!weapon.inactiveMagazine)
-			recoil.magazine.SetActive(true);
+		_firearm.magazine.SetActive(weapon.activeMagazine);
 
 		Destroy(_magazineInHand);
+	}
+	
+	private void DetachMagazineToLeftHand(RangedWeapon weapon)
+	{
+		_magazineInHand = Instantiate(_firearm.magazine, leftHand, true);
+
+		_magazineInHand.SetActive(weapon.activeMagazineInHand);
+		_firearm.magazine.SetActive(weapon.activeMagazine);
+	}
+
+	private void DetachMagazineToRightHand(RangedWeapon weapon)
+	{
+		_magazineInHand = Instantiate(_firearm.magazine, rightHand, true);
+		
+		_magazineInHand.SetActive(weapon.activeMagazineInHand);
+		_firearm.magazine.SetActive(weapon.activeMagazine);
+	}
+
+	private void LoadNewMagazine(RangedWeapon weapon)
+	{
+		if (weapon.currentMagazineAmmo == 0)
+			_firearm.firearmAnimator.TryPlay("Reloaded Magazine");
+
+		weapon.StandardReload();
+		ammoText.text = $"{weapon.currentMagazineAmmo} / {weapon.reserveAmmo}";
 	}
 	#endregion
 }

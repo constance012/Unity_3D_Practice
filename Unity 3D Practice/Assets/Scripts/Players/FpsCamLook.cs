@@ -54,7 +54,7 @@ public class FpsCamLook : MonoBehaviour
 		// Gameobject rotates counter clockwise along an axis if that axis rotation value is possitive.
 		xRotation -= mouseY;
 
-		if (PlayerActions.isAiming)
+		if (PlayerActions.IsAiming)
 			xRotation = Mathf.Clamp(xRotation, -40f, 40f);  // Limit the angle of rotation.
 		else
 			xRotation = Mathf.Clamp(xRotation, -70f, 70f);  // Limit the angle of rotation.

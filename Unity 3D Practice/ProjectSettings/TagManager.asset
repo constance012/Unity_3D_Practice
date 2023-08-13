@@ -13,6 +13,7 @@ TagManager:
   - WeaponSocket
   - TPSAimingCam
   - WorldCanvas
+  - DroppedItemsHolder
   layers:
   - Default
   - TransparentFX

@@ -12,8 +12,7 @@ public class Item : ScriptableObject
 		public Color color;
 	}
 
-	[Header("ID")]
-	[Space]
+	[Header("ID"), Space]
 
 	[ReadOnly] public string id;
 	[ContextMenu("Generate ID")]
@@ -22,8 +21,7 @@ public class Item : ScriptableObject
 		id = Guid.NewGuid().ToString();
 	}
 
-	[Header("Basic Info")]
-	[Space]
+	[Header("BASIC INFO"), Space]
 	public ItemCategory category;
 	[ReadOnly] public int slotIndex = -1;
 
@@ -33,10 +31,7 @@ public class Item : ScriptableObject
 	public Rarity rarity;
 	public Sprite icon;
 
-	[Header("Base Properties")]
-	[Space]
-	public Mesh mesh;
-	public Material[] materials;
+	[Header("BASE PROPERTIES"), Space]
 	public GameObject prefab;
 
 	public float weight;

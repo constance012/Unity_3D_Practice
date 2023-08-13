@@ -30,24 +30,13 @@ public class Weapon : Item
 		Single
 	}
 
-	[Serializable]
-	public struct HandGripReferences
-	{
-		public Vector3 localPosition;
-		public Vector3 localEulerAngles;
-
-		public Vector3 elbowLocalPosition;
-	}
-
-	[Header("Types")]
-	[Space]
+	[Header("TYPES"), Space]
 	public WeaponSlot weaponSlot;
 	public WeaponType weaponType;
 	public WieldType wieldType;
 	public UseType useType;
 
-	[Header("Holding and Aiming Orientation")]
-	[Space]
+	[Header("HOLDING AND AIMING POSES"), Space]
 	[Tooltip("The offset of the Multi-position Constraint component of the holding pose.")]
 	public Vector3 holderPositionOffset;
 	public Vector3 holderLocalEulerAngles;
@@ -55,20 +44,14 @@ public class Weapon : Item
 	[Tooltip("The offset of the Multi-position Constraint component of the aiming pose.")]
 	public Vector3 aimingPositionOffset;
 
-	[Header("Orientation in Hand")]
-	[Space]
-	public HandGripReferences rightHandGrip;
-	public HandGripReferences leftHandGrip;
-	[Space]
+	[Header("ORIENTATION IN HANDS"), Space]
 	public Vector3 inHolsterOffset;
 	public float inHandScale = 1f;
 	public bool rebindAnimator;
 	[Space]
 	public Vector3 muzzleFlashLocalPosisiton;
 
-	[Header("Shared Properties")]
-	[Space]
-
+	[Header("SHARED PROPERTIES"), Space]
 	[Min(0f)]
 	public float baseDamage;
 	public float durability;

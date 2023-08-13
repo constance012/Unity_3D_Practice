@@ -27,7 +27,7 @@ public abstract class Interactable : MonoBehaviour
 		{
 			// Set some outline or display item's name on the screen.
 
-			if (!hasInteracted && InputManager.instance.GetKeyDown(KeybindingActions.Interact))
+			if (!hasInteracted && InputManager.Instance.GetKeyDown(KeybindingActions.Interact))
 			{
 				Interact();
 				hasInteracted = true;

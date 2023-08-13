@@ -15,20 +15,21 @@ public class AnimationHandler : MonoBehaviour
 	public static int isJumpingHash;
 
 	public static int holsterWeaponHash;
+	public static int IsAimingHash;
 	public static int endAimingHash;
 
 	public static int endReloadingHash;
 
 	// Private fields.
-	private Transform headLookTarget;
-	public static bool isChangingRigWeight { get; private set; }
+	private Transform _headLookTarget;
+	public static bool IsChangingRigWeight { get; private set; }
 
 	private void Awake()
 	{
 		animator = GetComponent<Animator>();
 		rigBuilder = GetComponent<RigBuilder>();
 
-		headLookTarget = Camera.main.transform.Find("Head Look Target");
+		_headLookTarget = Camera.main.transform.Find("Head Look Target");
 	}
 
 	private void Start()
@@ -42,6 +43,7 @@ public class AnimationHandler : MonoBehaviour
 
 		// Rig layers animator.
 		holsterWeaponHash = Animator.StringToHash("HolsterWeapon");
+		IsAimingHash = Animator.StringToHash("IsAiming");
 		endAimingHash = Animator.StringToHash("EndAiming");
 
 		endReloadingHash = Animator.StringToHash("EndReloading");
@@ -54,7 +56,7 @@ public class AnimationHandler : MonoBehaviour
 		animator.SetFloat(velZHash, PlayerMovement.velocityZ);
 
 		// Handle IK contraints.
-		if (isChangingRigWeight)
+		if (IsChangingRigWeight)
 			return;
 
 		ConstrainLookAtIK();
@@ -71,7 +73,7 @@ public class AnimationHandler : MonoBehaviour
 
 	private void ConstrainLookAtIK()
 	{
-		Vector3 headLookAtLocal = transform.InverseTransformPoint(headLookTarget.position);
+		Vector3 headLookAtLocal = transform.InverseTransformPoint(_headLookTarget.position);
 
 		// If the target is behind the player, then gradually decreases the weight to 0 in half a second.
 		if (headLookAtLocal.z < 0f)
@@ -82,14 +84,14 @@ public class AnimationHandler : MonoBehaviour
 
 	public static IEnumerator ChangeRigLayerWeight(string rigLayerName, RigLayerWeightControl control, float newWeight, float duration = 1f)
 	{
-		isChangingRigWeight = true;
+		IsChangingRigWeight = true;
 
 		rigLayerName = ("RigLayer_" + rigLayerName).ToLower();
 		Rig targetRig = rigBuilder.layers.Find(rig => rig.name.ToLower().Equals(rigLayerName)).rig;
 
 		if (targetRig == null)
 		{
-			isChangingRigWeight = false;
+			IsChangingRigWeight = false;
 			yield break;
 		}
 
@@ -114,6 +116,6 @@ public class AnimationHandler : MonoBehaviour
 				break;
 		}
 
-		isChangingRigWeight = false;
+		IsChangingRigWeight = false;
 	}
 }

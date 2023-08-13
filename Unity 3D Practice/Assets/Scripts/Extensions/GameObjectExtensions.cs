@@ -2,13 +2,16 @@
 
 public static class GameObjectExtensions
 {
-	public static TComponent GetComponentWithTag<TComponent>(string tag)
+	public static Vector3 WorldPosition(this GameObject gameObject) => gameObject.transform.position;
+	public static Quaternion WorldRotation(this GameObject gameObject) => gameObject.transform.rotation;
+
+	public static TComponent GetComponentWithTag<TComponent>(string tag) where TComponent : Component
 	{
 		GameObject gameObject = GameObject.FindWithTag(tag);
 		return gameObject.GetComponent<TComponent>();
 	}
 
-	public static TComponent GetComponentWithTag<TComponent>(string tag, string childName)
+	public static TComponent GetComponentWithTag<TComponent>(string tag, string childName) where TComponent : Component
 	{
 		GameObject gameObject = GameObject.FindWithTag(tag);
 		Transform child = gameObject.transform.Find(childName);
@@ -33,7 +36,7 @@ public static class GameObjectExtensions
 		Transform placeholderSphere = player.transform.Find("Placeholder Sphere");
 		Transform model = player.transform.Find("Model");
 
-		CameraManager.instance.ToggleMovementScript(CameraSwitcher.activeCam, false);
+		CameraManager.Instance.ToggleMovementScript(CameraSwitcher.activeCam, false);
 		actionScript.OnWeaponDrop();
 		actionScript.enabled = false;
 
@@ -51,7 +54,7 @@ public static class GameObjectExtensions
 		Transform model = player.transform.Find("Model");
 		Animator playerAnimator = player.GetComponent<Animator>();
 
-		CameraManager.instance.ToggleMovementScript(CameraSwitcher.activeCam, true);
+		CameraManager.Instance.ToggleMovementScript(CameraSwitcher.activeCam, true);
 		playerAnimator.Rebind();
 
 		actionScript.enabled = true;

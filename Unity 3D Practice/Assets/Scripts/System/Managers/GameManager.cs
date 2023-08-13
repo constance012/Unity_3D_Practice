@@ -1,24 +1,10 @@
 ﻿using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
-	public static GameManager instance { get; private set; }
-
 	[Header("Debugging")]
 	[Space]
 	public bool allowPausingPlaymode;
-
-	private void Awake()
-	{
-		if (instance == null)
-			instance = this;
-		else
-		{
-			Debug.LogWarning("More than one instance of Input Manager found!!");
-			Destroy(gameObject);
-			return;
-		}
-	}
 
 	private void Update()
 	{

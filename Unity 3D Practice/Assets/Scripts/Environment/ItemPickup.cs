@@ -1,37 +1,36 @@
 using UnityEngine;
 using CSTGames.CommonEnums;
+using UnityEditor.Rendering;
 
 public class ItemPickup : Interactable
 {
-	[Header("Item")]
+	[Header("Item Scriptable Object")]
 	[Space]
-	public Item itemPrefab;
-	private Item currentItem;
-	private WeaponSocket weaponSocket;
+	public Item itemData;
 
-	// This dropped item's components.
-	private MeshCollider meshCollider;
-	private MeshRenderer meshRenderer;
-	private MeshFilter meshFilter;
-	private Rigidbody rb;
+	private static Transform s_DroppedItemsHolder;
+
+	// Private fields.
+	private Item _currentItem;
+	private WeaponSocket _weaponSocket;
+	private Rigidbody _rb;
 
 	protected override void Awake()
 	{
 		base.Awake();
 
-		weaponSocket = GameObjectExtensions.GetComponentWithTag<WeaponSocket>("WeaponSocket");
-		
-		meshCollider = GetComponent<MeshCollider>();
-		meshRenderer = GetComponent<MeshRenderer>();
-		meshFilter = GetComponent<MeshFilter>();
-		rb = GetComponent<Rigidbody>();
+		if (s_DroppedItemsHolder == null)
+			s_DroppedItemsHolder = GameObject.FindWithTag("DroppedItemsHolder").transform;
+
+		_weaponSocket = GameObjectExtensions.GetComponentWithTag<WeaponSocket>("WeaponSocket");
+		_rb = GetComponent<Rigidbody>();
 	}
 
 	private void Start()
 	{
-		currentItem = Instantiate(itemPrefab);
-		currentItem.name = itemPrefab.itemName;
-		AddItem();
+		_currentItem = Instantiate(itemData);
+		_currentItem.name = itemData.itemName;
+		InstantiateItem();
 	}
 
 	public override void Interact()
@@ -41,26 +40,28 @@ public class ItemPickup : Interactable
 		Pickup();
 	}
 
-	public void AddItem()
+	private void InstantiateItem()
 	{
-		meshFilter.mesh = currentItem.mesh;
-		meshCollider.sharedMesh = currentItem.mesh;
-		meshRenderer.materials = currentItem.materials;
+		if (transform.parent != s_DroppedItemsHolder)
+			transform.parent = s_DroppedItemsHolder;
 
-		rb.mass = currentItem.weight;
+		GameObject item = Instantiate(_currentItem.prefab, this.transform);
+		item.name = _currentItem.name;
+
+		_rb.mass = _currentItem.weight;
 	}
 
 	private void Pickup()
 	{
-		Debug.Log($"Picking up {currentItem.name}.");
+		Debug.Log($"Picking up {_currentItem.name}.");
 
-		if (currentItem.category == ItemCategory.Weapon)
+		if (_currentItem.category == ItemCategory.Weapon)
 		{
-			Weapon weapon = currentItem as Weapon;
+			Weapon weapon = _currentItem as Weapon;
 			int slotIndex = (int)weapon.weaponSlot;
 
-			PlayerActions.needToRebindAnimator = weapon.rebindAnimator;
-			weaponSocket.AddWeaponToHolder(weapon);
+			PlayerActions.NeedToRebindAnimator = weapon.rebindAnimator;
+			_weaponSocket.AddWeaponToHolder(weapon);
 
 			PlayerActions.weapons[slotIndex] = weapon;
 		}

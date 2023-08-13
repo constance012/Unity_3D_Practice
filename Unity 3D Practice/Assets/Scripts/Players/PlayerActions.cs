@@ -18,12 +18,12 @@ public class PlayerActions : MonoBehaviour
 	public static Weapon[] weapons = new Weapon[4];
 
 	[HideInInspector] public WeaponSocket weaponSocket;
-	private Weapon currentWeapon;
+	private Weapon _currentWeapon;
 
 	// Properties.
-	public static bool needToRebindAnimator { get; set; }
-	public static bool isAiming { get; private set; }
-	public static bool isUnequipingDone { get; set; }
+	public static bool NeedToRebindAnimator { get; set; }
+	public static bool IsAiming { get; private set; }
+	public static bool IsUnequipingDone { get; set; }
 
 	// Private fields.
 	private bool _switchingWeapon;
@@ -40,11 +40,11 @@ public class PlayerActions : MonoBehaviour
 	{
 		SelectWeapon();
 
-		if (currentWeapon == null || _switchingWeapon)
+		// Stop aiming when unarmed or is switching weapons.
+		if (_currentWeapon == null || _switchingWeapon)
 		{
-			// Stop aiming if was doing so.
-			if (isAiming)
-				HandleAiming();
+			IsAiming = false;
+			SetAimingBehaviour(false, false);
 
 			return;
 		}
@@ -73,7 +73,7 @@ public class PlayerActions : MonoBehaviour
 	{
 		if (state)
 		{
-			rigAnimator.Play($"Start Aiming {currentWeapon.itemName}", 1);
+			rigAnimator.Play($"Start Aiming {_currentWeapon.itemName}", 1);
 
 			StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Increase, 1f, .5f));
 		}
@@ -86,7 +86,7 @@ public class PlayerActions : MonoBehaviour
 		}
 		
 		crosshair.SetActive(state);
-		isAiming = state;
+		IsAiming = state;
 	}
 
 	private void CheckForAimingInput()
@@ -94,46 +94,46 @@ public class PlayerActions : MonoBehaviour
 		if (_switchingWeapon)
 			return;
 
-		if (weaponSocket.forcedAiming)
+		if (WeaponSocket.ForcedAiming)
 		{
-			isAiming = true;
+			IsAiming = true;
 			return;
 		}
 
 		if (holdToAim)
 		{
-			isAiming = false;
+			IsAiming = false;
 
 			// Check aiming.
 			if (Input.GetKey(KeyCode.Mouse1))
-				isAiming = true;
+				IsAiming = true;
 		}
 		else if (Input.GetKeyDown(KeyCode.Mouse1))
-			isAiming = !isAiming;
+			IsAiming = !IsAiming;
 	}
 
 	private void HandleAiming()
 	{
-		bool wasAiming = isAiming;
+		bool wasAiming = IsAiming;
 
 		CheckForAimingInput();
 		
 		// What to change when starts of stops aiming.
-		if (wasAiming != isAiming)
+		if (wasAiming != IsAiming)
 		{
 			StopAllCoroutines();
 			
-			SetAimingBehaviour(isAiming);
+			SetAimingBehaviour(IsAiming);
 		}
 	}
 	#endregion
 
 	private void EquipWeapon(bool unequip = false)
 	{
-		switch (currentWeapon.weaponType)
+		switch (_currentWeapon.weaponType)
 		{
 			case WeaponType.Ranged:
-				RangedWeapon rangedWeapon = currentWeapon as RangedWeapon;
+				RangedWeapon rangedWeapon = _currentWeapon as RangedWeapon;
 
 				if (!unequip)
 					rigAnimator.Play($"Ranged-Equip {rangedWeapon.itemName}");
@@ -150,34 +150,34 @@ public class PlayerActions : MonoBehaviour
 
 	private IEnumerator SwitchWeapon(int newWeaponIndex)
 	{
-		SetAimingBehaviour(false, isAiming);
+		SetAimingBehaviour(false, IsAiming);
 
 		_switchingWeapon = true;
-		isUnequipingDone = true;
+		IsUnequipingDone = true;
 
 		// Unequip the current weapon.
-		if (currentWeapon != null)
+		if (_currentWeapon != null)
 		{
-			isUnequipingDone = false;
+			IsUnequipingDone = false;
 
 			EquipWeapon(true);
 			weaponSocket.UnequipWeapon();
 		}
 
-		yield return new WaitUntil(() => isUnequipingDone);
+		yield return new WaitUntil(() => IsUnequipingDone);
 
 		// If the new weapon is the same as the current one, switch to unarmed state.
-		if (currentWeapon == weapons[newWeaponIndex] || weapons[newWeaponIndex] == null)
+		if (_currentWeapon == weapons[newWeaponIndex] || weapons[newWeaponIndex] == null)
 		{
 			rigAnimator.Play("Unarmed");
-			currentWeapon = null;
+			_currentWeapon = null;
 		}
 		// Else, equip the new weapon.
 		else
 		{
-			currentWeapon = weapons[newWeaponIndex];
+			_currentWeapon = weapons[newWeaponIndex];
 
-			weaponSocket.GrabWeapon(currentWeapon);
+			weaponSocket.GrabWeapon(_currentWeapon);
 
 			EquipWeapon();
 		}
@@ -206,15 +206,15 @@ public class PlayerActions : MonoBehaviour
 	/// </summary>
 	public void OnWeaponPickup(bool forcedRebind = false)
 	{
-		if (needToRebindAnimator || forcedRebind)
+		if (NeedToRebindAnimator || forcedRebind)
 		{
-			SetAimingBehaviour(false, isAiming);
+			SetAimingBehaviour(false, IsAiming);
 
 			// Switch back to the previous holding weapon after rebinding the animator.
-			if (currentWeapon != null)
+			if (_currentWeapon != null)
 			{
-				int indexBeforeRebind = (int)currentWeapon.weaponSlot;
-				currentWeapon = null;
+				int indexBeforeRebind = (int)_currentWeapon.weaponSlot;
+				_currentWeapon = null;
 
 				rigAnimator.Rebind();
 
@@ -224,7 +224,7 @@ public class PlayerActions : MonoBehaviour
 			else
 				rigAnimator.Rebind();
 
-			needToRebindAnimator = false;
+			NeedToRebindAnimator = false;
 		}
 	}
 
@@ -233,23 +233,23 @@ public class PlayerActions : MonoBehaviour
 	/// </summary>
 	public void OnWeaponDrop()
 	{
-		if (currentWeapon == null)
+		if (_currentWeapon == null)
 			return;
 
-		SetAimingBehaviour(false, isAiming);
+		SetAimingBehaviour(false, IsAiming);
 		rigAnimator.Play("Unarmed");
 
-		weaponSocket.ResetWeaponOffset(currentWeapon.weaponSlot);
+		weaponSocket.ResetWeaponOffset(_currentWeapon.weaponSlot);
 		
 		StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, 0f));
 
 		transform.rotation = Quaternion.Euler(Camera.main.transform.eulerAngles.y * Vector3.up);
 		
-		currentWeapon = null;
+		_currentWeapon = null;
 	}
 
 	public void OnWeaponReloadingDone()
 	{
-		SetAimingBehaviour(false, isAiming);
+		SetAimingBehaviour(false, IsAiming);
 	}
 }

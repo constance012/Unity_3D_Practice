@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d064fed358cdf479c17a9d5bc61244, type: 3}
+  m_Name: Vintage Pistol
+  m_EditorClassIdentifier: 
+  id: 4dac68c8-7199-4f70-99a6-0c8502991436
+  category: 2
+  slotIndex: -1
+  itemName: Vintage Pistol
+  description: A single-action, recoil-operated, semi-automatic pistol. It has several
+    worned spots because of the passage of time, but it's still a deadly weapon in
+    the hands of a skillful marksman.
+  rarity:
+    title: Uncommon
+    color: {r: 0.18632075, g: 0.4593627, b: 0.745283, a: 1}
+  icon: {fileID: 0}
+  prefab: {fileID: 4210100720165400533, guid: 87e308cb23eea97419b3c2623d8bb3fa, type: 3}
+  weight: 1.1
+  weaponSlot: 1
+  weaponType: 0
+  wieldType: 1
+  useType: 2
+  holderPositionOffset: {x: 0.05, y: -0.5, z: 0}
+  holderLocalEulerAngles: {x: 0, y: 270, z: 50}
+  aimingPositionOffset: {x: -0.05, y: 0.03, z: 0}
+  rightHandGrip:
+    localPosition: {x: 0.946, y: -0.069, z: -0.049}
+    localEulerAngles: {x: 0, y: 0, z: 275.48398}
+    elbowLocalPosition: {x: 0.233, y: 1.1152, z: 0.076}
+  leftHandGrip:
+    localPosition: {x: 0.95, y: -0.101, z: 0.07}
+    localEulerAngles: {x: 346.912, y: 185.762, z: 88.97502}
+    elbowLocalPosition: {x: -0.1843, y: 1.2283, z: 0.184}
+  inHolsterOffset: {x: 0, y: 0, z: 0}
+  inHandScale: 1
+  rebindAnimator: 1
+  muzzleFlashLocalPosisiton: {x: 0.44, y: 0.18, z: -0.163}
+  baseDamage: 20
+  durability: 100
+  knockBack: 1.8
+  baseCriticalChance: 14.6
+  useSpeed: 0.5
+  sellPrice: 720
+  gunType: 0
+  bulletTracer: {fileID: 439671133536590696, guid: 8774c151cc39505409c940c3be000c04, type: 3}
+  bulletImpactEffect: {fileID: 6835190806984127818, guid: be2e282380d13eb49a76d739139c523c, type: 3}
+  bulletCasing: {fileID: 198454335914372596, guid: a12bdde7557f6a64cb021f6e2d55c7ed, type: 3}
+  projectilePrefab: {fileID: 0}
+  trackingRigidity: 0
+  bulletSpeed: 800
+  bulletDrop: 200
+  bulletsPerShot: 1
+  bulletMaxLifeTime: 3
+  bulletSpread: {x: 0.01, y: 0.01}
+  spreadGainRate: 0
+  reserveAmmo: 63
+  <MagazineCapacity>k__BackingField: 7
+  currentMagazineAmmo: 7
+  infiniteAmmo: 0
+  magazineDropForce: 2
+  activeMagazine: 1
+  activeMagazineInHand: 0
+  reloadTime: 2.5
+  canShootWhileReloading: 0
+  hasReloadAnimation: 1
+  promptReload: 0
+  isReloading: 0
+  stability: 0.85
+  range: 50
+  impactForce: 60

@@ -874,46 +874,10 @@ AnimationClip:
   - serializedVersion: 2
     curve:
       serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalEulerAngles.z
-    path: Weapon Socket/Weapon Pivot
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalEulerAngles.y
-    path: Weapon Socket/Weapon Pivot
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalEulerAngles.x
-    path: Weapon Socket/Weapon Pivot
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -0.624
+        value: 49.614
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -922,16 +886,16 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.16666667
-        value: -172.316
-        inSlope: -25.008009
-        outSlope: -25.008009
+        value: -127.291
+        inSlope: 0
+        outSlope: 0
         tangentMode: 136
         weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.33333334
-        value: -174.4
+        value: -79.33301
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -940,7 +904,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.41666666
-        value: -174.4
+        value: -79.33301
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -949,7 +913,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.75
-        value: -179.376
+        value: -130.386
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -958,7 +922,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.8833333
-        value: -170.949
+        value: -101.367004
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -967,7 +931,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 1
-        value: -179.376
+        value: -130.386
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -977,7 +941,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    attribute: localEulerAngles.x
+    attribute: localEulerAngles.z
     path: Weapon Socket/Weapon Pivot/Left Hand Grip
     classID: 4
     script: {fileID: 0}
@@ -1063,7 +1027,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 49.614
+        value: -0.624
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -1072,16 +1036,16 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.16666667
-        value: -127.291
-        inSlope: 0
-        outSlope: 0
+        value: -172.316
+        inSlope: -25.008009
+        outSlope: -25.008009
         tangentMode: 136
         weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.33333334
-        value: -79.33301
+        value: -174.4
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -1090,7 +1054,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.41666666
-        value: -79.33301
+        value: -174.4
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -1099,7 +1063,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.75
-        value: -130.386
+        value: -179.376
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -1108,7 +1072,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.8833333
-        value: -101.367004
+        value: -170.949
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -1117,7 +1081,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 1
-        value: -130.386
+        value: -179.376
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -1127,8 +1091,44 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    attribute: localEulerAngles.z
+    attribute: localEulerAngles.x
     path: Weapon Socket/Weapon Pivot/Left Hand Grip
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalEulerAngles.x
+    path: Weapon Socket/Weapon Pivot
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalEulerAngles.y
+    path: Weapon Socket/Weapon Pivot
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalEulerAngles.z
+    path: Weapon Socket/Weapon Pivot
     classID: 4
     script: {fileID: 0}
     flags: 0

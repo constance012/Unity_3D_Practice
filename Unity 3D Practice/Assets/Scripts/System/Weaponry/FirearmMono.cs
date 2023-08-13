@@ -2,36 +2,38 @@ using UnityEngine;
 using Cinemachine;
 
 [RequireComponent(typeof(CinemachineImpulseSource))]
-public class WeaponRecoil : MonoBehaviour
+public class FirearmMono : MonoBehaviour
 {
 	[Header("References")]
 	[Space]
-	[SerializeField] private CinemachineImpulseSource cameraShake;
-	[SerializeField, ReadOnly] private AudioSource audioSource;
-
 	[ReadOnly] public GameObject magazine;
 	[ReadOnly] public Transform caseEjector;
 	[HideInInspector] public Animator rigAnimator;
+	[HideInInspector] public Animator firearmAnimator;
 
-	[Header("Recoil Values")]
+	[Header("Recoil")]
 	[Space]
+	[SerializeField] private CinemachineImpulseSource cameraShake;
 	public Vector2 recoilForces;
-
 	[Min(0f)]
 	public float duration;
 
-	// Private fields.
-	private float _timeToRecoil;
+	[Header("Audio")]
+	[Space]
+	[SerializeField, Range(-3f, 3f)] private float pitch;
 
+	// Private fields.
 	private CinemachineFreeLook _thirdPersonCam;
 	private CinemachineVirtualCamera _firstPersonCam;
+
+	private float _timeToRecoil;
 
 	private void Awake()
 	{
 		cameraShake = GetComponent<CinemachineImpulseSource>();
-		audioSource = GetComponent<AudioSource>();
+		firearmAnimator = GetComponent<Animator>();
 
-		caseEjector = transform.Find("Case Ejector");
+		caseEjector = transform.FindAny("Case Ejector");
 		magazine = transform.Find("Magazine").gameObject;
 
 		_thirdPersonCam = CameraSwitcher.tpsCam;
@@ -43,14 +45,16 @@ public class WeaponRecoil : MonoBehaviour
 		ProcessRecoil();	
 	}
 
-	public void GenerateRecoil()
+	public void GenerateRecoil(string weaponName)
 	{
 		_timeToRecoil = duration;
 
-		audioSource.Play();
+		firearmAnimator.TryPlay("Fire", 0, 0f);
+		
+		AudioManager.Instance.Play("Gun Shot", 0, pitch);
 		cameraShake.GenerateImpulse(Camera.main.transform.forward);
 
-		rigAnimator.Play($"Recoil {this.name}", 3);
+		rigAnimator.Play($"Recoil {weaponName}", 3, 0f);
 	}
 
 	private void ProcessRecoil()

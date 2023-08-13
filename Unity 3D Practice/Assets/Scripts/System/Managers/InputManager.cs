@@ -4,25 +4,11 @@ using CSTGames.CommonEnums;
 /// <summary>
 /// Manages all the keyboard input for the game.
 /// </summary>
-public class InputManager : MonoBehaviour
+public class InputManager : Singleton<InputManager>
 {
-	public static InputManager instance { get; private set; }
-
 	[Header("Keyset Reference")]
 	[Space]
 	[SerializeField] private Keyset keySet;
-
-	private void Awake()
-	{
-		if (instance == null)
-			instance = this;
-		else
-		{
-			Debug.LogWarning("More than one instance of Input Manager found!!");
-			Destroy(gameObject);
-			return;
-		}
-	}
 
 	public KeyCode GetKeyForAction(KeybindingActions action)
 	{

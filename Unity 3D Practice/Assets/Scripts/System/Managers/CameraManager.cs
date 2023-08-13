@@ -1,13 +1,9 @@
 using UnityEngine;
 using Cinemachine;
 using CSTGames.CommonEnums;
-using Unity.IO.LowLevel.Unsafe;
-using System.Reflection;
 
-public class CameraManager : MonoBehaviour
+public class CameraManager : Singleton<CameraManager>
 {
-	public static CameraManager instance { get; private set; }
-
 	[Header("References")]
 	[Space]
 	[SerializeField] private CinemachineFreeLook thirdPersonCam;
@@ -21,18 +17,9 @@ public class CameraManager : MonoBehaviour
 	private FirstPersonMovement move1stScript;
 	private FpsCamLook cam1stLookScript;
 
-	private int isAimingHash;
-
-	private void Awake()
+	protected override void Awake()
 	{
-		if (instance == null)
-			instance = this;
-		else
-		{
-			Debug.LogWarning("More than 1 instance of Camera Manger found!! Destroy the newest one.");
-			Destroy(gameObject);
-			return;
-		}
+		base.Awake();
 
 		thirdPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineFreeLook>("ThirdPersonCam");
 		firstPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineVirtualCamera>("FirstPersonCam");
@@ -44,11 +31,6 @@ public class CameraManager : MonoBehaviour
 		move1stScript = player.GetComponent<FirstPersonMovement>();
 
 		cam1stLookScript = firstPersonCam.GetComponent<FpsCamLook>();
-	}
-
-	private void Start()
-	{
-		isAimingHash = Animator.StringToHash("IsAiming");
 	}
 
 	private void OnEnable()
@@ -68,12 +50,12 @@ public class CameraManager : MonoBehaviour
 	// Update is called once per frame
 	private void LateUpdate()
 	{
-		bool wasAiming = cam3rdAnimator.GetBool(isAimingHash);
+		bool wasAiming = cam3rdAnimator.GetBool(AnimationHandler.IsAimingHash);
 
-		if (PlayerActions.isAiming != wasAiming)
-			SetAimingProperties(PlayerActions.isAiming);
+		if (PlayerActions.IsAiming != wasAiming)
+			SetAimingProperties(PlayerActions.IsAiming);
 
-		if (InputManager.instance.GetKeyDown(KeybindingActions.SwitchCamera))
+		if (InputManager.Instance.GetKeyDown(KeybindingActions.SwitchCamera))
 			SwitchCamera();
 	}
 
@@ -85,7 +67,7 @@ public class CameraManager : MonoBehaviour
 			move1stScript.enabled = state;
 	}
 
-	private void SetAimingProperties(bool isAiming)
+	private void SetAimingProperties(bool IsAiming)
 	{
 		void SetRigProperties(CinemachineOrbitRig rig, float height, float radius, Vector3 trackTargetOffset, Vector3 damping)
 		{
@@ -101,14 +83,14 @@ public class CameraManager : MonoBehaviour
 			trans.m_ZDamping = damping.z;
 		}
 
-		if (isAiming)
+		if (IsAiming)
 		{
 			thirdPersonCam.m_SplineCurvature = 0f;
 			SetRigProperties(CinemachineOrbitRig.Top, 3f, 4.2f, new Vector3(0f, .95f, 0f), Vector3.zero);
 			SetRigProperties(CinemachineOrbitRig.Middle, 1.1f, 4f, new Vector3(0f, 1f, 0f), Vector3.zero);
 			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, 1.2f, new Vector3(0f, 1.15f, 0f), Vector3.zero);
 
-			cam3rdAnimator.SetBool(isAimingHash, true);
+			cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, true);
 		}
 		else
 		{
@@ -117,7 +99,7 @@ public class CameraManager : MonoBehaviour
 			SetRigProperties(CinemachineOrbitRig.Middle, 1.8f, 4f, new Vector3(0f, 1f, 0f), Vector3.one);
 			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, .5f, new Vector3(0f, 1f, 0f), Vector3.one);
 
-			cam3rdAnimator.SetBool(isAimingHash, false);
+			cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, false);
 		}
 	}
 

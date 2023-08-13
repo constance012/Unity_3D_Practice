@@ -342,7 +342,7 @@ public abstract class PlayerMovement : MonoBehaviour
 			fallMomentum.y = Mathf.Max(fallMomentum.y, -20f);
 		}
 
-		if (InputManager.instance.GetKeyDown(KeybindingActions.Jump) && canJumpAgain)
+		if (InputManager.Instance.GetKeyDown(KeybindingActions.Jump) && canJumpAgain)
 		{
 			Jump();
 			onJumpingEvent?.Invoke();
@@ -365,11 +365,11 @@ public abstract class PlayerMovement : MonoBehaviour
 
 	private void GetInputSignals(out Vector3 moveVector, out float currentMaxVelocity)
 	{
-		moveInputX = InputManager.instance.GetAxisRaw("Horizontal");
-		moveInputZ = InputManager.instance.GetAxisRaw("Vertical");
+		moveInputX = InputManager.Instance.GetAxisRaw("Horizontal");
+		moveInputZ = InputManager.Instance.GetAxisRaw("Vertical");
 
 		moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
-		isRunning = InputManager.instance.GetKey(KeybindingActions.Run) && !PlayerActions.isAiming;
+		isRunning = InputManager.Instance.GetKey(KeybindingActions.Run) && !PlayerActions.IsAiming;
 
 		currentMaxVelocity = isRunning ? MAX_RUNNING_SPEED : MAX_WALKING_SPEED;
 	}

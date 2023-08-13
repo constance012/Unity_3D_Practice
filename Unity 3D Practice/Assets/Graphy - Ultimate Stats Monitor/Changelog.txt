@@ -41,7 +41,7 @@ v1.6.0
 This is the last release that will officially support Unity 5.4+. Next releases will be targeted towards 2019.3+.
 
 - Minor tweaks, optimizations and bugfixes.
-- Added support for VR single pass instanced rendering.
+- Added support for VR single pass Instanced rendering.
 
 -----------------------------
 v1.5.2

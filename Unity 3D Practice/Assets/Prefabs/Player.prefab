@@ -13325,7 +13325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba8cb1dbe3425a4a8f43fc5d3fc510a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  droppedItemPrefab: {fileID: 4345611297494309214, guid: d76989a2ad0d91a40bc3830fb9a3fcb0, type: 3}
+  droppedItemPrefab: {fileID: 985299006758311806, guid: 52d71cd21709ac744a943ebca7fcbb02, type: 3}
   leftHand: {fileID: 4404816329859248458}
   rightHand: {fileID: 9126761251866729281}
   weaponEvent: {fileID: 0}
@@ -13374,7 +13374,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  forcedAiming: 0
 --- !u!1 &6537524936585287204
 GameObject:
   m_ObjectHideFlags: 0
