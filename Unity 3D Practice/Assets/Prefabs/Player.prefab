@@ -751,7 +751,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Weight: 0
-  m_Effectors: []
+  m_Effectors:
+  - m_Transform: {fileID: 8623039040349107826}
+    m_Style:
+      shape: {fileID: 4300000, guid: c6793350c150f456688e39a81f97364a, type: 2}
+      color: {r: 1, g: 0, b: 0, a: 1}
+      size: 1.5
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0}
+    m_Visible: 1
 --- !u!1 &887792110425231734
 GameObject:
   m_ObjectHideFlags: 0
@@ -12415,8 +12423,8 @@ MonoBehaviour:
   whatIsGround:
     serializedVersion: 2
     m_Bits: 128
-  acceleration: 5
-  deceleration: 5
+  acceleration: 7
+  deceleration: 7
   turn180Deceleration: 8
   jumpHeight: 0.5
   gravity: 9.8
@@ -12464,8 +12472,8 @@ MonoBehaviour:
   whatIsGround:
     serializedVersion: 2
     m_Bits: 128
-  acceleration: 5
-  deceleration: 5
+  acceleration: 7
+  deceleration: 7
   turn180Deceleration: 8
   jumpHeight: 0.5
   gravity: 9.8

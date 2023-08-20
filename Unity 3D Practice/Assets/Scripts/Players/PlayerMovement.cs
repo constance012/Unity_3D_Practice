@@ -339,7 +339,9 @@ public abstract class PlayerMovement : MonoBehaviour
 		{
 			// Calculate the free fall distance: s = v * t = g * t^2.
 			fallMomentum.y -= (gravity * Time.deltaTime);
-			fallMomentum.y = Mathf.Max(fallMomentum.y, -20f);
+
+			// Limit the fall speed.
+			fallMomentum.y = Mathf.Max(fallMomentum.y, -10f);
 		}
 
 		if (InputManager.Instance.GetKeyDown(KeybindingActions.Jump) && canJumpAgain)

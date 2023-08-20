@@ -50,10 +50,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _CutoffHeight: 0.2
-    - _GlowingEdgeThickness: 0.12
-    - _NoiseScale: 42.37
-    - _NoiseStrength: 0.5
+    - _CutoffHeight: 1.02
+    - _GlowingEdgeThickness: 0.114
+    - _NoiseScale: 31.3
+    - _NoiseStrength: 1.64
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
