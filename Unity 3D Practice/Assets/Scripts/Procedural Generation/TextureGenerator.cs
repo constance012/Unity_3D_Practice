@@ -2,6 +2,13 @@
 
 public static class TextureGenerator
 {
+	/// <summary>
+	/// Generates a texture from the provided color map.
+	/// </summary>
+	/// <param name="colorMap"></param>
+	/// <param name="width"></param>
+	/// <param name="height"></param>
+	/// <returns></returns>
 	public static Texture2D FromColorMap(Color[] colorMap, int width, int height)
 	{
 		Texture2D tex = new Texture2D(width, height);
@@ -15,6 +22,11 @@ public static class TextureGenerator
 		return tex;
 	}
 
+	/// <summary>
+	/// Generates a black-white texture from the provided height map.
+	/// </summary>
+	/// <param name="heightMap"></param>
+	/// <returns></returns>
 	public static Texture2D FromHeightMap(float[,] heightMap)
 	{
 		int width = heightMap.GetLength(0);

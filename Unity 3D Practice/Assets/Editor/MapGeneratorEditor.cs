@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using static MapGenerator;
 
 [CustomEditor(typeof(MapGenerator))]
 public class MapGeneratorEditor : Editor
@@ -23,15 +24,22 @@ public class MapGeneratorEditor : Editor
 	{
 		bool onValueChanged = DrawDefaultInspector();
 
-		if (onValueChanged)
+		if (onValueChanged && _generator.autoUpdate)
 		{
-			if (_generator.autoUpdate)
-				_generator.DrawMapInEditor();
+			if (_generator.useFalloffMap || _generator.drawMode == MapDrawMode.Falloff)
+				_generator.GenerateFalloff();
+
+			_generator.DrawMapInEditor();
 		}
 
 		GUILayout.Space(5f);
 
 		if (GUILayout.Button("Generate"))
+		{
+			if (_generator.useFalloffMap || _generator.drawMode == MapGenerator.MapDrawMode.Falloff)
+				_generator.GenerateFalloff();
+
 			_generator.DrawMapInEditor();
+		}
 	}
 }
