@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class CrosshairTarget : MonoBehaviour
 {
-	private Transform mainCam;
+	private Transform _mainCam;
 
 	private void Awake()
 	{
-		mainCam = Camera.main.transform;
+		_mainCam = Camera.main.transform;
 	}
 
 	void Update()
 	{
-		Ray ray = new Ray(mainCam.position, mainCam.forward);
+		Ray ray = new Ray(_mainCam.position, _mainCam.forward);
 
 		if (Physics.Raycast(ray, out RaycastHit target, 1000f, RangedWeapon.LAYER_TO_RAYCAST))
 			transform.position = target.point;

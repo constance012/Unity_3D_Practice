@@ -12,7 +12,7 @@ public static class MeshGenerator
 	/// <returns>A mesh data object to create a new mesh.</returns>
 	public static MeshData ToTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve heightCurve, int levelOfDetail)
 	{
-		AnimationCurve thisHeightCurve = new AnimationCurve(heightCurve.keys);
+		AnimationCurve threadSafeCurve = new AnimationCurve(heightCurve.keys);
 		
 		int meshVerticesStep = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
 
@@ -62,7 +62,7 @@ public static class MeshGenerator
 
 				Vector2  uvCoord = new Vector2((x - meshVerticesStep) / (float)meshSizeActual, (y - meshVerticesStep) / (float)meshSizeActual);
 
-				float vertexHeight = thisHeightCurve.Evaluate(heightMap[x, y]) * heightMultiplier;
+				float vertexHeight = threadSafeCurve.Evaluate(heightMap[x, y]) * heightMultiplier;
 				Vector3 vertexPosition = new Vector3(topLeftX + uvCoord.x * meshSizeUnsimplified,
 													 vertexHeight,
 													 topLeftZ - uvCoord.y * meshSizeUnsimplified);
@@ -87,6 +87,8 @@ public static class MeshGenerator
 				}
 			}
 		}
+
+		meshData.BakeVertexNormals();
 
 		return meshData;
 	}
@@ -116,6 +118,8 @@ public class MeshData
 
 	private Vector3[] _borderVertices;
 	private int[] _borderTriangles;
+
+	private Vector3[] bakedNormals;
 
 	private int _meshTriangleIndex = 0;
 	private int _borderTriangleIndex = 0;
@@ -179,7 +183,7 @@ public class MeshData
 		}
 	}
 
-	public Mesh CreateMesh()
+	public Mesh CreateChunkMesh()
 	{
 		Mesh mesh = new Mesh();
 
@@ -188,15 +192,41 @@ public class MeshData
 		mesh.uv = this._UVs;
 
 		// Recalculate normal vectors so the lighting will work properly.
-		mesh.normals = RecalculateVertexNormals();
+		mesh.normals = bakedNormals;
 
 		return mesh;
+	}
+
+	public Mesh CreateWaterMesh()
+	{
+		Mesh water = new Mesh();
+
+		Vector3[] waterVertices = new Vector3[_meshVertices.Length];
+
+		for (int i = 0; i < waterVertices.Length; i++)
+		{
+			waterVertices[i] = new Vector3(_meshVertices[i].x, 0f, _meshVertices[i].z);
+		}
+
+		water.vertices = waterVertices;
+		water.triangles = _meshTriangles;
+		water.uv = _UVs;
+
+		water.RecalculateNormals();
+
+		return water;
+	}
+
+	public void BakeVertexNormals()
+	{
+		bakedNormals = RecalculateVertexNormals();
 	}
 
 	private Vector3[] RecalculateVertexNormals()
 	{
 		Vector3[] vertexNormals = new Vector3[_meshVertices.Length];
 
+		#region Add the mesh's triangle normals to each vertex.
 		int triangleCount = _meshTriangles.Length / 3;
 
 		for (int i = 0; i < triangleCount; i++)
@@ -216,7 +246,9 @@ public class MeshData
 			(vertexNormals[vertexIndexB] += triangleNormal).Normalize();
 			(vertexNormals[vertexIndexC] += triangleNormal).Normalize();
 		}
+		#endregion
 
+		#region Add the border's triangle normals to each vertex.
 		int borderTriangleCount = _borderTriangles.Length / 3;
 
 		for (int i = 0; i < borderTriangleCount; i++)
@@ -241,6 +273,7 @@ public class MeshData
 			if (vertexIndexC >= 0)
 				(vertexNormals[vertexIndexC] += triangleNormal).Normalize();
 		}
+		#endregion
 
 		return vertexNormals;
 	}

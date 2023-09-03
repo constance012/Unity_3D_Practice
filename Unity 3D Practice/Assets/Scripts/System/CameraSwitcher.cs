@@ -5,47 +5,47 @@ using System.Linq;
 
 public static class CameraSwitcher
 {
-	private static List<CinemachineVirtualCameraBase> cameras = new List<CinemachineVirtualCameraBase>();
+	private static List<CinemachineVirtualCameraBase> Cameras = new List<CinemachineVirtualCameraBase>();
 
-	public static CinemachineVirtualCameraBase activeCam { get; private set; } = null;
+	public static CinemachineVirtualCameraBase ActiveCam { get; private set; } = null;
 
-	public static CinemachineVirtualCamera fpsCam
+	public static CinemachineVirtualCamera FpsCam
 	{
-		get { return cameras.Find(camera => camera.CompareTag("FirstPersonCam")) as CinemachineVirtualCamera; }
+		get { return Cameras.Find(camera => camera.CompareTag("FirstPersonCam")) as CinemachineVirtualCamera; }
 	}
 
-	public static CinemachineFreeLook tpsCam
+	public static CinemachineFreeLook TpsCam
 	{
-		get { return cameras.Find(camera => camera.CompareTag("ThirdPersonCam")) as CinemachineFreeLook; }
+		get { return Cameras.Find(camera => camera.CompareTag("ThirdPersonCam")) as CinemachineFreeLook; }
 	}
 
-	public static bool doneInitializing
+	public static bool DoneInitializing
 	{
-		get { return cameras != null && cameras.Any(); }
+		get { return Cameras != null && Cameras.Any(); }
 	}
 
-	public static bool IsActive(CinemachineVirtualCameraBase cam) => cam == activeCam;
+	public static bool IsActive(CinemachineVirtualCameraBase cam) => cam == ActiveCam;
 
 	public static void SwitchCam(CinemachineVirtualCameraBase cam)
 	{
 		cam.Priority = 20;
-		activeCam = cam;
+		ActiveCam = cam;
 
 		// Iterate through the list of cameras and set the priority of those which are not the active cam to 0.
-		foreach (CinemachineVirtualCameraBase c in cameras)
-			if (c.Priority != 0 && c != activeCam)
+		foreach (CinemachineVirtualCameraBase c in Cameras)
+			if (c.Priority != 0 && c != ActiveCam)
 				c.Priority = 0;
 	}
 
 	public static void Register(CinemachineVirtualCameraBase cam)
 	{
-		cameras.Add(cam);
+		Cameras.Add(cam);
 		Debug.Log("Registered camera: " + cam);
 	}
 
 	public static void Unregister(CinemachineVirtualCameraBase cam)
 	{
-		cameras.Remove(cam);
+		Cameras.Remove(cam);
 		Debug.Log("Unregistered camera: " + cam);
 	}
 }

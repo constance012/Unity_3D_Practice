@@ -509,8 +509,9 @@ public class WeaponSocket : MonoBehaviour
 	{
 		GameObject droppedMagazine = Instantiate(_firearm.magazine, _firearm.magazine.WorldPosition(), _firearm.magazine.WorldRotation());
 
-		droppedMagazine.AddComponent<Rigidbody>().AddForce(-_firearm.transform.up * weapon.magazineDropForce, ForceMode.Impulse);
 		droppedMagazine.AddComponent<BoxCollider>();
+		droppedMagazine.AddComponent<Rigidbody>().AddForce(-_firearm.transform.up * weapon.magazineDropForce, ForceMode.Impulse);
+		droppedMagazine.AddComponent<SelfDestructor>().timeBeforeDestruct = 5f;
 		droppedMagazine.transform.localScale *= weapon.inHandScale;
 
 		_firearm.magazine.SetActive(false);
@@ -520,8 +521,9 @@ public class WeaponSocket : MonoBehaviour
 	{
 		GameObject droppedMagazine = Instantiate(_magazineInHand, _magazineInHand.WorldPosition(), _magazineInHand.WorldRotation());
 
-		droppedMagazine.AddComponent<Rigidbody>();
 		droppedMagazine.AddComponent<BoxCollider>();
+		droppedMagazine.AddComponent<Rigidbody>();
+		droppedMagazine.AddComponent<SelfDestructor>().timeBeforeDestruct = 5f;
 		droppedMagazine.transform.localScale *= weapon.inHandScale;
 
 		_magazineInHand.SetActive(false);

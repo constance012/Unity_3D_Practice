@@ -36,8 +36,8 @@ public class FirearmMono : MonoBehaviour
 		caseEjector = transform.FindAny("Case Ejector");
 		magazine = transform.Find("Magazine").gameObject;
 
-		_thirdPersonCam = CameraSwitcher.tpsCam;
-		_firstPersonCam = CameraSwitcher.fpsCam;
+		_thirdPersonCam = CameraSwitcher.TpsCam;
+		_firstPersonCam = CameraSwitcher.FpsCam;
 	}
 
 	private void Update()

@@ -8,11 +8,11 @@ public class FirstPersonMovement : PlayerMovement
 
 		HandleStrafeHorizontalMovement();
 
-		currentDir = (transform.right * moveInputX + transform.forward * moveInputZ).normalized;
+		_currentDir = (transform.right * _moveInputX + transform.forward * _moveInputZ).normalized;
 
-		if (currentDir.magnitude > 0f)
-			previousDir = currentDir;
+		if (_currentDir.magnitude > 0f)
+			_previousDir = _currentDir;
 		
-		controller.Move(previousDir * linearVelocity * Time.deltaTime);
+		controller.Move(_previousDir * LinearVelocity * Time.deltaTime);
 	}
 }

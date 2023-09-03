@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 public static class ComponentExtensions
 {
 	/// <summary>
-	/// Gets a component of type TComponent in a specified child of this Transform, includes inactive one.
+	/// Gets a component of type TComponent in a specified child of this Game Object, includes inactive one.
 	/// </summary>
 	/// <typeparam name="TComponent"></typeparam>
 	/// <param name="transform"></param>
@@ -16,20 +17,20 @@ public static class ComponentExtensions
 	}
 
 	/// <summary>
-	/// Gets an array of components in a specified child of this Transform, includes inactive ones.
+	/// Gets an array of components in a specified child of this Game Object, includes inactive ones.
 	/// </summary>
 	/// <typeparam name="TComponent"></typeparam>
 	/// <param name="transform"></param>
 	/// <param name="childToSearch"></param>
 	/// <returns></returns>
-	public static TComponent[] GetComponentsInChildren<TComponent>(this Component component, string childToSearch) where TComponent : Component
+	public static TComponent[] GetComponentsInChildren<TComponent>(this Component component, string childName) where TComponent : Component
 	{
-		Transform child = component.transform.Find(childToSearch);
-		return child.GetComponentsInChildren<TComponent>();
+		Transform childToSearch = component.transform.Find(childName);
+		return childToSearch.GetComponentsInChildren<TComponent>();
 	}
 
 	/// <summary>
-	/// Gets a component of type TComponent in a specified sibling of this Transform by name, includes inactive one. 
+	/// Gets a component of type TComponent in a specified sibling of this Game Object by name, includes inactive one. 
 	/// </summary>
 	/// <typeparam name="TComponent"></typeparam>
 	/// <param name="transform"></param>
@@ -39,5 +40,16 @@ public static class ComponentExtensions
 	{
 		Transform sibling = component.transform.parent.Find(siblingName);
 		return sibling.GetComponent<TComponent>();
+	}
+
+	/// <summary>
+	/// Gets a component of type TComponent in any sibling of this Game Object, includes inactive one. 
+	/// </summary>
+	/// <typeparam name="TComponent"></typeparam>
+	/// <param name="component"></param>
+	/// <returns></returns>
+	public static TComponent GetComponentInSibling<TComponent>(this Component component) where TComponent : Component
+	{
+		return component.transform.parent.GetComponentInChildren<TComponent>();
 	}
 }

@@ -1,15 +1,29 @@
+using UnityEditor;
 using UnityEngine;
 
 public class MapPreviewer : MonoBehaviour
 {
+	[Header("Water Surface"), Space]
+	public GameObject waterPrefab;
+	public bool includeWater;
+
 	[Header("Texture Drawer"), Space]
 	public Renderer textureRenderer;
 
 	[Header("Mesh Drawer"), Space]
+	[Min(1f)] public float meshScale;
 	public MeshFilter meshFilter;
 	public MeshRenderer meshRenderer;
 
 	public bool drawMeshWireframe;
+
+	private GameObject _waterSurfaceObject;
+
+	private void Start()
+	{
+		textureRenderer.transform.parent.gameObject.SetActive(false);
+		ClearWater();
+	}
 
 	public void DrawTexture(Texture2D texture)
 	{
@@ -20,13 +34,30 @@ public class MapPreviewer : MonoBehaviour
 
 	public void DrawMesh(MeshData meshData, Texture2D texture)
 	{
-		meshFilter.sharedMesh = meshData.CreateMesh();
+		meshFilter.sharedMesh = meshData.CreateChunkMesh();
 		
 		meshRenderer.sharedMaterial.SetTexture("_BaseMap", texture);
-		meshRenderer.transform.localScale = Vector3.one * texture.width / 10f;
+		meshRenderer.transform.localScale = Vector3.one * meshScale;
+
+		if (includeWater && waterPrefab != null)
+		{
+			_waterSurfaceObject = (GameObject)PrefabUtility.InstantiatePrefab(waterPrefab, meshRenderer.transform);
+			PrefabUtility.UnpackPrefabInstance(_waterSurfaceObject, PrefabUnpackMode.Completely, InteractionMode.UserAction);
+			_waterSurfaceObject.GetComponent<MeshFilter>().mesh = meshData.CreateWaterMesh();
+		}
 	}
 
-	public void OnDrawGizmosSelected()
+	public void ClearWater()
+	{
+		DestroyImmediate(_waterSurfaceObject);
+
+		while (meshRenderer.transform.Find(waterPrefab.name, out Transform leftover))
+		{
+			DestroyImmediate(leftover.gameObject);
+		}
+	}
+
+	private void OnDrawGizmosSelected()
 	{
 		if (meshFilter != null && drawMeshWireframe)
 		{

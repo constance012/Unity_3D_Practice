@@ -43,20 +43,20 @@ public abstract class PlayerMovement : MonoBehaviour
 	public UnityEvent<bool> onStrafeSwitchingEvent = new UnityEvent<bool>();
 
 	// Public static fields.
-	public static float linearVelocity { get; protected set; }
-	public static float velocityX { get; protected set; }
-	public static float velocityZ { get; protected set; }
-	public static bool canJumpAgain { get; set; } = true;	
+	public static float LinearVelocity { get; protected set; }
+	public static float VelocityX { get; protected set; }
+	public static float VelocityZ { get; protected set; }
+	public static bool CanJumpAgain { get; set; } = true;
 
 	// Protected fields.
-	protected static Vector3 fallMomentum;
-	protected static bool isJumping;
-	protected static bool isRunning;
+	protected static Vector3 _fallMomentum;
+	protected static bool _isJumping;
+	protected static bool _isRunning;
 	private static bool _isGrounded;
 	
-	protected float moveInputX, moveInputZ;
-	protected Vector3 currentDir;
-	protected Vector3 previousDir;
+	protected float _moveInputX, _moveInputZ;
+	protected Vector3 _currentDir;
+	protected Vector3 _previousDir;
 
 	// Private fields.
 	private static bool _useStrafeMovement;
@@ -78,7 +78,7 @@ public abstract class PlayerMovement : MonoBehaviour
 
 	protected void LateUpdate()
 	{
-		controller.Move(fallMomentum * Time.deltaTime);
+		controller.Move(_fallMomentum * Time.deltaTime);
 	}
 
 	private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -108,18 +108,18 @@ public abstract class PlayerMovement : MonoBehaviour
 	/// <param name="currentMaxVelocity"></param>
 	private void ChangeVelocity(Vector3 moveVector, float currentMaxVelocity)
 	{
-		if (moveVector.magnitude > .1f && linearVelocity < currentMaxVelocity)
-			linearVelocity += acceleration * Time.deltaTime;
+		if (moveVector.magnitude > .1f && LinearVelocity < currentMaxVelocity)
+			LinearVelocity += acceleration * Time.deltaTime;
 
 		if (moveVector.magnitude == 0f)
 		{
 			float decelerateValue = _turned180 ? turn180Deceleration : deceleration;
 
-			if (linearVelocity > 0f)
-				linearVelocity -= decelerateValue * Time.deltaTime;
+			if (LinearVelocity > 0f)
+				LinearVelocity -= decelerateValue * Time.deltaTime;
 
-			if (linearVelocity < 0f)
-				linearVelocity = 0f;
+			if (LinearVelocity < 0f)
+				LinearVelocity = 0f;
 		}
 	}
 
@@ -133,22 +133,22 @@ public abstract class PlayerMovement : MonoBehaviour
 		// Lock forward velocity.
 		if (moveVector.magnitude > .1f)
 		{
-			if (isRunning && linearVelocity > currentMaxVelocity)
-				linearVelocity = currentMaxVelocity;
+			if (_isRunning && LinearVelocity > currentMaxVelocity)
+				LinearVelocity = currentMaxVelocity;
 
 			// Decelerate from running.
-			else if (linearVelocity > currentMaxVelocity)
+			else if (LinearVelocity > currentMaxVelocity)
 			{
-				linearVelocity -= deceleration * Time.deltaTime;
+				LinearVelocity -= deceleration * Time.deltaTime;
 
 				// Lock if decelerates from running.
-				if (linearVelocity > currentMaxVelocity && linearVelocity < (currentMaxVelocity + .05f))
-					linearVelocity = currentMaxVelocity;
+				if (LinearVelocity > currentMaxVelocity && LinearVelocity < (currentMaxVelocity + .05f))
+					LinearVelocity = currentMaxVelocity;
 			}
 
 			// Lock if accelerates from standing still.
-			else if (linearVelocity < currentMaxVelocity && linearVelocity > (currentMaxVelocity - .05f))
-				linearVelocity = currentMaxVelocity;
+			else if (LinearVelocity < currentMaxVelocity && LinearVelocity > (currentMaxVelocity - .05f))
+				LinearVelocity = currentMaxVelocity;
 		}
 	}
 
@@ -161,42 +161,42 @@ public abstract class PlayerMovement : MonoBehaviour
 	private void ChangeVelocity(float x, float z, float currentMaxVelocity)
 	{
 		// Increase walking velocity.
-		if (z > 0f && velocityZ < currentMaxVelocity)
-			velocityZ += acceleration * Time.deltaTime;
+		if (z > 0f && VelocityZ < currentMaxVelocity)
+			VelocityZ += acceleration * Time.deltaTime;
 
-		if (z < 0f && velocityZ > -currentMaxVelocity)
-			velocityZ -= acceleration * Time.deltaTime;
+		if (z < 0f && VelocityZ > -currentMaxVelocity)
+			VelocityZ -= acceleration * Time.deltaTime;
 
-		if (x > 0f && velocityX < currentMaxVelocity)
-			velocityX += acceleration * Time.deltaTime;
+		if (x > 0f && VelocityX < currentMaxVelocity)
+			VelocityX += acceleration * Time.deltaTime;
 
-		if (x < 0f && velocityX > -currentMaxVelocity)
-			velocityX -= acceleration * Time.deltaTime;
+		if (x < 0f && VelocityX > -currentMaxVelocity)
+			VelocityX -= acceleration * Time.deltaTime;
 
 		// Decrease the forward velocity.
 		if (z == 0f)
 		{
-			if (velocityZ > 0f)
-				velocityZ -= deceleration * Time.deltaTime;
+			if (VelocityZ > 0f)
+				VelocityZ -= deceleration * Time.deltaTime;
 
-			if (velocityZ < 0f)
-				velocityZ += deceleration * Time.deltaTime;
+			if (VelocityZ < 0f)
+				VelocityZ += deceleration * Time.deltaTime;
 
-			if (velocityZ != 0f && velocityZ > -.05f && velocityZ < .05f)
-				velocityZ = 0f;
+			if (VelocityZ != 0f && VelocityZ > -.05f && VelocityZ < .05f)
+				VelocityZ = 0f;
 		}
 
 		// Decrease the sideways velocity.
 		if (x == 0f)
 		{
-			if (velocityX > 0f)
-				velocityX -= deceleration * Time.deltaTime;
+			if (VelocityX > 0f)
+				VelocityX -= deceleration * Time.deltaTime;
 
-			if (velocityX < 0f)
-				velocityX += deceleration * Time.deltaTime;
+			if (VelocityX < 0f)
+				VelocityX += deceleration * Time.deltaTime;
 
-			if (velocityX != 0f && velocityX > -.05f && velocityX < .05f)
-				velocityX = 0f;
+			if (VelocityX != 0f && VelocityX > -.05f && VelocityX < .05f)
+				VelocityX = 0f;
 		}
 	}
 
@@ -211,85 +211,85 @@ public abstract class PlayerMovement : MonoBehaviour
 		// Lock forward velocity.
 		if (z > 0f)
 		{
-			if (isRunning && velocityZ > currentMaxVelocity)
-				velocityZ = currentMaxVelocity;
+			if (_isRunning && VelocityZ > currentMaxVelocity)
+				VelocityZ = currentMaxVelocity;
 
 			// Decelerate from running.
-			else if (velocityZ > currentMaxVelocity)
+			else if (VelocityZ > currentMaxVelocity)
 			{
-				velocityZ -= deceleration * Time.deltaTime;
+				VelocityZ -= deceleration * Time.deltaTime;
 
 				// Lock if decelerates from running.
-				if (velocityZ > currentMaxVelocity && velocityZ < (currentMaxVelocity + .05f))
-					velocityZ = currentMaxVelocity;
+				if (VelocityZ > currentMaxVelocity && VelocityZ < (currentMaxVelocity + .05f))
+					VelocityZ = currentMaxVelocity;
 			}
 
 			// Lock if accelerates from standing still.
-			else if (velocityZ < currentMaxVelocity && velocityZ > (currentMaxVelocity - .05f))
-				velocityZ = currentMaxVelocity;
+			else if (VelocityZ < currentMaxVelocity && VelocityZ > (currentMaxVelocity - .05f))
+				VelocityZ = currentMaxVelocity;
 		}
 
 		// Lock backward velocity.
 		if (z < 0f)
 		{
-			if (isRunning && velocityZ < -currentMaxVelocity)
-				velocityZ = -currentMaxVelocity;
+			if (_isRunning && VelocityZ < -currentMaxVelocity)
+				VelocityZ = -currentMaxVelocity;
 
 			// Decelerate from running.
-			else if (velocityZ < -currentMaxVelocity)
+			else if (VelocityZ < -currentMaxVelocity)
 			{
-				velocityZ += deceleration * Time.deltaTime;
+				VelocityZ += deceleration * Time.deltaTime;
 
 				// Lock if decelerates from running.
-				if (velocityZ < -currentMaxVelocity && velocityZ > (-currentMaxVelocity - .05f))
-					velocityZ = -currentMaxVelocity;
+				if (VelocityZ < -currentMaxVelocity && VelocityZ > (-currentMaxVelocity - .05f))
+					VelocityZ = -currentMaxVelocity;
 			}
 
 			// Lock if accelerates from standing still.
-			else if (velocityZ > -currentMaxVelocity && velocityZ < (-currentMaxVelocity + .05f))
-				velocityZ = -currentMaxVelocity;
+			else if (VelocityZ > -currentMaxVelocity && VelocityZ < (-currentMaxVelocity + .05f))
+				VelocityZ = -currentMaxVelocity;
 		}
 
 		// Lock right velocity.
 		if (x > 0f)
 		{
-			if (isRunning && velocityX > currentMaxVelocity)
-				velocityX = currentMaxVelocity;
+			if (_isRunning && VelocityX > currentMaxVelocity)
+				VelocityX = currentMaxVelocity;
 
 			// Decelerate from running.
-			else if (velocityX > currentMaxVelocity)
+			else if (VelocityX > currentMaxVelocity)
 			{
-				velocityX -= deceleration * Time.deltaTime;
+				VelocityX -= deceleration * Time.deltaTime;
 
 				// Lock if decelerates from running.
-				if (velocityX > currentMaxVelocity && velocityX < (currentMaxVelocity + .05f))
-					velocityX = currentMaxVelocity;
+				if (VelocityX > currentMaxVelocity && VelocityX < (currentMaxVelocity + .05f))
+					VelocityX = currentMaxVelocity;
 			}
 
 			// Lock if accelerates from standing still.
-			else if (velocityX < currentMaxVelocity && velocityX > (currentMaxVelocity - .05f))
-				velocityX = currentMaxVelocity;
+			else if (VelocityX < currentMaxVelocity && VelocityX > (currentMaxVelocity - .05f))
+				VelocityX = currentMaxVelocity;
 		}
 
 		// Lock left velocity.
 		if (x < 0f)
 		{
-			if (isRunning && velocityX < -currentMaxVelocity)
-				velocityX = -currentMaxVelocity;
+			if (_isRunning && VelocityX < -currentMaxVelocity)
+				VelocityX = -currentMaxVelocity;
 
 			// Decelerate from running.
-			else if (velocityX < -currentMaxVelocity)
+			else if (VelocityX < -currentMaxVelocity)
 			{
-				velocityX += deceleration * Time.deltaTime;
+				VelocityX += deceleration * Time.deltaTime;
 
 				// Lock if decelerates from running.
-				if (velocityX < -currentMaxVelocity && velocityX > (-currentMaxVelocity - .05f))
-					velocityX = -currentMaxVelocity;
+				if (VelocityX < -currentMaxVelocity && VelocityX > (-currentMaxVelocity - .05f))
+					VelocityX = -currentMaxVelocity;
 			}
 
 			// Lock if accelerates from standing still.
-			else if (velocityX > -currentMaxVelocity && velocityX < (-currentMaxVelocity + .05f))
-				velocityX = -currentMaxVelocity;
+			else if (VelocityX > -currentMaxVelocity && VelocityX < (-currentMaxVelocity + .05f))
+				VelocityX = -currentMaxVelocity;
 		}
 	}
 
@@ -323,57 +323,57 @@ public abstract class PlayerMovement : MonoBehaviour
 		LockOrResetVelocity(moveVector, currentMaxVelocity);
 
 		// Calculate each axis velocity for the animator.
-		ChangeVelocity(moveInputX, moveInputZ, currentMaxVelocity);
-		LockOrResetVelocity(moveInputX, moveInputZ, currentMaxVelocity);
+		ChangeVelocity(_moveInputX, _moveInputZ, currentMaxVelocity);
+		LockOrResetVelocity(_moveInputX, _moveInputZ, currentMaxVelocity);
 	}
 
 	private void HandleVerticalMovement()
 	{	
 		if (_isGrounded)
 		{
-			fallMomentum.y = -controller.stepOffset;
-			isJumping = false;
+			_fallMomentum.y = -controller.stepOffset;
+			_isJumping = false;
 		}
 
 		if (!_isGrounded)
 		{
 			// Calculate the free fall distance: s = v * t = g * t^2.
-			fallMomentum.y -= (gravity * Time.deltaTime);
+			_fallMomentum.y -= (gravity * Time.deltaTime);
 
 			// Limit the fall speed.
-			fallMomentum.y = Mathf.Max(fallMomentum.y, -10f);
+			_fallMomentum.y = Mathf.Max(_fallMomentum.y, -10f);
 		}
 
-		if (InputManager.Instance.GetKeyDown(KeybindingActions.Jump) && canJumpAgain)
+		if (InputManager.Instance.GetKeyDown(KeybindingActions.Jump) && CanJumpAgain)
 		{
 			Jump();
 			onJumpingEvent?.Invoke();
 		}
 
-		fallSpeedCurve.AddKey(Time.realtimeSinceStartup, fallMomentum.y);
+		fallSpeedCurve.AddKey(Time.realtimeSinceStartup, _fallMomentum.y);
 
-		controller.Move(fallMomentum * Time.deltaTime);
+		controller.Move(_fallMomentum * Time.deltaTime);
 	}
 
 	private void Jump()
 	{
 		animator.SetBool(AnimationHandler.isJumpingHash, true);
-		isJumping = true;
+		_isJumping = true;
 
 		// Calculate the jump velocity: v = sqrt(2 * h * g).
-		fallMomentum.y = Mathf.Sqrt(jumpHeight * 2f * gravity);
-		controller.Move(fallMomentum * Time.deltaTime);
+		_fallMomentum.y = Mathf.Sqrt(jumpHeight * 2f * gravity);
+		controller.Move(_fallMomentum * Time.deltaTime);
 	}
 
 	private void GetInputSignals(out Vector3 moveVector, out float currentMaxVelocity)
 	{
-		moveInputX = InputManager.Instance.GetAxisRaw("Horizontal");
-		moveInputZ = InputManager.Instance.GetAxisRaw("Vertical");
+		_moveInputX = InputManager.Instance.GetAxisRaw("Horizontal");
+		_moveInputZ = InputManager.Instance.GetAxisRaw("Vertical");
 
-		moveVector = new Vector3(moveInputX, 0f, moveInputZ).normalized;
-		isRunning = InputManager.Instance.GetKey(KeybindingActions.Run) && !PlayerActions.IsAiming;
+		moveVector = new Vector3(_moveInputX, 0f, _moveInputZ).normalized;
+		_isRunning = InputManager.Instance.GetKey(KeybindingActions.Run) && !PlayerActions.IsAiming;
 
-		currentMaxVelocity = isRunning ? MAX_RUNNING_SPEED : MAX_WALKING_SPEED;
+		currentMaxVelocity = _isRunning ? MAX_RUNNING_SPEED : MAX_WALKING_SPEED;
 	}
 
 	private void OnDrawGizmosSelected()

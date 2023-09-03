@@ -65,7 +65,7 @@ public class FollowingDrone : MonoBehaviour
 
 	private void Update()
 	{
-		if (PlayerMovement.linearVelocity <= 1.5f)
+		if (PlayerMovement.LinearVelocity <= 1.5f)
 		{
 			SetTrailsEmitting(false);
 			transform.position = transform.position.SineFluctuate(VectorAxis.Y, idleSpeed, idleAmplitude);

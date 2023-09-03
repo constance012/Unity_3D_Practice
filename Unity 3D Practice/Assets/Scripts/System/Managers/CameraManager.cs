@@ -9,13 +9,13 @@ public class CameraManager : Singleton<CameraManager>
 	[SerializeField] private CinemachineFreeLook thirdPersonCam;
 	[SerializeField] private CinemachineVirtualCamera firstPersonCam;
 
-	private Transform player;
-	private Animator cam3rdAnimator;
+	private Transform _player;
+	private Animator _cam3rdAnimator;
 
 	// Scripts
-	private ThirdPersonMovement move3rdScript;
-	private FirstPersonMovement move1stScript;
-	private FpsCamLook cam1stLookScript;
+	private ThirdPersonMovement _move3rdScript;
+	private FirstPersonMovement _move1stScript;
+	private FpsCamLook _cam1stLookScript;
 
 	protected override void Awake()
 	{
@@ -24,13 +24,13 @@ public class CameraManager : Singleton<CameraManager>
 		thirdPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineFreeLook>("ThirdPersonCam");
 		firstPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineVirtualCamera>("FirstPersonCam");
 
-		cam3rdAnimator = thirdPersonCam.GetComponent<Animator>();
+		_cam3rdAnimator = thirdPersonCam.GetComponent<Animator>();
 
-		player = GameObject.FindWithTag("Player").transform;
-		move3rdScript = player.GetComponent<ThirdPersonMovement>();
-		move1stScript = player.GetComponent<FirstPersonMovement>();
+		_player = GameObject.FindWithTag("Player").transform;
+		_move3rdScript = _player.GetComponent<ThirdPersonMovement>();
+		_move1stScript = _player.GetComponent<FirstPersonMovement>();
 
-		cam1stLookScript = firstPersonCam.GetComponent<FpsCamLook>();
+		_cam1stLookScript = firstPersonCam.GetComponent<FpsCamLook>();
 	}
 
 	private void OnEnable()
@@ -50,7 +50,7 @@ public class CameraManager : Singleton<CameraManager>
 	// Update is called once per frame
 	private void LateUpdate()
 	{
-		bool wasAiming = cam3rdAnimator.GetBool(AnimationHandler.IsAimingHash);
+		bool wasAiming = _cam3rdAnimator.GetBool(AnimationHandler.IsAimingHash);
 
 		if (PlayerActions.IsAiming != wasAiming)
 			SetAimingProperties(PlayerActions.IsAiming);
@@ -61,10 +61,10 @@ public class CameraManager : Singleton<CameraManager>
 
 	public void ToggleMovementScript(CinemachineVirtualCameraBase activeCam, bool state)
 	{
-		if (activeCam == CameraSwitcher.tpsCam)
-			move3rdScript.enabled = state;
+		if (activeCam == CameraSwitcher.TpsCam)
+			_move3rdScript.enabled = state;
 		else
-			move1stScript.enabled = state;
+			_move1stScript.enabled = state;
 	}
 
 	private void SetAimingProperties(bool IsAiming)
@@ -90,7 +90,7 @@ public class CameraManager : Singleton<CameraManager>
 			SetRigProperties(CinemachineOrbitRig.Middle, 1.1f, 4f, new Vector3(0f, 1f, 0f), Vector3.zero);
 			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, 1.2f, new Vector3(0f, 1.15f, 0f), Vector3.zero);
 
-			cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, true);
+			_cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, true);
 		}
 		else
 		{
@@ -99,13 +99,13 @@ public class CameraManager : Singleton<CameraManager>
 			SetRigProperties(CinemachineOrbitRig.Middle, 1.8f, 4f, new Vector3(0f, 1f, 0f), Vector3.one);
 			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, .5f, new Vector3(0f, 1f, 0f), Vector3.one);
 
-			cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, false);
+			_cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, false);
 		}
 	}
 
 	private void SwitchCamera()
 	{
-		if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
+		if (CameraSwitcher.IsActive(CameraSwitcher.TpsCam))
 			SwitchCamera(CameraPerspective.FirstPerson);
 		else
 			SwitchCamera(CameraPerspective.ThirdPerson);
@@ -117,19 +117,19 @@ public class CameraManager : Singleton<CameraManager>
 		{
 			CameraSwitcher.SwitchCam(thirdPersonCam);
 
-			move3rdScript.enabled = true;
-			move1stScript.enabled = false;
+			_move3rdScript.enabled = true;
+			_move1stScript.enabled = false;
 
-			cam1stLookScript.enabled = false;
+			_cam1stLookScript.enabled = false;
 		}
 		else
 		{
 			CameraSwitcher.SwitchCam(firstPersonCam);
 
-			move3rdScript.enabled = false;
-			move1stScript.enabled = true;
+			_move3rdScript.enabled = false;
+			_move1stScript.enabled = true;
 
-			cam1stLookScript.enabled = true;
+			_cam1stLookScript.enabled = true;
 		}
 	}
 

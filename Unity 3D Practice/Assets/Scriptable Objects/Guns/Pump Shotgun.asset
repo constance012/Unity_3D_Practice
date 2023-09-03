@@ -31,14 +31,6 @@ MonoBehaviour:
   holderPositionOffset: {x: 0.15, y: 0, z: 0.05}
   holderLocalEulerAngles: {x: 345.19815, y: 218.3483, z: 323.48434}
   aimingPositionOffset: {x: 0, y: 0.03, z: 0}
-  rightHandGrip:
-    localPosition: {x: 0.636, y: 0.014, z: -0.092}
-    localEulerAngles: {x: 358.5475, y: 350.2878, z: 254.52022}
-    elbowLocalPosition: {x: 0.36, y: 1.1270001, z: -0.10499999}
-  leftHandGrip:
-    localPosition: {x: 1.327, y: -0.051, z: 0.149}
-    localEulerAngles: {x: 274.06714, y: 347.17288, z: 337.56555}
-    elbowLocalPosition: {x: -0.307, y: 1.193, z: -0.252}
   inHolsterOffset: {x: 0.4838, y: 0, z: 0}
   inHandScale: 0.45
   rebindAnimator: 1
@@ -60,7 +52,8 @@ MonoBehaviour:
   bulletsPerShot: 7
   bulletMaxLifeTime: 3
   bulletSpread: {x: 0.07, y: 0.07}
-  reserveAmmo: 8
+  spreadGainRate: 0
+  reserveAmmo: 72
   <MagazineCapacity>k__BackingField: 8
   currentMagazineAmmo: 8
   infiniteAmmo: 0

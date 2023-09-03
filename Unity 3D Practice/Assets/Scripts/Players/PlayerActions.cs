@@ -190,12 +190,12 @@ public class PlayerActions : MonoBehaviour
 	/// </summary>
 	public void OnCameraLive()
 	{
-		if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
+		if (CameraSwitcher.IsActive(CameraSwitcher.TpsCam))
 		{
-			CameraSwitcher.tpsCam.m_XAxis.Value = transform.eulerAngles.y;
+			CameraSwitcher.TpsCam.m_XAxis.Value = transform.eulerAngles.y;
 		}
 
-		else if (CameraSwitcher.IsActive(CameraSwitcher.fpsCam))
+		else if (CameraSwitcher.IsActive(CameraSwitcher.FpsCam))
 		{
 			return;
 		}

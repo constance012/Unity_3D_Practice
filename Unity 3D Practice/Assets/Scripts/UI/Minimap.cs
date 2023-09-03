@@ -25,8 +25,8 @@ public class Minimap : MonoBehaviour
 
 		coordinateText.text = $"{Mathf.Round(playerPos.x)}, {Mathf.Round(playerPos.y)}, {Mathf.Round(playerPos.z)}";
 
-		if (CameraSwitcher.IsActive(CameraSwitcher.tpsCam))
-			lookingArrow.rotation = Quaternion.Euler(new Vector3(0f, 0f, -CameraSwitcher.tpsCam.m_XAxis.Value));
+		if (CameraSwitcher.IsActive(CameraSwitcher.TpsCam))
+			lookingArrow.rotation = Quaternion.Euler(new Vector3(0f, 0f, -CameraSwitcher.TpsCam.m_XAxis.Value));
 		else
 			lookingArrow.rotation = Quaternion.Euler(new Vector3(0f, 0f, -player.eulerAngles.y));
 

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2b2e88f903d9a945b795f535f004ff9, type: 3}
+  m_Name: Poplar Tree
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 137650, guid: 826b6a0b570e8460990010fa615b5a2a, type: 3}
+  prefabType: 0
+  density: 200
+  minHeight: 0.48
+  maxHeight: 0.74
+  sampleXRange: {x: -238, y: 237.98312}
+  sampleZRange: {x: -237.98312, y: 238}
+  rotateAxis: 1
+  rotateTowardsNormalTendency: 0.132
+  rotationRange: {x: 0, y: 360}
+  scaleRange: {x: 1, y: 3}

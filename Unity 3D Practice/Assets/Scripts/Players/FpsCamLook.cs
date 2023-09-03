@@ -9,13 +9,13 @@ public class FpsCamLook : MonoBehaviour
 	[SerializeField] private Transform player;
 	[SerializeField] private Transform fpsCamPos;
 
-	public static float mouseSensitivity { get; set; } = 100f;
-	public static float mouseX { get; set; }
-	public static float mouseY { get; set; }
+	public static float MouseSensitivity { get; set; } = 100f;
+	public static float MouseX { get; set; }
+	public static float MouseY { get; set; }
 
-	private float xRotation = 0f;
-	private float yRotation = 0f;
-	private bool isAlignedWithPlayer;
+	private float _xRotation = 0f;
+	private float _yRotation = 0f;
+	private bool _isAlignedWithPlayer;
 	
 	private void Awake()
 	{
@@ -25,46 +25,46 @@ public class FpsCamLook : MonoBehaviour
 
 	private void OnEnable()
 	{
-		if (!CameraSwitcher.doneInitializing)
+		if (!CameraSwitcher.DoneInitializing)
 			return;
 
-		player.rotation = Quaternion.Euler(CameraSwitcher.tpsCam.m_XAxis.Value * Vector3.up);
+		player.rotation = Quaternion.Euler(CameraSwitcher.TpsCam.m_XAxis.Value * Vector3.up);
 
-		xRotation = player.eulerAngles.x;
-		yRotation = player.eulerAngles.y;
+		_xRotation = player.eulerAngles.x;
+		_yRotation = player.eulerAngles.y;
 
 		transform.LookAt(fpsCamPos.forward);
 
-		isAlignedWithPlayer = true;
+		_isAlignedWithPlayer = true;
 	}
 
 	private void OnDisable()
 	{
-		isAlignedWithPlayer = false;
+		_isAlignedWithPlayer = false;
 	}
 
 	private void LateUpdate()
 	{
-		if (!isAlignedWithPlayer)
+		if (!_isAlignedWithPlayer)
 			return;
 
-		mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-		mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+		MouseX = Input.GetAxis("Mouse X") * MouseSensitivity * Time.deltaTime;
+		MouseY = Input.GetAxis("Mouse Y") * MouseSensitivity * Time.deltaTime;
 
 		// Gameobject rotates counter clockwise along an axis if that axis rotation value is possitive.
-		xRotation -= mouseY;
+		_xRotation -= MouseY;
 
 		if (PlayerActions.IsAiming)
-			xRotation = Mathf.Clamp(xRotation, -40f, 40f);  // Limit the angle of rotation.
+			_xRotation = Mathf.Clamp(_xRotation, -40f, 40f);  // Limit the angle of rotation.
 		else
-			xRotation = Mathf.Clamp(xRotation, -70f, 70f);  // Limit the angle of rotation.
+			_xRotation = Mathf.Clamp(_xRotation, -70f, 70f);  // Limit the angle of rotation.
 
-		yRotation += mouseX;
+		_yRotation += MouseX;
 		
 		transform.position = fpsCamPos.position;
 
-		transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
+		transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0f);
 
-		player.Rotate(Vector3.up * mouseX);
+		player.Rotate(Vector3.up * MouseX);
 	}
 }

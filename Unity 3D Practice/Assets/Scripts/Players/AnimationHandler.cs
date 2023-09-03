@@ -51,9 +51,9 @@ public class AnimationHandler : MonoBehaviour
 
 	private void Update()
 	{
-		animator.SetFloat(speedHash, PlayerMovement.linearVelocity);
-		animator.SetFloat(velXHash, PlayerMovement.velocityX);
-		animator.SetFloat(velZHash, PlayerMovement.velocityZ);
+		animator.SetFloat(speedHash, PlayerMovement.LinearVelocity);
+		animator.SetFloat(velXHash, PlayerMovement.VelocityX);
+		animator.SetFloat(velZHash, PlayerMovement.VelocityZ);
 
 		// Handle IK contraints.
 		if (IsChangingRigWeight)

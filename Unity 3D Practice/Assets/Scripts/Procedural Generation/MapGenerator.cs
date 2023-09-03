@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class MapGenerator : MonoBehaviour
+public class MapGenerator : Singleton<MapGenerator>
 {
 	/// <summary>
 	/// Represents a type of terrain on the terrain map.
@@ -14,24 +14,6 @@ public class MapGenerator : MonoBehaviour
 		public string name;
 		[Min(0f)] public float minHeight;
 		public Color color;
-	}
-
-	/// <summary>
-	/// Holds the data and the callback method of a thread.
-	/// </summary>
-	/// <typeparam name="TData"></typeparam>
-	private readonly struct ThreadInfo<TData>
-	{
-		public readonly TData data;
-		public readonly Action<TData> callback;
-
-		public ThreadInfo(TData data, Action<TData> callback)
-		{
-			this.data = data;
-			this.callback = callback;
-		}
-
-		public void ExecuteCallback() => this.callback(this.data);
 	}
 
 	public enum MapDrawMode { Noise, Falloff, Texture, Mesh }
@@ -47,6 +29,7 @@ public class MapGenerator : MonoBehaviour
 	// Ideal value, because 240 can be divisible by all even numbers from 2 to 12.
 	// Minus 2 because of the border vertices of this chunk.
 	public const int MAP_CHUNK_SIZE = 239;
+	public const int MAP_CHUNK_SIZE_WITH_BORDER = MAP_CHUNK_SIZE + 2;
 
 	[Header("BASIC INFO"), Space]
 	[Range(0, 6)] public int editorLOD;
@@ -106,8 +89,9 @@ public class MapGenerator : MonoBehaviour
 
 	private float[,] _falloffMap;
 
-	private void Start()
+	protected override void Awake()
 	{
+		base.Awake();
 		GenerateFalloff();
 	}
 
@@ -214,15 +198,15 @@ public class MapGenerator : MonoBehaviour
 	private MapData GenerateMapData(Vector2 chunkCenter)
 	{
 		// Generate one extra noise value for the border of this chunk.
-		float[,] noiseMap = Noise.GenerateNoiseMap(MAP_CHUNK_SIZE + 2, MAP_CHUNK_SIZE + 2, seed, scale,
+		float[,] noiseMap = Noise.GenerateNoiseMap(MAP_CHUNK_SIZE_WITH_BORDER, MAP_CHUNK_SIZE_WITH_BORDER, seed, scale,
 							octaves, persistance, lacunarity, maxPossibleHeightCutoff, chunkCenter + offset, normalizeMode);
 
 		#region Generate the color map.
-		Color[] colorMap = new Color[(MAP_CHUNK_SIZE + 2) * (MAP_CHUNK_SIZE + 2)];
+		Color[] colorMap = new Color[(MAP_CHUNK_SIZE_WITH_BORDER) * (MAP_CHUNK_SIZE_WITH_BORDER)];
 
-		for (int y = 0; y < MAP_CHUNK_SIZE + 2; y++)
+		for (int y = 0; y < MAP_CHUNK_SIZE_WITH_BORDER; y++)
 		{
-			for (int x = 0; x < MAP_CHUNK_SIZE + 2; x++)
+			for (int x = 0; x < MAP_CHUNK_SIZE_WITH_BORDER; x++)
 			{
 				if (useFalloffMap)
 					noiseMap[x, y] = Mathf.Max(noiseMap[x, y] - _falloffMap[x, y], 0f);
@@ -251,15 +235,15 @@ public class MapGenerator : MonoBehaviour
 		switch (falloffShape)
 		{
 			case FalloffShape.Square:
-				_falloffMap = FalloffMapGenerator.GenerateFalloffMapSquare(MAP_CHUNK_SIZE + 2, inverse, falloffSmoothness, falloffIntensity);
+				_falloffMap = FalloffMapGenerator.GenerateFalloffMapSquare(MAP_CHUNK_SIZE_WITH_BORDER, inverse, falloffSmoothness, falloffIntensity);
 				break;
 
 			case FalloffShape.Circle:
-				_falloffMap = FalloffMapGenerator.GenerateFalloffMapCircle(MAP_CHUNK_SIZE + 2, inverse, falloffSmoothness, falloffIntensity);
+				_falloffMap = FalloffMapGenerator.GenerateFalloffMapCircle(MAP_CHUNK_SIZE_WITH_BORDER, inverse, falloffSmoothness, falloffIntensity);
 				break;
 
 			case FalloffShape.Custom:
-				_falloffMap = FalloffMapGenerator.GenerateFalloffMapCustom(MAP_CHUNK_SIZE + 2, inverse, customShapeCurve);
+				_falloffMap = FalloffMapGenerator.GenerateFalloffMapCustom(MAP_CHUNK_SIZE_WITH_BORDER, inverse, customShapeCurve);
 				break;
 		}
 	}
@@ -279,4 +263,22 @@ public readonly struct MapData
 		this.heightMap = heightMap;
 		this.colorMap = colorMap;
 	}
+}
+
+/// <summary>
+/// Holds the data and the callback method of a thread.
+/// </summary>
+/// <typeparam name="TData"></typeparam>
+public readonly struct ThreadInfo<TData>
+{
+	public readonly TData data;
+	public readonly Action<TData> callback;
+
+	public ThreadInfo(TData data, Action<TData> callback)
+	{
+		this.data = data;
+		this.callback = callback;
+	}
+
+	public void ExecuteCallback() => this.callback(this.data);
 }

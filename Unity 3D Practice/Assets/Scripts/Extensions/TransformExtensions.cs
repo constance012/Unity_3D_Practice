@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public static class TransformExtensions
 {
+	public enum TransformAxis { LocalX, LocalY, LocalZ, WorldX, WorldY, WorldZ }
+
 	/// <summary>
 	/// Finds any child with the matching name within this Transform, traverses through the hierarchy using Breadth-first Search.
 	/// </summary>
@@ -26,6 +29,23 @@ public static class TransformExtensions
 		}
 
 		return null;
+	}
+
+	public static bool Find(this Transform transform, string childName, out Transform result)
+	{
+		result = transform.Find(childName);
+
+		return result != null;
+	}
+
+	public static GameObject CreateEmptyChild(this Transform parent, string childName)
+	{
+		GameObject child = new GameObject(childName);
+
+		child.transform.parent = parent;
+		child.transform.ResetTransform(true);
+
+		return child;
 	}
 
 	/// <summary>

@@ -6,6 +6,7 @@ using static MapGenerator;
 public class MapGeneratorEditor : Editor
 {
 	private MapGenerator _generator;
+	private MapPreviewer _previewer;
 
 	//private SerializedObject _generatorObj;
 	//private SerializedProperty _mapWidth;
@@ -14,6 +15,7 @@ public class MapGeneratorEditor : Editor
 	private void OnEnable()
 	{
 		_generator = (MapGenerator)target;
+		_previewer = _generator.GetComponentInChildren<MapPreviewer>();
 		
 		//_generatorObj = new SerializedObject(_generator);
 		//_mapWidth = _generatorObj.FindProperty("mapWidth");
@@ -26,6 +28,8 @@ public class MapGeneratorEditor : Editor
 
 		if (onValueChanged && _generator.autoUpdate)
 		{
+			ManagePreviewObjects();
+
 			if (_generator.useFalloffMap || _generator.drawMode == MapDrawMode.Falloff)
 				_generator.GenerateFalloff();
 
@@ -36,10 +40,31 @@ public class MapGeneratorEditor : Editor
 
 		if (GUILayout.Button("Generate"))
 		{
-			if (_generator.useFalloffMap || _generator.drawMode == MapGenerator.MapDrawMode.Falloff)
+			ManagePreviewObjects();
+
+			if (_generator.useFalloffMap || _generator.drawMode == MapDrawMode.Falloff)
 				_generator.GenerateFalloff();
 
 			_generator.DrawMapInEditor();
+		}
+	}
+
+	private void ManagePreviewObjects()
+	{
+		_previewer.ClearWater();
+
+		if (_previewer != null)
+		{
+			if (_generator.drawMode == MapDrawMode.Mesh)
+			{
+				_previewer.textureRenderer.gameObject.SetActive(false);
+				_previewer.meshRenderer.gameObject.SetActive(true);
+			}
+			else
+			{
+				_previewer.textureRenderer.gameObject.SetActive(true);
+				_previewer.meshRenderer.gameObject.SetActive(false);
+			}
 		}
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
+using static UnityEngine.Object;
 
 public class EndlessTerrainSystem : Singleton<EndlessTerrainSystem>
 {
@@ -20,8 +20,9 @@ public class EndlessTerrainSystem : Singleton<EndlessTerrainSystem>
 	[Min(1f), Tooltip("How big would each terrain chunk be?")]
 	public float chunkScale = 1f;
 	
-	[Space, SerializeField] private Material chunkMaterial;
-	[SerializeField] private Transform chunkParent;
+	[Space] public Material chunkMaterial;
+	public Transform chunkParent;
+	public GameObject waterPrefab;
 	
 	[Header("Viewer Settings"), Space]
 	public Transform viewer;
@@ -29,12 +30,11 @@ public class EndlessTerrainSystem : Singleton<EndlessTerrainSystem>
 	public static float maxViewDistanceSquared;
 
 	// Constants.
-	private const float viewerMoveDeltaBeforeChunkUpdate = 25f;
+	private const float viewerMoveDeltaBeforeChunkUpdate = 100f;
 	private const float viewerMoveDeltaBeforeChunkUpdateSquared = viewerMoveDeltaBeforeChunkUpdate *
 																	  viewerMoveDeltaBeforeChunkUpdate;
 	// Static members.
 	public static Vector2 viewerPosition;
-	public static MapGenerator mapGenerator;
 	public static List<TerrainChunk> outOfViewChunks = new List<TerrainChunk>();
 
 	// Private fields.
@@ -47,7 +47,6 @@ public class EndlessTerrainSystem : Singleton<EndlessTerrainSystem>
 	protected override void Awake()
 	{
 		base.Awake();
-		mapGenerator = GetComponent<MapGenerator>();
 	}
 
 	private void Start()
@@ -109,7 +108,7 @@ public class EndlessTerrainSystem : Singleton<EndlessTerrainSystem>
 				}
 				else
 				{
-					TerrainChunk newChunk = new TerrainChunk(visibleChunkCoord, _chunkSize, detailLevels, chunkParent, chunkMaterial);
+					TerrainChunk newChunk = new TerrainChunk(visibleChunkCoord, _chunkSize, detailLevels);
 					_terrainChunks.Add(visibleChunkCoord, newChunk);
 				}
 			}
@@ -129,47 +128,70 @@ public class TerrainChunk
 
 	private LODInfo[] _detailLevels;
 	private LODMesh[] _lodMeshes;
+	private LODMesh _colliderLODMesh;
 	private int _previousLODIndex = -1;
 
-	private Bounds _bounds;
+	private Bounds _bound;
+
 	private MeshRenderer _meshRenderer;
-	private MeshFilter _meshFilter;
+	private MeshFilter _chunkMeshFilter;
+	private MeshFilter _waterMeshFilter;
+	private MeshCollider _collider;
 
 	private MapData _mapData;
 	private bool _hasMapData;
 
-	public TerrainChunk(Vector2 normalizedCoord, int size, LODInfo[] detailLevels, Transform parent, Material material)
+	private Transform _vegetationRoot;
+	private bool _hasVegetation;
+	private bool _hasRequestedVegetation;
+
+	public TerrainChunk(Vector2 normalizedCoord, int size, LODInfo[] detailLevels)
 	{
 		this._detailLevels = detailLevels;
 		this._lodMeshes = new LODMesh[detailLevels.Length];
-		for (int i = 0; i < _lodMeshes.Length; i++)
+		for (int i = 0; i < detailLevels.Length; i++)
 		{
 			_lodMeshes[i] = new LODMesh(detailLevels[i].levelOfDetail, UpdateSelf);
+
+			if (detailLevels[i].useForCollider)
+				_colliderLODMesh = _lodMeshes[i];
 		}
 
 		this.position = normalizedCoord * size;
-		this._bounds = new Bounds(this.position, Vector2.one * size);
+		this._bound = new Bounds(this.position, Vector2.one * size);
 		
 		// Create the chunk game object.
 		this.chunkObject = new GameObject("Terrain Chunk");
+
+		// Add and reference components.
 		_meshRenderer = this.chunkObject.AddComponent<MeshRenderer>();
-		_meshFilter = this.chunkObject.AddComponent<MeshFilter>();
+		_chunkMeshFilter = this.chunkObject.AddComponent<MeshFilter>();
+		_collider = this.chunkObject.AddComponent<MeshCollider>();
 
 		// Set up the transform.
 		float chunkScale = EndlessTerrainSystem.Instance.chunkScale;
-		Vector3 position3D = new Vector3(this.position.x, 50f, this.position.y);
+		Vector3 position3D = new Vector3(this.position.x, 0f, this.position.y);
 
-		this.chunkObject.transform.parent = parent;
+		this.chunkObject.transform.parent = EndlessTerrainSystem.Instance.chunkParent;
+		this.chunkObject.layer = EndlessTerrainSystem.Instance.chunkParent.gameObject.layer;
 		this.chunkObject.transform.position = position3D * chunkScale;
 		this.chunkObject.transform.localScale = Vector3.one * chunkScale;
 
 		this.chunkObject.name += $" {this.chunkObject.transform.GetSiblingIndex()}";
+		_vegetationRoot = this.chunkObject.transform.CreateEmptyChild("Generables").transform;
 
-		_meshRenderer.material = material;
+		// Asign the material.
+		_meshRenderer.material = EndlessTerrainSystem.Instance.chunkMaterial;
+
+		// Instantiate the water surface.
+		GameObject water = Instantiate(EndlessTerrainSystem.Instance.waterPrefab, this.chunkObject.transform);
+		water.transform.localPosition = Vector3.zero;
+		water.name = "Water Surface";
+		_waterMeshFilter = water.GetComponent<MeshFilter>();
 
 		SetVisible(false);
 
-		EndlessTerrainSystem.mapGenerator.RequestMapData(this.position, OnMapDataReceived);
+		MapGenerator.Instance.RequestMapData(this.position, OnMapDataReceived);
 	}
 
 	public void UpdateSelf()
@@ -177,7 +199,7 @@ public class TerrainChunk
 		if (!_hasMapData)
 			return;
 
-		float viewerToNearestEdgeDistanceSquared = _bounds.SqrDistance(EndlessTerrainSystem.viewerPosition);
+		float viewerToNearestEdgeDistanceSquared = _bound.SqrDistance(EndlessTerrainSystem.viewerPosition);
 		bool visible = viewerToNearestEdgeDistanceSquared <= EndlessTerrainSystem.maxViewDistanceSquared; // Compare two squared values.
 
 		//Debug.Log($"{viewerToNearestEdgeDistanceSquared}, {EndlessTerrainSystem.maxViewDistanceSquared}");
@@ -200,12 +222,27 @@ public class TerrainChunk
 
 				if (lodMesh.hasMesh)
 				{
-					_meshFilter.mesh = lodMesh.mesh;
+					_chunkMeshFilter.mesh = lodMesh.chunkMesh;
+					_waterMeshFilter.mesh = lodMesh.waterMesh;
 					_previousLODIndex = lodIndex;
 				}
 
 				else if (!lodMesh.hasRequestedMesh)
 					lodMesh.RequestMesh(_mapData);
+			}
+
+			if (lodIndex == 0)
+			{
+				if (_colliderLODMesh.hasMesh)
+					_collider.sharedMesh = _colliderLODMesh.chunkMesh;
+				else if (!_colliderLODMesh.hasRequestedMesh)
+					_colliderLODMesh.RequestMesh(_mapData);
+			}
+
+			if (!_hasVegetation && !_hasRequestedVegetation && _previousLODIndex != -1)
+			{
+				PrefabGenerator.Instance.RequestPrefabGeneration(_meshRenderer.bounds, MapGenerator.Instance.meshHeightCurve, MapGenerator.Instance.meshHeight, OnGenerableDataReceived);
+				_hasRequestedVegetation = true;
 			}
 
 			EndlessTerrainSystem.outOfViewChunks.Add(this);
@@ -232,6 +269,13 @@ public class TerrainChunk
 
 		UpdateSelf();
 	}
+
+	private void OnGenerableDataReceived(GenerableData data)
+	{
+		bool success = PrefabGenerator.Instance.generables[data.index].Generate(_vegetationRoot, data);
+		_hasVegetation = success;
+		_hasRequestedVegetation = false;
+	}
 }
 
 /// <summary>
@@ -239,7 +283,9 @@ public class TerrainChunk
 /// </summary>
 public class LODMesh
 {
-	public Mesh mesh;
+	public Mesh chunkMesh;
+	public Mesh waterMesh;
+
 	public bool hasRequestedMesh;
 	public bool hasMesh;
 
@@ -255,12 +301,13 @@ public class LODMesh
 	public void RequestMesh(MapData mapData)
 	{
 		hasRequestedMesh = true;
-		EndlessTerrainSystem.mapGenerator.RequestMeshData(mapData, _levelOfDetail, OnMeshDataReceived);
+		MapGenerator.Instance.RequestMeshData(mapData, _levelOfDetail, OnMeshDataReceived);
 	}
 
 	public void OnMeshDataReceived(MeshData meshData)
 	{
-		mesh = meshData.CreateMesh();
+		chunkMesh = meshData.CreateChunkMesh();
+		waterMesh = meshData.CreateWaterMesh();
 		hasMesh = true;
 
 		_chunkUpdateCalback();
@@ -279,4 +326,6 @@ public struct LODInfo
 	public float VisibleDistanceThreshold { get; private set; }
 
 	public float VisibleDistanceThresholdSquared => VisibleDistanceThreshold * VisibleDistanceThreshold;
+
+	public bool useForCollider;
 }

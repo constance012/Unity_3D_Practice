@@ -13,3 +13,4 @@ Credits for assets and tools I used:
 + "[Graphy] - Ultimate FPS Counter - Stats Monitor & Debugger" by Tayx - https://assetstore.unity.com/packages/tools/gui/graphy-ultimate-fps-counter-stats-monitor-debugger-105778
 + "VFX Bullet Casing" by Simon Mercuzot - https://assetstore.unity.com/packages/3d/characters/vfx-bullet-casing-120111
 + "Modern Guns: Handgun" by Nokobot - https://assetstore.unity.com/packages/3d/props/guns/modern-guns-handgun-129821
++ "Free Trees" by Ada_King - https://assetstore.unity.com/packages/3d/vegetation/trees/free-trees-103208

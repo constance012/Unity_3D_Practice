@@ -36,7 +36,7 @@ public static class GameObjectExtensions
 		Transform placeholderSphere = player.transform.Find("Placeholder Sphere");
 		Transform model = player.transform.Find("Model");
 
-		CameraManager.Instance.ToggleMovementScript(CameraSwitcher.activeCam, false);
+		CameraManager.Instance.ToggleMovementScript(CameraSwitcher.ActiveCam, false);
 		actionScript.OnWeaponDrop();
 		actionScript.enabled = false;
 
@@ -54,7 +54,7 @@ public static class GameObjectExtensions
 		Transform model = player.transform.Find("Model");
 		Animator playerAnimator = player.GetComponent<Animator>();
 
-		CameraManager.Instance.ToggleMovementScript(CameraSwitcher.activeCam, true);
+		CameraManager.Instance.ToggleMovementScript(CameraSwitcher.ActiveCam, true);
 		playerAnimator.Rebind();
 
 		actionScript.enabled = true;
