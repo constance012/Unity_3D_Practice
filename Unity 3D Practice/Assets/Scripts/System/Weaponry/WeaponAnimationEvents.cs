@@ -11,4 +11,9 @@ public class WeaponAnimationEvents : MonoBehaviour
 	{
 		weaponAnimationCallback?.Invoke(action);
 	}
+
+	public void OnWeaponHolstered()
+	{
+		PlayerActions.IsUnequipingDone = true;
+	}
 }

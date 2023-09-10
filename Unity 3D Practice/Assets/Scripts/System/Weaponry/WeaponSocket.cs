@@ -324,7 +324,7 @@ public class WeaponSocket : MonoBehaviour
 
 	private void SingleFire(RangedWeapon weapon)
 	{
-		if (weapon.isReloading && !weapon.canShootWhileReloading)
+		if (weapon.NotAllowShootDuringReload)
 			return;
 
 		ForceStopReloading(weapon);
@@ -344,7 +344,7 @@ public class WeaponSocket : MonoBehaviour
 
 	private IEnumerator BurstFire(RangedWeapon weapon)
 	{
-		if (weapon.isReloading && !weapon.canShootWhileReloading)
+		if (weapon.NotAllowShootDuringReload)
 			yield break;
 
 		ForceStopReloading(weapon);
@@ -369,15 +369,19 @@ public class WeaponSocket : MonoBehaviour
 	/// Stop reloading if are doing so.
 	/// </summary>
 	/// <param name="weapon"></param>
-	private void ForceStopReloading(RangedWeapon weapon)
+	public void ForceStopReloading(Weapon weapon)
 	{
 		if (_reloadCoroutine != null)
 		{
+			RangedWeapon rangedWeapon = weapon as RangedWeapon;
+
 			StopCoroutine(_reloadCoroutine);
 			Destroy(_magazineInHand);
 
 			rigAnimator.Play("Stand By", 2);
-			weapon.isReloading = false;
+			rangedWeapon.isReloading = false;
+			ForcedAiming = false;
+
 			_reloadCoroutine = null;
 		}
 	}

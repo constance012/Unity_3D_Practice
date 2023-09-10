@@ -24,13 +24,13 @@ public class MapGeneratorEditor : Editor
 
 	public override void OnInspectorGUI()
 	{
-		bool onValueChanged = DrawDefaultInspector();
+		bool onValuesChanged = DrawDefaultInspector();
 
-		if (onValueChanged && _generator.autoUpdate)
+		if (onValuesChanged && _generator.autoUpdate)
 		{
-			ManagePreviewObjects();
+			_previewer.ManagePreviewObjects(_generator.drawMode);
 
-			if (_generator.useFalloffMap || _generator.drawMode == MapDrawMode.Falloff)
+			if (_generator.terrainData.useFalloffMap || _generator.drawMode == MapDrawMode.Falloff)
 				_generator.GenerateFalloff();
 
 			_generator.DrawMapInEditor();
@@ -40,31 +40,12 @@ public class MapGeneratorEditor : Editor
 
 		if (GUILayout.Button("Generate"))
 		{
-			ManagePreviewObjects();
+			_previewer.ManagePreviewObjects(_generator.drawMode);
 
-			if (_generator.useFalloffMap || _generator.drawMode == MapDrawMode.Falloff)
+			if (_generator.terrainData.useFalloffMap || _generator.drawMode == MapDrawMode.Falloff)
 				_generator.GenerateFalloff();
 
 			_generator.DrawMapInEditor();
-		}
-	}
-
-	private void ManagePreviewObjects()
-	{
-		_previewer.ClearWater();
-
-		if (_previewer != null)
-		{
-			if (_generator.drawMode == MapDrawMode.Mesh)
-			{
-				_previewer.textureRenderer.gameObject.SetActive(false);
-				_previewer.meshRenderer.gameObject.SetActive(true);
-			}
-			else
-			{
-				_previewer.textureRenderer.gameObject.SetActive(true);
-				_previewer.meshRenderer.gameObject.SetActive(false);
-			}
 		}
 	}
 }

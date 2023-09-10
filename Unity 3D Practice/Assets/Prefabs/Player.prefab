@@ -1524,7 +1524,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7037335223627891165}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -85.934}
+  m_LocalEulerAnglesHint: {x: 144.114, y: -42.07599, z: -54.242004}
 --- !u!1 &2929298152156529419
 GameObject:
   m_ObjectHideFlags: 0
@@ -12192,7 +12192,7 @@ GameObject:
   - component: {fileID: 4327007106470076184}
   - component: {fileID: 110947987489721559}
   - component: {fileID: 4939768874091208776}
-  - component: {fileID: 512074359702548701}
+  - component: {fileID: 6159743335489448169}
   - component: {fileID: 4939768874091208779}
   - component: {fileID: 4939768874091208778}
   - component: {fileID: 4939768874091208772}
@@ -12220,7 +12220,7 @@ Transform:
   - {fileID: 8413501729116894711}
   - {fileID: 6960261235812483938}
   m_Father: {fileID: 0}
-  m_RootOrder: 16
+  m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &4939768874091208775
 Animator:
@@ -12387,7 +12387,7 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0.93, z: 0}
---- !u!114 &512074359702548701
+--- !u!114 &6159743335489448169
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12396,7 +12396,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4939768874091208781}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81b8ff4a6df05844192519bffc4b4353, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d349c7e8bdd9b24889c4d2bb17f0008, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &4939768874091208779
@@ -13784,7 +13784,7 @@ Transform:
   - {fileID: 3367974828590691198}
   m_Father: {fileID: 6653795800426393368}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 8.735, y: -8.843, z: 213.347}
 --- !u!114 &1840734209670960504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14168,7 +14168,7 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: -0.03, y: -0.04, z: 0}
+    m_Offset: {x: -0.03, y: 0.02, z: 0}
     m_ConstrainedAxes:
       x: 1
       y: 1

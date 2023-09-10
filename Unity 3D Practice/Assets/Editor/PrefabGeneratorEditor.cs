@@ -25,7 +25,7 @@ public class PrefabGeneratorEditor : Editor
 		{
 			Bounds previewBound = _previewer.meshRenderer.bounds;
 
-			_generator.GenerateInEditor(previewBound, _mapGenerator.meshHeightCurve, _mapGenerator.meshHeight);
+			_generator.GenerateInEditor(previewBound, _mapGenerator.terrainData.meshHeightCurve, _mapGenerator.terrainData.meshHeight);
 		}
 
 		if (GUILayout.Button("Clear All"))

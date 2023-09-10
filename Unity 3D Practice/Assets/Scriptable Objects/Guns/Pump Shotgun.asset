@@ -30,7 +30,7 @@ MonoBehaviour:
   useType: 2
   holderPositionOffset: {x: 0.15, y: 0, z: 0.05}
   holderLocalEulerAngles: {x: 345.19815, y: 218.3483, z: 323.48434}
-  aimingPositionOffset: {x: 0, y: 0.03, z: 0}
+  aimingPositionOffset: {x: 0, y: 0.08, z: 0.03}
   inHolsterOffset: {x: 0.4838, y: 0, z: 0}
   inHandScale: 0.45
   rebindAnimator: 1

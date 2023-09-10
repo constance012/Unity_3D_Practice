@@ -31,15 +31,7 @@ MonoBehaviour:
   useType: 2
   holderPositionOffset: {x: 0.05, y: -0.5, z: 0}
   holderLocalEulerAngles: {x: 0, y: 270, z: 50}
-  aimingPositionOffset: {x: -0.05, y: 0.03, z: 0}
-  rightHandGrip:
-    localPosition: {x: 0.946, y: -0.069, z: -0.049}
-    localEulerAngles: {x: 0, y: 0, z: 275.48398}
-    elbowLocalPosition: {x: 0.233, y: 1.1152, z: 0.076}
-  leftHandGrip:
-    localPosition: {x: 0.95, y: -0.101, z: 0.07}
-    localEulerAngles: {x: 346.912, y: 185.762, z: 88.97502}
-    elbowLocalPosition: {x: -0.1843, y: 1.2283, z: 0.184}
+  aimingPositionOffset: {x: -0.05, y: 0.08, z: 0}
   inHolsterOffset: {x: 0, y: 0, z: 0}
   inHandScale: 1
   rebindAnimator: 1

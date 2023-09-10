@@ -1,18 +1,23 @@
-﻿using Unity.VisualScripting;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using System;
 using static TransformExtensions;
+using System.Linq;
 
-[CreateAssetMenu(fileName = "New Generable", menuName = "Generable Object")]
+[CreateAssetMenu(fileName = "New Generable", menuName = "Procedural Generation/Generable Object")]
 public class GenerableObject : ScriptableObject
 {
 	public enum GenerableType { Tree, Grass, Bush, Stone, Object, Other}
+	public enum SampleMode { Random, FullCoverage }
 
 	[Header("Prefab to generate"), Space]
 	public GameObject prefab;
 	public GenerableType prefabType;
+	public SampleMode sampleMode;
 
 	[Header("Raycast Settings"), Space]
+	[Tooltip("The density of sample points, only accounts if the sample mode is Random.")]
 	public int density;
 
 	[Range(0f, 1f)] public float minHeight;
@@ -36,7 +41,52 @@ public class GenerableObject : ScriptableObject
 
 	public const int ENVIRONMENT_LAYER_MASK = 1 << 7;
 
-	public bool Generate(Transform rootParent, GenerableData data)
+	public void Generate(Transform rootParent, GenerableData data, Action<bool> returnCallback = null)
+	{
+		if (prefab == null)
+		{
+			Debug.LogWarning("No prefab found to generate, please asign it first.");
+			return;
+		}
+		
+		switch (prefabType)
+		{
+			case GenerableType.Grass:
+				GenerateGrass(rootParent, data, returnCallback);
+				break;
+
+			default:
+				GeneratePrefab(rootParent, data, returnCallback);
+				break;
+		}
+	}
+
+	private void GenerateGrass(Transform rootParent, GenerableData data, Action<bool> returnBack)
+	{
+		float chunkScale = rootParent.parent.localScale.x;
+
+		GameObject prefabInstance = Instantiate(prefab, rootParent);
+		
+		prefabInstance.transform.ResetTransform(true);
+		prefabInstance.transform.localScale = Vector3.one / chunkScale; // Keep the world scale at 1.
+		prefabInstance.name = prefab.name;
+
+		GrassPainter painter = prefabInstance.GetComponent<GrassPainter>();
+
+		for (int i = 0; i < data.samplePoints.Length; i++)
+		{
+			Ray ray = new Ray(data.GetRayOrigin(i), Vector3.down);
+
+			painter.GenerateAtRuntime(ray, data.RayMaxDistance);
+		}
+
+		prefabInstance.GetComponent<GrassComputeHandler>().UpdateShaderData();
+
+		bool success = painter.mesh.vertices.Length > 0;
+		returnBack?.Invoke(success);
+	}
+
+	private void GeneratePrefab(Transform rootParent, GenerableData data, Action<bool> returnCallback)
 	{
 		string parentName = prefabType.ToString();
 
@@ -52,12 +102,23 @@ public class GenerableObject : ScriptableObject
 			if (!Physics.Raycast(ray, out RaycastHit hit, data.RayMaxDistance, ENVIRONMENT_LAYER_MASK))
 				continue;
 
-			GameObject prefabInstance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
-			
+			GameObject prefabInstance = null;
+
+			#if UNITY_EDITOR
+			if (!Application.isPlaying)
+				prefabInstance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+			#endif
+
+			if (Application.isPlaying)
+			{
+				prefabInstance = Instantiate(prefab, parent);
+				prefabInstance.name = prefab.name;
+			}
+
 			prefabInstance.transform.position = hit.point;
 
 			// Apply random rotation.
-			float rotateDegree = Random.Range(rotationRange.x, rotationRange.y);
+			float rotateDegree = UnityEngine.Random.Range(rotationRange.x, rotationRange.y);
 			prefabInstance.transform.Rotate(rotateAxis, rotateDegree, Space.Self);
 
 			// Align with the hit point normal vector.
@@ -65,10 +126,10 @@ public class GenerableObject : ScriptableObject
 			prefabInstance.transform.rotation = Quaternion.Lerp(prefabInstance.transform.rotation, matchNormalRotation, rotateTowardsNormalTendency);
 
 			// Apply random scale.
-			prefabInstance.transform.localScale = Vector3.one * Random.Range(scaleRange.x, scaleRange.y);
+			prefabInstance.transform.localScale = Vector3.one * UnityEngine.Random.Range(scaleRange.x, scaleRange.y);
 		}
 
-		return parent.childCount != 0;
+		returnCallback?.Invoke(parent.childCount != 0);
 	}
 
 	public void SetSampleRange(Bounds rendererBound)
@@ -126,10 +187,10 @@ public struct GenerableData
 
 	public float RayMaxDistance => heightRange.y - heightRange.x;
 
-	public GenerableData(int index, Vector2[] samplePoints, Vector2 heightRange)
+	public GenerableData(int index, IEnumerable<Vector2> samplePoints, Vector2 heightRange)
 	{
 		this.index = index;
-		this.samplePoints = samplePoints;
+		this.samplePoints = samplePoints.ToArray();
 		this.heightRange = heightRange;
 	}
 

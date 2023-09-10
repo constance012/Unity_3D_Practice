@@ -10,7 +10,7 @@ public static class MeshGenerator
 	/// <param name="heightCurve"></param>
 	/// <param name="levelOfDetail"></param>
 	/// <returns>A mesh data object to create a new mesh.</returns>
-	public static MeshData ToTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve heightCurve, int levelOfDetail)
+	public static MeshData ToTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve heightCurve, int levelOfDetail, bool useFlatShading)
 	{
 		AnimationCurve threadSafeCurve = new AnimationCurve(heightCurve.keys);
 		
@@ -27,7 +27,7 @@ public static class MeshGenerator
 
 		int verticesPerAxis = (meshSizeActual - 1) / meshVerticesStep + 1;
 
-		MeshData meshData = new MeshData(verticesPerAxis);
+		MeshData meshData = new MeshData(verticesPerAxis, useFlatShading);
 
 		int[,] vertexIndicesMap = new int[borderedSize, borderedSize];
 		int meshVertexIndex = 0;
@@ -69,7 +69,7 @@ public static class MeshGenerator
 
 				meshData.AddVertex(vertexPosition, uvCoord, vertexIndex);
 
-				// Add 2 triangles (ADC and DAB) that made up a square at this vertex,
+				// Add 2 triangles (CAD and BDA) that made up a square at this vertex,
 				// ignore all vertices along the right and bottom of the map.
 				// A--B
 				// |\\|
@@ -82,13 +82,16 @@ public static class MeshGenerator
 					int D = vertexIndicesMap[x + meshVerticesStep, y + meshVerticesStep];
 
 					// Add vertices in the clock-wise order.
-					meshData.AddTriangle(A, D, C);
-					meshData.AddTriangle(D, A, B);
+					meshData.AddTriangle(C, A, D);
+					meshData.AddTriangle(B, D, A);
 				}
 			}
 		}
 
-		meshData.BakeVertexNormals();
+		if (useFlatShading)
+			meshData.FlatShadingSurfaces();
+		else
+			meshData.BakeVertexNormals();
 
 		return meshData;
 	}
@@ -123,15 +126,18 @@ public class MeshData
 
 	private int _meshTriangleIndex = 0;
 	private int _borderTriangleIndex = 0;
+	private bool _useFlatShading;
 
-	public MeshData(int verticesPerAxis)
+	public MeshData(int verticesPerAxis, bool useFlatShading)
 	{
+		_useFlatShading = useFlatShading;
+		
 		// Initialize the mesh data.
 		_meshVertices = new Vector3[verticesPerAxis * verticesPerAxis];
 
 		// Each triangle is made up by 3 vertices, and 2 triangles form a square.
-		int meshTriangles = (verticesPerAxis - 1) * (verticesPerAxis - 1) * 6;
-		_meshTriangles = new int[meshTriangles];
+		int meshTriangleIndices = (verticesPerAxis - 1) * (verticesPerAxis - 1) * 6;
+		_meshTriangles = new int[meshTriangleIndices];
 
 		_UVs = new Vector2[verticesPerAxis * verticesPerAxis];
 
@@ -192,7 +198,10 @@ public class MeshData
 		mesh.uv = this._UVs;
 
 		// Recalculate normal vectors so the lighting will work properly.
-		mesh.normals = bakedNormals;
+		if (_useFlatShading)
+			mesh.RecalculateNormals();
+		else
+			mesh.normals = bakedNormals;
 
 		return mesh;
 	}
@@ -217,9 +226,33 @@ public class MeshData
 		return water;
 	}
 
+	/// <summary>
+	/// Bake the vertex normals separate from the Unity's main thread to prevent heavy performance impacts.
+	/// </summary>
 	public void BakeVertexNormals()
 	{
 		bakedNormals = RecalculateVertexNormals();
+	}
+
+	/// <summary>
+	/// Makes triangles receive the same lighting across their surfaces - in other words, to be flat-shaded.
+	/// </summary>
+	public void FlatShadingSurfaces()
+	{
+		Vector3[] flatShadedVertices = new Vector3[_meshTriangles.Length];
+		Vector2[] flatShadedUVs = new Vector2[_meshTriangles.Length];
+
+		for (int i = 0; i < flatShadedVertices.Length; i++)
+		{
+			int vertexIndex = _meshTriangles[i];
+			flatShadedVertices[i] = _meshVertices[vertexIndex];
+			flatShadedUVs[i] = _UVs[vertexIndex];
+
+			_meshTriangles[i] = i;
+		}
+
+		_meshVertices = flatShadedVertices;
+		_UVs = flatShadedUVs;
 	}
 
 	private Vector3[] RecalculateVertexNormals()

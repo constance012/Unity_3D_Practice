@@ -109,6 +109,7 @@ public sealed class RangedWeapon : Weapon
 	
 	// Properties.
 	public bool CanReload => reserveAmmo > 0 && currentMagazineAmmo < MagazineCapacity;
+	public bool NotAllowShootDuringReload => isReloading && (!canShootWhileReloading || currentMagazineAmmo == 0);
 
 	// Private fields.
 	private List<Bullet> _bullets = new List<Bullet>();

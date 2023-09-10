@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2b2e88f903d9a945b795f535f004ff9, type: 3}
+  m_Name: Grass
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 4612413390578229141, guid: 0ad3bad267bd8114a9a463962b69c43a, type: 3}
+  prefabType: 1
+  sampleMode: 0
+  density: 1000
+  minHeight: 0.5
+  maxHeight: 0.64
+  sampleXRange: {x: -714, y: -238.01686}
+  sampleZRange: {x: -713.98315, y: -238.00002}
+  rotateAxis: 0
+  rotateTowardsNormalTendency: 0
+  rotationRange: {x: 0, y: 0}
+  scaleRange: {x: 0, y: 0}

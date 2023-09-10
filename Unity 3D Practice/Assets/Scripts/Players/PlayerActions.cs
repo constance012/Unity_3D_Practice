@@ -14,11 +14,14 @@ public class PlayerActions : MonoBehaviour
 	[Space]
 	[SerializeField] private Animator rigAnimator;
 	[SerializeField] private GameObject crosshair;
+	[SerializeField] private GrassComputeHandler grassHandler;
+	[SerializeField] private GrassPainter grassPainter;
 
 	public static Weapon[] weapons = new Weapon[4];
 
 	[HideInInspector] public WeaponSocket weaponSocket;
 	private Weapon _currentWeapon;
+
 
 	// Properties.
 	public static bool NeedToRebindAnimator { get; set; }
@@ -27,6 +30,7 @@ public class PlayerActions : MonoBehaviour
 
 	// Private fields.
 	private bool _switchingWeapon;
+	private Vector3 _previousPosition;
 
 	private void Awake()
 	{
@@ -38,6 +42,8 @@ public class PlayerActions : MonoBehaviour
 
 	private void Update()
 	{
+		//GenerateGrassOnTheRun();
+
 		SelectWeapon();
 
 		// Stop aiming when unarmed or is switching weapons.
@@ -50,6 +56,19 @@ public class PlayerActions : MonoBehaviour
 		}
 
 		HandleAiming();
+	}
+
+	private void GenerateGrassOnTheRun()
+	{
+		if (Vector3.Distance(_previousPosition, transform.position) > .1f)
+		{
+			Ray ray = new Ray(transform.position, Vector3.down);
+
+			grassPainter.GenerateAtRuntime(ray, 10f);
+			grassHandler.UpdateShaderData();
+
+			_previousPosition = transform.position;
+		}
 	}
 
 	private void SelectWeapon()
@@ -158,6 +177,8 @@ public class PlayerActions : MonoBehaviour
 		// Unequip the current weapon.
 		if (_currentWeapon != null)
 		{
+			weaponSocket.ForceStopReloading(_currentWeapon);
+
 			IsUnequipingDone = false;
 
 			EquipWeapon(true);
