@@ -54,7 +54,7 @@ public class FirearmMono : MonoBehaviour
 		AudioManager.Instance.Play("Gun Shot", 0, pitch);
 		cameraShake.GenerateImpulse(Camera.main.transform.forward);
 
-		rigAnimator.Play($"Recoil {weaponName}", 3, 0f);
+		rigAnimator.Play($"Recoil {weaponName}", 4, 0f);
 	}
 
 	private void ProcessRecoil()

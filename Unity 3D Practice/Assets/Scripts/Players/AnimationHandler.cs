@@ -1,12 +1,11 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using CSTGames.CommonEnums;
-using System.Collections;
+using CSTGames.Utility;
 
 public class AnimationHandler : MonoBehaviour
 {
 	[SerializeField] private Animator animator;
-	[SerializeField] private static RigBuilder rigBuilder;
 
 	// Animators' parameter hashes.
 	public static int velXHash, velZHash;
@@ -15,21 +14,27 @@ public class AnimationHandler : MonoBehaviour
 	public static int isJumpingHash;
 
 	public static int holsterWeaponHash;
-	public static int IsAimingHash;
+	public static int isAimingHash;
 	public static int endAimingHash;
 
+	public static int isFocusingHash;
+	public static int endFocusHash;
+
+	public static int startReloadingHash;
 	public static int endReloadingHash;
+	public static bool IsChangingRigWeight { get; private set; }
 
 	// Private fields.
-	private Transform _headLookTarget;
-	public static bool IsChangingRigWeight { get; private set; }
+	private static RigBuilder _rigBuilder;
+	private Transform _cameraLookTarget;
+	private float _headLookOvershoot = 1f;
 
 	private void Awake()
 	{
 		animator = GetComponent<Animator>();
-		rigBuilder = GetComponent<RigBuilder>();
+		_rigBuilder = GetComponent<RigBuilder>();
 
-		_headLookTarget = Camera.main.transform.Find("Head Look Target");
+		_cameraLookTarget = Camera.main.transform.Find("Camera Look Target");
 	}
 
 	private void Start()
@@ -43,9 +48,13 @@ public class AnimationHandler : MonoBehaviour
 
 		// Rig layers animator.
 		holsterWeaponHash = Animator.StringToHash("HolsterWeapon");
-		IsAimingHash = Animator.StringToHash("IsAiming");
+		isAimingHash = Animator.StringToHash("IsAiming");
 		endAimingHash = Animator.StringToHash("EndAiming");
 
+		isFocusingHash = Animator.StringToHash("IsFocusing");
+		endFocusHash = Animator.StringToHash("EndFocus");
+
+		startReloadingHash = Animator.StringToHash("StartReloading");
 		endReloadingHash = Animator.StringToHash("EndReloading");
 	}
 
@@ -54,6 +63,8 @@ public class AnimationHandler : MonoBehaviour
 		animator.SetFloat(speedHash, PlayerMovement.LinearVelocity);
 		animator.SetFloat(velXHash, PlayerMovement.VelocityX);
 		animator.SetFloat(velZHash, PlayerMovement.VelocityZ);
+
+		Debug.Log(IsChangingRigWeight);
 
 		// Handle IK contraints.
 		if (IsChangingRigWeight)
@@ -73,21 +84,26 @@ public class AnimationHandler : MonoBehaviour
 
 	private void ConstrainLookAtIK()
 	{
-		Vector3 headLookAtLocal = transform.InverseTransformPoint(_headLookTarget.position);
+		Vector3 headLookAtLocal = transform.InverseTransformPoint(_cameraLookTarget.position);
 
 		// If the target is behind the player, then gradually decreases the weight to 0 in half a second.
-		if (headLookAtLocal.z < 0f)
-			StartCoroutine(ChangeRigLayerWeight("look at ik", RigLayerWeightControl.Decrease, 0f, .5f));
-		else if (headLookAtLocal.z > 0f)
-			StartCoroutine(ChangeRigLayerWeight("look at ik", RigLayerWeightControl.Increase, 1f, .5f));
+		if (Mathf.Sign(headLookAtLocal.z) != _headLookOvershoot)
+		{
+			if (headLookAtLocal.z < 0f)
+				StartCoroutine(ChangeRigLayerWeight("look at ik",  0f, 1f));
+			else
+				StartCoroutine(ChangeRigLayerWeight("look at ik", 1f, 1f));
+			
+			_headLookOvershoot = Mathf.Sign(headLookAtLocal.z);
+		}
 	}
 
-	public static IEnumerator ChangeRigLayerWeight(string rigLayerName, RigLayerWeightControl control, float newWeight, float duration = 1f)
+	public static IEnumerator ChangeRigLayerWeight(string rigLayerName, float newWeight, float duration = 1f)
 	{
 		IsChangingRigWeight = true;
 
 		rigLayerName = ("RigLayer_" + rigLayerName).ToLower();
-		Rig targetRig = rigBuilder.layers.Find(rig => rig.name.ToLower().Equals(rigLayerName)).rig;
+		Rig targetRig = _rigBuilder.layers.Find(rig => rig.name.ToLower().Equals(rigLayerName)).rig;
 
 		if (targetRig == null)
 		{
@@ -95,26 +111,21 @@ public class AnimationHandler : MonoBehaviour
 			yield break;
 		}
 
-		switch (control)
+		float currentTime = 0f;
+
+		if (duration > 0f)
 		{
-			case RigLayerWeightControl.Increase:
-				while (targetRig.weight < newWeight)
-				{
-					targetRig.weight += Time.deltaTime / duration;
+			while (currentTime < duration)
+			{
+				float w = NumberManipulator.RangeConvert(currentTime / duration, 0f, 1f, targetRig.weight, newWeight);
+				targetRig.weight = w;
 
-					yield return null;
-				}
-				break;
-
-			case RigLayerWeightControl.Decrease:
-				while (targetRig.weight > newWeight)
-				{
-					targetRig.weight -= Time.deltaTime / duration;
-
-					yield return null;
-				}
-				break;
+				currentTime += Time.deltaTime;
+				yield return null;
+			}
 		}
+		else
+			targetRig.weight = newWeight;
 
 		IsChangingRigWeight = false;
 	}

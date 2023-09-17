@@ -54,6 +54,7 @@ public class Weapon : Item
 	[Header("SHARED PROPERTIES"), Space]
 	[Min(0f)]
 	public float baseDamage;
+	public float headshotDamage;
 	public float durability;
 	public float knockBack;
 

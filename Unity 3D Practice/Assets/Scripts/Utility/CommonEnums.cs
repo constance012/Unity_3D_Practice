@@ -1,11 +1,5 @@
 namespace CSTGames.CommonEnums
 {
-	public enum RigLayerWeightControl
-	{
-		Increase,
-		Decrease
-	}
-
 	/// <summary>
 	/// Represents types of treasure and the their maximum quantity when generated in a chest.
 	/// </summary>

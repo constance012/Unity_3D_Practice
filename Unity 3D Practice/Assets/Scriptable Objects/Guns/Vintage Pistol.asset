@@ -37,10 +37,11 @@ MonoBehaviour:
   rebindAnimator: 1
   muzzleFlashLocalPosisiton: {x: 0.44, y: 0.18, z: -0.163}
   baseDamage: 20
+  headshotDamage: 50
   durability: 100
   knockBack: 1.8
   baseCriticalChance: 14.6
-  useSpeed: 0.5
+  useSpeed: 0.4
   sellPrice: 720
   gunType: 0
   bulletTracer: {fileID: 439671133536590696, guid: 8774c151cc39505409c940c3be000c04, type: 3}

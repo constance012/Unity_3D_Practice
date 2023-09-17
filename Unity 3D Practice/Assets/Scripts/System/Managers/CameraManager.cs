@@ -9,10 +9,11 @@ public class CameraManager : Singleton<CameraManager>
 	[SerializeField] private CinemachineFreeLook thirdPersonCam;
 	[SerializeField] private CinemachineVirtualCamera firstPersonCam;
 
-	private Transform _player;
-	private Animator _cam3rdAnimator;
+	[HideInInspector] public Animator cam3rdAnimator;
+	[HideInInspector] public Animator cam1stAnimator;
 
-	// Scripts
+	// Private fields.
+	private Transform _player;
 	private ThirdPersonMovement _move3rdScript;
 	private FirstPersonMovement _move1stScript;
 	private FpsCamLook _cam1stLookScript;
@@ -24,7 +25,8 @@ public class CameraManager : Singleton<CameraManager>
 		thirdPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineFreeLook>("ThirdPersonCam");
 		firstPersonCam = GameObjectExtensions.GetComponentWithTag<CinemachineVirtualCamera>("FirstPersonCam");
 
-		_cam3rdAnimator = thirdPersonCam.GetComponent<Animator>();
+		cam3rdAnimator = thirdPersonCam.GetComponent<Animator>();
+		cam1stAnimator = firstPersonCam.GetComponent<Animator>();
 
 		_player = GameObject.FindWithTag("Player").transform;
 		_move3rdScript = _player.GetComponent<ThirdPersonMovement>();
@@ -50,11 +52,6 @@ public class CameraManager : Singleton<CameraManager>
 	// Update is called once per frame
 	private void LateUpdate()
 	{
-		bool wasAiming = _cam3rdAnimator.GetBool(AnimationHandler.IsAimingHash);
-
-		if (PlayerActions.IsAiming != wasAiming)
-			SetAimingProperties(PlayerActions.IsAiming);
-
 		if (InputManager.Instance.GetKeyDown(KeybindingActions.SwitchCamera))
 			SwitchCamera();
 	}
@@ -67,9 +64,9 @@ public class CameraManager : Singleton<CameraManager>
 			_move1stScript.enabled = state;
 	}
 
-	private void SetAimingProperties(bool IsAiming)
+	public void SetAimingProperties(bool IsAiming)
 	{
-		void SetRigProperties(CinemachineOrbitRig rig, float height, float radius, Vector3 trackTargetOffset, Vector3 damping)
+		void SetRigProperties(CinemachineFreeLookOrbitRig rig, float height, float radius, Vector3 trackTargetOffset, Vector3 damping)
 		{
 			thirdPersonCam.m_Orbits[(int)rig].m_Height = height;
 			thirdPersonCam.m_Orbits[(int)rig].m_Radius = radius;
@@ -83,23 +80,21 @@ public class CameraManager : Singleton<CameraManager>
 			trans.m_ZDamping = damping.z;
 		}
 
+		cam3rdAnimator.SetBool(AnimationHandler.isAimingHash, IsAiming);
+
 		if (IsAiming)
 		{
 			thirdPersonCam.m_SplineCurvature = 0f;
-			SetRigProperties(CinemachineOrbitRig.Top, 3f, 4.2f, new Vector3(0f, .95f, 0f), Vector3.zero);
-			SetRigProperties(CinemachineOrbitRig.Middle, 1.1f, 4f, new Vector3(0f, 1f, 0f), Vector3.zero);
-			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, 1.2f, new Vector3(0f, 1.15f, 0f), Vector3.zero);
-
-			_cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, true);
+			SetRigProperties(CinemachineFreeLookOrbitRig.Top, 3f, 4.2f, new Vector3(0f, .95f, 0f), Vector3.zero);
+			SetRigProperties(CinemachineFreeLookOrbitRig.Middle, 1.1f, 4f, new Vector3(0f, 1f, 0f), Vector3.zero);
+			SetRigProperties(CinemachineFreeLookOrbitRig.Bottom, 0f, 1.2f, new Vector3(0f, 1.15f, 0f), Vector3.zero);
 		}
 		else
 		{
 			thirdPersonCam.m_SplineCurvature = .5f;
-			SetRigProperties(CinemachineOrbitRig.Top, 5f, .5f, new Vector3(0f, 0f, 0f), Vector3.one);
-			SetRigProperties(CinemachineOrbitRig.Middle, 1.8f, 4f, new Vector3(0f, 1f, 0f), Vector3.one);
-			SetRigProperties(CinemachineOrbitRig.Bottom, 0f, .5f, new Vector3(0f, 1f, 0f), Vector3.one);
-
-			_cam3rdAnimator.SetBool(AnimationHandler.IsAimingHash, false);
+			SetRigProperties(CinemachineFreeLookOrbitRig.Top, 5f, .5f, new Vector3(0f, 0f, 0f), Vector3.one);
+			SetRigProperties(CinemachineFreeLookOrbitRig.Middle, 1.8f, 4f, new Vector3(0f, 1f, 0f), Vector3.one);
+			SetRigProperties(CinemachineFreeLookOrbitRig.Bottom, 0f, .5f, new Vector3(0f, 1f, 0f), Vector3.one);
 		}
 	}
 
@@ -133,6 +128,6 @@ public class CameraManager : Singleton<CameraManager>
 		}
 	}
 
-	public enum CinemachineOrbitRig { Top, Middle, Bottom }
+	public enum CinemachineFreeLookOrbitRig { Top, Middle, Bottom }
 	public enum CameraPerspective { ThirdPerson, FirstPerson }
 }

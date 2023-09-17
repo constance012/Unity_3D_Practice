@@ -1,43 +1,40 @@
 using System.Collections;
 using System.Linq;
 using UnityEngine;
-using CSTGames.CommonEnums;
+using UnityEngine.Events;
 using static Weapon;
+using CSTGames.CommonEnums;
 
 public class PlayerActions : MonoBehaviour
 {
-	[Header("Debugging")]
-	[Space]
-	[SerializeField] private bool holdToAim;
-	
 	[Header("References")]
 	[Space]
 	[SerializeField] private Animator rigAnimator;
-	[SerializeField] private GameObject crosshair;
 	[SerializeField] private GrassComputeHandler grassHandler;
 	[SerializeField] private GrassPainter grassPainter;
+
+	[Header("Events"), Space]
+	public UnityEvent onActiveWeaponSwitched = new UnityEvent();
 
 	public static Weapon[] weapons = new Weapon[4];
 
 	[HideInInspector] public WeaponSocket weaponSocket;
-	private Weapon _currentWeapon;
-
 
 	// Properties.
 	public static bool NeedToRebindAnimator { get; set; }
-	public static bool IsAiming { get; private set; }
 	public static bool IsUnequipingDone { get; set; }
+	public static bool IsSwitchingWeapon { get; private set; }
+	public static Weapon CurrentActiveWeapon { get { return _currentWeapon; } }
 
 	// Private fields.
-	private bool _switchingWeapon;
 	private Vector3 _previousPosition;
+	private static Weapon _currentWeapon;
 
 	private void Awake()
 	{
 		rigAnimator = transform.GetComponentInChildren<Animator>("Model/-----RIG LAYERS-----");
+		
 		weaponSocket = GameObjectExtensions.GetComponentWithTag<WeaponSocket>("WeaponSocket");
-
-		crosshair = GameObjectExtensions.FindChildTransformWithTag("UICanvas", "Gun UI/Crosshair").gameObject;
 	}
 
 	private void Update()
@@ -45,17 +42,6 @@ public class PlayerActions : MonoBehaviour
 		//GenerateGrassOnTheRun();
 
 		SelectWeapon();
-
-		// Stop aiming when unarmed or is switching weapons.
-		if (_currentWeapon == null || _switchingWeapon)
-		{
-			IsAiming = false;
-			SetAimingBehaviour(false, false);
-
-			return;
-		}
-
-		HandleAiming();
 	}
 
 	private void GenerateGrassOnTheRun()
@@ -77,7 +63,7 @@ public class PlayerActions : MonoBehaviour
 		if (weapons.All(weapon => weapon == null))
 			return;
 
-		if (!_switchingWeapon)
+		if (!IsSwitchingWeapon)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 				StartCoroutine(SwitchWeapon((int)WeaponSlot.Primary));
@@ -86,66 +72,6 @@ public class PlayerActions : MonoBehaviour
 				StartCoroutine(SwitchWeapon((int)WeaponSlot.Secondary));
 		}
 	}
-
-	#region Aiming Weapon.
-	private void SetAimingBehaviour(bool state, bool setTrigger = true)
-	{
-		if (state)
-		{
-			rigAnimator.Play($"Start Aiming {_currentWeapon.itemName}", 1);
-
-			StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Increase, 1f, .5f));
-		}
-		else
-		{
-			if (setTrigger)
-				rigAnimator.SetTrigger(AnimationHandler.endAimingHash);
-
-			StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, .5f));
-		}
-		
-		crosshair.SetActive(state);
-		IsAiming = state;
-	}
-
-	private void CheckForAimingInput()
-	{
-		if (_switchingWeapon)
-			return;
-
-		if (WeaponSocket.ForcedAiming)
-		{
-			IsAiming = true;
-			return;
-		}
-
-		if (holdToAim)
-		{
-			IsAiming = false;
-
-			// Check aiming.
-			if (Input.GetKey(KeyCode.Mouse1))
-				IsAiming = true;
-		}
-		else if (Input.GetKeyDown(KeyCode.Mouse1))
-			IsAiming = !IsAiming;
-	}
-
-	private void HandleAiming()
-	{
-		bool wasAiming = IsAiming;
-
-		CheckForAimingInput();
-		
-		// What to change when starts of stops aiming.
-		if (wasAiming != IsAiming)
-		{
-			StopAllCoroutines();
-			
-			SetAimingBehaviour(IsAiming);
-		}
-	}
-	#endregion
 
 	private void EquipWeapon(bool unequip = false)
 	{
@@ -169,16 +95,13 @@ public class PlayerActions : MonoBehaviour
 
 	private IEnumerator SwitchWeapon(int newWeaponIndex)
 	{
-		SetAimingBehaviour(false, IsAiming);
-
-		_switchingWeapon = true;
+		onActiveWeaponSwitched?.Invoke(); // Force stop aiming.
+		IsSwitchingWeapon = true;
 		IsUnequipingDone = true;
 
 		// Unequip the current weapon.
 		if (_currentWeapon != null)
 		{
-			weaponSocket.ForceStopReloading(_currentWeapon);
-
 			IsUnequipingDone = false;
 
 			EquipWeapon(true);
@@ -203,7 +126,7 @@ public class PlayerActions : MonoBehaviour
 			EquipWeapon();
 		}
 
-		_switchingWeapon = false;
+		IsSwitchingWeapon = false;
 	}
 
 	/// <summary>
@@ -229,8 +152,6 @@ public class PlayerActions : MonoBehaviour
 	{
 		if (NeedToRebindAnimator || forcedRebind)
 		{
-			SetAimingBehaviour(false, IsAiming);
-
 			// Switch back to the previous holding weapon after rebinding the animator.
 			if (_currentWeapon != null)
 			{
@@ -257,20 +178,14 @@ public class PlayerActions : MonoBehaviour
 		if (_currentWeapon == null)
 			return;
 
-		SetAimingBehaviour(false, IsAiming);
 		rigAnimator.Play("Unarmed");
 
 		weaponSocket.ResetWeaponOffset(_currentWeapon.weaponSlot);
 		
-		StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", RigLayerWeightControl.Decrease, 0f, 0f));
+		StartCoroutine(AnimationHandler.ChangeRigLayerWeight("weapon aiming ik", 0f, 0f));
 
 		transform.rotation = Quaternion.Euler(Camera.main.transform.eulerAngles.y * Vector3.up);
 		
 		_currentWeapon = null;
-	}
-
-	public void OnWeaponReloadingDone()
-	{
-		SetAimingBehaviour(false, IsAiming);
 	}
 }

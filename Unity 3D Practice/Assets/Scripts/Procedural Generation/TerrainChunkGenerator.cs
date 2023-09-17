@@ -100,7 +100,7 @@ public class TerrainChunkGenerator : Singleton<TerrainChunkGenerator>
 				if (sizeMode == TerrainSizeMode.FixedSize && visibleChunkCoord.CompareBounds(_chunkCoordBounds) == 1)
 					continue;
 
-				if (_terrainChunks.ContainsKey(visibleChunkCoord, out TerrainChunk chunk))
+				if (_terrainChunks.TryGetValue(visibleChunkCoord, out TerrainChunk chunk))
 				{
 					chunk.UpdateSelf();
 				}

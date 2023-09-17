@@ -26,7 +26,7 @@ public class ThirdPersonMovement : PlayerMovement
 
 		HandleLinearHorizontalMovement();
 
-		if (PlayerActions.IsAiming)
+		if (WeaponAiming.IsAiming)
 		{
 			HandleStrafeHorizontalMovement();
 			OnAimingMode();

@@ -36,6 +36,7 @@ MonoBehaviour:
   rebindAnimator: 1
   muzzleFlashLocalPosisiton: {x: 1.493, y: 0.085, z: 0}
   baseDamage: 45
+  headshotDamage: 100
   durability: 100
   knockBack: 3
   baseCriticalChance: 24.1

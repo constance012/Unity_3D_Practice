@@ -66,7 +66,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 820939220}
-  - component: {fileID: 820939221}
+  - component: {fileID: 520175876152635262}
   m_Layer: 6
   m_Name: Chest Look
   m_TagString: Untagged
@@ -89,7 +89,7 @@ Transform:
   m_Father: {fileID: 7989453628285844032}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &820939221
+--- !u!114 &520175876152635262
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -98,17 +98,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 820939219}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
+  m_Script: {fileID: 11500000, guid: fdb90b913935e644baaa86c076d788e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 0.3
+  m_Weight: 1
   m_Data:
     m_ConstrainedObject: {fileID: 7064322260900213990}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
-        transform: {fileID: 0}
-        weight: 1
+        transform: {fileID: 3961833142456898017}
+        weight: 0.25
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -131,18 +131,11 @@ MonoBehaviour:
         transform: {fileID: 0}
         weight: 0
     m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -30
-    m_MaxLimit: 30
-    m_AimAxis: 4
-    m_UpAxis: 2
-    m_WorldUpType: 1
-    m_WorldUpObject: {fileID: 0}
-    m_WorldUpAxis: 2
-    m_MaintainOffset: 0
     m_ConstrainedAxes:
-      x: 1
+      x: 0
       y: 1
       z: 0
+    m_MaintainOffset: 0
 --- !u!1 &1384504508
 GameObject:
   m_ObjectHideFlags: 0
@@ -152,7 +145,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1384504509}
-  - component: {fileID: 1384504510}
+  - component: {fileID: 4717137071861023634}
   m_Layer: 6
   m_Name: Abdomen Look
   m_TagString: Untagged
@@ -175,7 +168,7 @@ Transform:
   m_Father: {fileID: 7989453628285844032}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1384504510
+--- !u!114 &4717137071861023634
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -184,17 +177,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1384504508}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
+  m_Script: {fileID: 11500000, guid: fdb90b913935e644baaa86c076d788e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 0.2
+  m_Weight: 1
   m_Data:
     m_ConstrainedObject: {fileID: 8625175999515968653}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
-        transform: {fileID: 0}
-        weight: 1
+        transform: {fileID: 3961833142456898017}
+        weight: 0.2
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -217,18 +210,11 @@ MonoBehaviour:
         transform: {fileID: 0}
         weight: 0
     m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -20
-    m_MaxLimit: 20
-    m_AimAxis: 4
-    m_UpAxis: 2
-    m_WorldUpType: 1
-    m_WorldUpObject: {fileID: 0}
-    m_WorldUpAxis: 2
-    m_MaintainOffset: 0
     m_ConstrainedAxes:
       x: 1
       y: 1
       z: 0
+    m_MaintainOffset: 0
 --- !u!1 &25385897326569453
 GameObject:
   m_ObjectHideFlags: 0
@@ -755,8 +741,8 @@ MonoBehaviour:
   - m_Transform: {fileID: 8623039040349107826}
     m_Style:
       shape: {fileID: 4300000, guid: c6793350c150f456688e39a81f97364a, type: 2}
-      color: {r: 1, g: 0, b: 0, a: 1}
-      size: 1.5
+      color: {r: 1, g: 0, b: 0, a: 0.5}
+      size: 2.31
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0}
     m_Visible: 1
@@ -12290,7 +12276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneShape: 1
-  drawBones: 0
+  drawBones: 1
   drawTripods: 0
   boneSize: 1.5
   tripodSize: 1
@@ -12511,9 +12497,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58a37259f2e803149a2478cd7a5f35a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holdToAim: 0
   rigAnimator: {fileID: 0}
-  crosshair: {fileID: 0}
+  grassHandler: {fileID: 0}
+  grassPainter: {fileID: 0}
+  onActiveWeaponSwitched:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6211725020636762119}
+        m_TargetAssemblyTypeName: WeaponAiming, Assembly-CSharp
+        m_MethodName: ForceStopAiming
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   weaponSocket: {fileID: 0}
 --- !u!114 &4939768874091208774
 MonoBehaviour:
@@ -13144,8 +13145,8 @@ MonoBehaviour:
         transform: {fileID: 0}
         weight: 0
     m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -90
-    m_MaxLimit: 90
+    m_MinLimit: -80
+    m_MaxLimit: 80
     m_AimAxis: 4
     m_UpAxis: 2
     m_WorldUpType: 1
@@ -13298,6 +13299,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6653795800426393368}
   - component: {fileID: 6316467088894147940}
+  - component: {fileID: 1006874154816526101}
+  - component: {fileID: 6211725020636762119}
   m_Layer: 0
   m_Name: Weapon Socket
   m_TagString: WeaponSocket
@@ -13334,9 +13337,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   droppedItemPrefab: {fileID: 985299006758311806, guid: 52d71cd21709ac744a943ebca7fcbb02, type: 3}
-  leftHand: {fileID: 4404816329859248458}
-  rightHand: {fileID: 9126761251866729281}
-  weaponEvent: {fileID: 0}
   onWeaponPickup:
     m_PersistentCalls:
       m_Calls:
@@ -13344,6 +13344,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: PlayerActions, Assembly-CSharp
         m_MethodName: OnWeaponPickup
         m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 6211725020636762119}
+        m_TargetAssemblyTypeName: WeaponAiming, Assembly-CSharp
+        m_MethodName: ForceStopAiming
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -13367,12 +13379,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  onWeaponReloadingDone:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4939768874091208772}
-        m_TargetAssemblyTypeName: PlayerActions, Assembly-CSharp
-        m_MethodName: OnWeaponReloadingDone
+      - m_Target: {fileID: 6211725020636762119}
+        m_TargetAssemblyTypeName: WeaponAiming, Assembly-CSharp
+        m_MethodName: ForceStopAiming
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -13382,6 +13391,46 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1006874154816526101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6477030268172606375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3674e2ac86dbfd14bb2bb39492e67b5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onWeaponReloadingDone:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6211725020636762119}
+        m_TargetAssemblyTypeName: WeaponAiming, Assembly-CSharp
+        m_MethodName: ForceStopAiming
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &6211725020636762119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6477030268172606375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7dca25add68d8a4c88e7a65fa998df9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdToAim: 0
 --- !u!1 &6537524936585287204
 GameObject:
   m_ObjectHideFlags: 0
@@ -13718,6 +13767,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7e59ab84cfc2d64b882713ed976ea7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  leftHand: {fileID: 4404816329859248458}
+  rightHand: {fileID: 9126761251866729281}
 --- !u!1 &7107335972625353897
 GameObject:
   m_ObjectHideFlags: 0
@@ -14168,7 +14219,7 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: -0.03, y: 0.02, z: 0}
+    m_Offset: {x: 0, y: 0.02, z: 0}
     m_ConstrainedAxes:
       x: 1
       y: 1
@@ -14333,7 +14384,7 @@ MonoBehaviour:
     m_MaxLimit: 70
     m_AimAxis: 0
     m_UpAxis: 2
-    m_WorldUpType: 2
+    m_WorldUpType: 1
     m_WorldUpObject: {fileID: 8623039040349107826}
     m_WorldUpAxis: 0
     m_MaintainOffset: 0
@@ -14387,7 +14438,7 @@ MonoBehaviour:
       y: 1
       z: 1
     m_ConstrainedRotationAxes:
-      x: 0
+      x: 1
       y: 1
       z: 1
     m_MaintainPositionOffset: 0

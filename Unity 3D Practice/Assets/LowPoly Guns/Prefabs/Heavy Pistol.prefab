@@ -260,6 +260,7 @@ MonoBehaviour:
   magazine: {fileID: 0}
   caseEjector: {fileID: 0}
   rigAnimator: {fileID: 0}
+  firearmAnimator: {fileID: 0}
   cameraShake: {fileID: 0}
   recoilForces: {x: 0, y: 25}
   duration: 0.1

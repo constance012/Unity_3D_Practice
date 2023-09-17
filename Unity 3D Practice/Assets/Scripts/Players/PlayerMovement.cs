@@ -371,7 +371,7 @@ public abstract class PlayerMovement : MonoBehaviour
 		_moveInputZ = InputManager.Instance.GetAxisRaw("Vertical");
 
 		moveVector = new Vector3(_moveInputX, 0f, _moveInputZ).normalized;
-		_isRunning = InputManager.Instance.GetKey(KeybindingActions.Run) && !PlayerActions.IsAiming;
+		_isRunning = InputManager.Instance.GetKey(KeybindingActions.Run) && !WeaponAiming.IsAiming;
 
 		currentMaxVelocity = _isRunning ? MAX_RUNNING_SPEED : MAX_WALKING_SPEED;
 	}
